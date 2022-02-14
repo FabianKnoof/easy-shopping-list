@@ -1,6 +1,6 @@
-import 'package:easy_shopping_list/mealList.dart';
-import 'package:easy_shopping_list/optionsList.dart';
-import 'package:easy_shopping_list/shoppingList.dart';
+import 'package:easy_shopping_list/meal_list.dart';
+import 'package:easy_shopping_list/options_list.dart';
+import 'package:easy_shopping_list/shopping_list.dart';
 import "package:flutter/material.dart";
 
 void main() {
