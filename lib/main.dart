@@ -1,3 +1,4 @@
+import 'package:easy_shopping_list/add_item.dart';
 import 'package:easy_shopping_list/meal_list.dart';
 import 'package:easy_shopping_list/options_list.dart';
 import 'package:easy_shopping_list/shopping_list.dart';
@@ -29,7 +30,7 @@ class AppView extends StatefulWidget {
 class _AppViewState extends State<AppView> {
   int _selectedIndex = 0;
   static const List<Widget> _widgetOptions = <Widget>[
-    ShoppingList(),
+    ShoppingListView(),
     MealList(),
     OptionsList()
   ];
@@ -56,6 +57,13 @@ class _AppViewState extends State<AppView> {
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
         onTap: _onItemTapped,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const AddItemView()));
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
