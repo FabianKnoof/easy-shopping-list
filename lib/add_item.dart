@@ -1,25 +1,7 @@
 import 'dart:developer';
 
+import 'package:easy_shopping_list/article.dart';
 import 'package:flutter/material.dart';
-
-class AddItemView extends StatelessWidget {
-  const AddItemView({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body:
-            Align(alignment: Alignment.bottomCenter, child: AddItemStepper()));
-  }
-}
-
-class Article {
-  String name = "";
-  String quantity = "";
-  String quantityUnit =
-      ""; // Todo rework quantityUnit to use sth else than string
-  String details = "";
-}
 
 class AddItemBottomSheet extends StatefulWidget {
   const AddItemBottomSheet({Key? key}) : super(key: key);
@@ -29,31 +11,22 @@ class AddItemBottomSheet extends StatefulWidget {
 }
 
 class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
+  final Article _article = Article();
+
   final double _padding = 5;
 
-  Article _article = Article();
-  GlobalKey<FormState> _addItemFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _addItemFormKey = GlobalKey<FormState>();
 
-  final List<String> dropdownValues = ["stk", "g", "ml"];
-  String dropdownValue = "stk";
+  QuantityUnit dropdownValue = QuantityUnit.pieces;
+  final List<DropdownMenuItem<QuantityUnit>> dropdownItems =
+      QuantityUnit.values.map((QuantityUnit unit) {
+    return DropdownMenuItem<QuantityUnit>(
+        value: unit, child: Text(Article.quantityUnitToString(unit)));
+  }).toList();
 
   void _submitForm() {
     FormState? formState = _addItemFormKey.currentState;
-
-    if (formState == null || !formState.validate()) {
-      showDialog<String>(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(
-                title: const Text('Not valid'),
-                content: const Text('Not Valid'),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, 'OK'),
-                    child: const Text('OK'),
-                  ),
-                ],
-              ));
-    } else {
+    if (formState != null && formState.validate()) {
       formState.save();
       log("Name: ${_article.name}");
       log("Quantity: ${_article.quantity}");
@@ -77,12 +50,6 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final List<DropdownMenuItem<String>> dropdownItems =
-        dropdownValues.map((String unit) {
-      return DropdownMenuItem<String>(value: unit, child: Text(unit));
-    }).toList();
-    _article.quantityUnit = dropdownValues[0];
-
     return Container(
       constraints: BoxConstraints.expand(),
       child: Form(
@@ -121,8 +88,20 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
                         flex: 2,
                         child: TextFormField(
                           textInputAction: TextInputAction.next,
+                          validator: (value) {
+                            if (value!.isNotEmpty) {
+                              RegExp commaDecimal = RegExp("(^\\d*[.,]?\\d*\$)",
+                                  caseSensitive: false, multiLine: false);
+                              if (!commaDecimal.hasMatch(value)) {
+                                return "Mengenangabe ist nicht valide";
+                              }
+                            }
+                            return null;
+                          },
                           onSaved: (newValue) {
-                            _article.quantity = newValue!;
+                            if (newValue != null && newValue.isNotEmpty) {
+                              _article.quantity = newValue;
+                            }
                           },
                           keyboardType: TextInputType.number,
                           maxLines: 1,
@@ -134,33 +113,22 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
                     ),
                     Expanded(
                       flex: 1,
-                      child: DropdownButtonFormField<String>(
-                        decoration:
-                            InputDecoration(border: OutlineInputBorder()),
+                      child: DropdownButtonFormField<QuantityUnit>(
+                        // Todo fix focus on dropdown
                         value: dropdownValue,
                         items: dropdownItems,
-                        onChanged: (String? value) {
+                        onChanged: (value) {
                           setState(() {
                             dropdownValue = value!;
                             _article.quantityUnit = value;
-                            log("unit " + value);
-                            log("unit " + _article.quantityUnit);
+                            log("article " +
+                                Article.quantityUnitToString(
+                                    _article.quantityUnit));
+                            log("article " + _article.quantityUnit.name);
                           });
                         },
                       ),
                     ),
-                    // DropdownButton<String>(
-                    //   // Todo fix focus on dropdown
-                    //   value: dropdownValue,
-                    //   onChanged: (String? value) {
-                    //     setState(() {
-                    //       // Todo fix string value weirdness
-                    //       dropdownValue = value!;
-                    //       _article.quantityUnit = value;
-                    //     });
-                    //   },
-                    //   items: dropdownItems,
-                    // )
                   ],
                 ),
               ),
@@ -188,124 +156,12 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
                         onPressed: () {
                           _submitForm();
                         },
-                        child: Text("Add"))
+                        child: Text("Add")) // Todo fix text
                   ],
                 ),
               ),
             ],
           )),
     );
-  }
-}
-
-class AddItemStepper extends StatefulWidget {
-  const AddItemStepper({Key? key}) : super(key: key);
-
-  @override
-  _AddItemStepperState createState() => _AddItemStepperState();
-}
-
-class _AddItemStepperState extends State<AddItemStepper> {
-  int _index = 0;
-  String dropdownValue = "stk";
-  static Article article = Article();
-  FocusNode _focusNode = FocusNode();
-
-  List<DropdownMenuItem<String>> dropdownItems =
-      ["stk", "g", "ml"].map((String unit) {
-    return DropdownMenuItem<String>(value: unit, child: Text(unit));
-  }).toList();
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode.addListener(() {
-      setState(() {});
-    });
-  }
-
-  void nextStep() {
-    if (_index < 2) {
-      setState(() {
-        _index += 1;
-      });
-    } else if (_index == 2) {
-      print(article.name);
-    } else {
-      Navigator.pop(context);
-      // Saving to list
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    List<Step> steps = [
-      Step(
-          title: Text("Artikel"),
-          content: TextFormField(
-              focusNode: _focusNode,
-              onSaved: (value) {
-                article.name = value!;
-                nextStep();
-              },
-              onEditingComplete: nextStep,
-              maxLines: 1,
-              // validator: (value) {
-              //   if (value.isEmpty || value.length < 1) {
-              //     return 'Please enter name';
-              //   }
-              // },
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(), labelText: "Artikel"))),
-      Step(
-          title: Text("Menge"),
-          content: Row(
-            children: [
-              Expanded(
-                  child: TextFormField(
-                focusNode: _focusNode,
-                onSaved: (value) {
-                  article.quantity = value!;
-                  nextStep();
-                },
-                onEditingComplete: nextStep,
-                maxLines: 1,
-                decoration: InputDecoration(
-                    border: OutlineInputBorder(), labelText: "Menge"),
-              )),
-              DropdownButton<String>(
-                value: dropdownValue,
-                onChanged: (value) {
-                  setState(() {
-                    dropdownValue = value!;
-                  });
-                },
-                items: dropdownItems,
-              )
-            ],
-          )),
-      Step(
-          title: const Text("Details"),
-          content: TextFormField(
-            focusNode: _focusNode,
-            onSaved: (value) {
-              article.details = value!;
-              nextStep();
-            },
-            maxLines: 1,
-            decoration: InputDecoration(
-                border: OutlineInputBorder(), labelText: "Details"),
-          ))
-    ];
-
-    return Form(
-        child: Stepper(
-      steps: steps,
-      currentStep: _index,
-      onStepContinue: nextStep,
-      onStepCancel: () {
-        Navigator.pop(context);
-      },
-    ));
   }
 }
