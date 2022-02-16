@@ -1,18 +1,16 @@
-
 import 'package:easy_shopping_list/article.dart';
 import 'package:flutter/material.dart';
 
 class AddItemBottomSheet extends StatefulWidget {
-  const AddItemBottomSheet({Key? key}) : super(key: key);
+  const AddItemBottomSheet({Key? key, this.article}) : super(key: key);
+  final Article? article;
 
   @override
   State<AddItemBottomSheet> createState() => _AddItemBottomSheetState();
 }
 
 class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
-  ChangeNotifier changeNotifier = ChangeNotifier();
-
-  final Article article = Article();
+  Article article = Article();
 
   final double _padding = 5;
 
@@ -52,6 +50,10 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.article != null) {
+      article = widget.article!;
+    }
+
     return Container(
       constraints: BoxConstraints.expand(),
       child: Form(
@@ -67,7 +69,7 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
                   children: [
                     Expanded(
                       child: TextFormField(
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        initialValue: article.name,
                         validator: (String? value) {
                           if (value == null || value.isEmpty) {
                             return "Artikel eingeben"; // Todo Fix validation
@@ -104,12 +106,14 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
                     Expanded(
                         flex: 2,
                         child: TextFormField(
+                          initialValue: article.quantity.toString(),
                           textInputAction: TextInputAction.next,
                           validator: (value) {
                             if (value!.isNotEmpty) {
                               RegExp commaDecimal = RegExp("(^\\d*[.,]?\\d*\$)",
                                   caseSensitive: false, multiLine: false);
                               if (!commaDecimal.hasMatch(value)) {
+                                // Todo adjust regex
                                 return "Mengenangabe ist nicht valide";
                               }
                             }
@@ -148,6 +152,7 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
               Padding(
                 padding: EdgeInsets.all(_padding),
                 child: TextFormField(
+                  initialValue: article.details,
                   textInputAction: TextInputAction.done,
                   keyboardType: TextInputType.text,
                   onFieldSubmitted: (value) {

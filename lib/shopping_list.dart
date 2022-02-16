@@ -26,14 +26,30 @@ class _ShoppingListState extends State<ShoppingList> {
   List<DataRow> getArticleRows() {
     return <DataRow>[
       for (Article article in articleList)
-        (DataRow(cells: <DataCell>[
-          DataCell(CheckboxWidget()),
-          DataCell(Text(article.name)),
-          // Todo don't display quantity and quantityUnit if no quantity is given
-          DataCell(Text(article.quantity.toString())),
-          DataCell(Text(Article.quantityUnitToString(article.quantityUnit))),
-          DataCell(Text(article.details))
-        ]))
+        (DataRow(
+            onLongPress: () {
+              articleList.remove(article);
+              showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AddItemBottomSheet(
+                      article: article,
+                    );
+                  }).then((value) {
+                setState(() {
+                  addToArticleList(value);
+                });
+              });
+            },
+            cells: <DataCell>[
+              DataCell(CheckboxWidget()),
+              DataCell(Text(article.name)),
+              // Todo don't display quantity and quantityUnit if no quantity is given
+              DataCell(Text(article.quantity.toString())),
+              DataCell(
+                  Text(Article.quantityUnitToString(article.quantityUnit))),
+              DataCell(Text(article.details))
+            ]))
     ];
   }
 
