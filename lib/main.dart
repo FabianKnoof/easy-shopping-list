@@ -1,4 +1,3 @@
-import 'package:easy_shopping_list/add_item.dart';
 import 'package:easy_shopping_list/meal_list.dart';
 import 'package:easy_shopping_list/options_list.dart';
 import 'package:easy_shopping_list/shopping_list.dart';
@@ -29,8 +28,9 @@ class AppView extends StatefulWidget {
 
 class _AppViewState extends State<AppView> {
   int _selectedIndex = 0;
+
   static const List<Widget> _widgetOptions = <Widget>[
-    ShoppingListView(),
+    ShoppingList(),
     MealList(),
     OptionsList()
   ];
@@ -44,9 +44,9 @@ class _AppViewState extends State<AppView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Align(
-        child: _widgetOptions.elementAt(_selectedIndex),
-        alignment: Alignment.topCenter,
+      body: IndexedStack(
+        children: _widgetOptions,
+        index: _selectedIndex,
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -58,23 +58,23 @@ class _AppViewState extends State<AppView> {
         selectedItemColor: Colors.amber[800],
         onTap: _onItemTapped,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
-            // Todo on exit of bottom sheet
-
-              context: context,
-              builder: (BuildContext context) {
-                return AddItemBottomSheet();
-              });
-
-
-          // AddItemStepper
-          // Navigator.push(context,
-          //     MaterialPageRoute(builder: (context) => const AddItemView()));
-        },
-        child: const Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     showModalBottomSheet(
+      //         // Todo on exit of bottom sheet
+      //
+      //         context: context,
+      //         builder: (BuildContext context) {
+      //           return AddItemBottomSheet();
+      //         }).then((value) {
+      //     });
+      //
+      //     // AddItemStepper
+      //     // Navigator.push(context,
+      //     //     MaterialPageRoute(builder: (context) => const AddItemView()));
+      //   },
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 }

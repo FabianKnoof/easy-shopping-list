@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:easy_shopping_list/article.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +10,9 @@ class AddItemBottomSheet extends StatefulWidget {
 }
 
 class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
-  final Article _article = Article();
+  ChangeNotifier changeNotifier = ChangeNotifier();
+
+  final Article article = Article();
 
   final double _padding = 5;
 
@@ -28,23 +29,24 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
     FormState? formState = _addItemFormKey.currentState;
     if (formState != null && formState.validate()) {
       formState.save();
-      log("Name: ${_article.name}");
-      log("Quantity: ${_article.quantity}");
-      log("QuantityUnit: ${_article.quantityUnit}");
-      log("Details: ${_article.details}");
-      showDialog<String>(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(
-                title: const Text('Valid'),
-                content: Text(
-                    "Name: ${_article.name}, Quantity: ${_article.quantity}, QuantityUnit: ${_article.quantityUnit}, Details: ${_article.details}"),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, 'OK'),
-                    child: const Text('OK'),
-                  ),
-                ],
-              ));
+      // log("Name: ${article.name}");
+      // log("Quantity: ${article.quantity}");
+      // log("QuantityUnit: ${article.quantityUnit}");
+      // log("Details: ${article.details}");
+      Navigator.pop(context, article);
+      // showDialog<String>(
+      //     context: context,
+      //     builder: (BuildContext context) => AlertDialog(
+      //           title: const Text('Valid'),
+      //           content: Text(
+      //               "Name: ${article.name}, Quantity: ${article.quantity}, QuantityUnit: ${article.quantityUnit}, Details: ${article.details}"),
+      //           actions: <Widget>[
+      //             TextButton(
+      //               onPressed: () => Navigator.pop(context, 'OK'),
+      //               child: const Text('OK'),
+      //             ),
+      //           ],
+      //         ));
     }
   }
 
@@ -73,7 +75,7 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
                           return null;
                         },
                         onSaved: (newValue) {
-                          _article.name = newValue!;
+                          article.name = newValue!;
                         },
                         autofocus: true,
                         textInputAction: TextInputAction.next,
@@ -115,7 +117,7 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
                           },
                           onSaved: (newValue) {
                             if (newValue != null && newValue.isNotEmpty) {
-                              _article.quantity = newValue;
+                              article.quantity = int.tryParse(newValue)!;
                             }
                           },
                           keyboardType: TextInputType.number,
@@ -135,11 +137,7 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
                         onChanged: (value) {
                           setState(() {
                             dropdownValue = value!;
-                            _article.quantityUnit = value;
-                            log("article " +
-                                Article.quantityUnitToString(
-                                    _article.quantityUnit));
-                            log("article " + _article.quantityUnit.name);
+                            article.quantityUnit = value;
                           });
                         },
                       ),
@@ -156,7 +154,7 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
                     _submitForm();
                   },
                   onSaved: (newValue) {
-                    _article.details = newValue!;
+                    article.details = newValue!;
                   },
                   maxLines: 1,
                   decoration: InputDecoration(

@@ -1,45 +1,70 @@
+import 'package:easy_shopping_list/article.dart';
 import 'package:flutter/material.dart';
 
-class ShoppingListView extends StatelessWidget {
-  const ShoppingListView({Key? key}) : super(key: key);
+import 'add_item.dart';
 
-  @override
-  Widget build(BuildContext context) {
-    return Align(alignment: Alignment.topLeft, child: ShoppingList());
-  }
-}
-
-class ShoppingList extends StatelessWidget {
+class ShoppingList extends StatefulWidget {
   const ShoppingList({Key? key}) : super(key: key);
 
   @override
+  State<ShoppingList> createState() => _ShoppingListState();
+}
+
+class _ShoppingListState extends State<ShoppingList> {
+  List<Article> articleList = <Article>[];
+
+  void addToArticleList(Article newArticle) {
+    articleList.add(newArticle);
+  }
+
+  List<DataRow> getArticleRows() {
+    return <DataRow>[
+      for (Article article in articleList)
+        (DataRow(cells: <DataCell>[
+          DataCell(CheckboxWidget()),
+          DataCell(Text(article.name)),
+          DataCell(Text(article.quantity.toString())),
+          DataCell(Text(Article.quantityUnitToString(article.quantityUnit))),
+          DataCell(Text(article.details))
+        ]))
+    ];
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: DataTable(columnSpacing: 5, columns: const <DataColumn>[
-        DataColumn(label: Text("")),
-        DataColumn(label: Text("Artikel")),
-        DataColumn(label: Text("Menge")),
-        DataColumn(label: Text("Details")),
-      ], rows: const <DataRow>[
-        DataRow(cells: <DataCell>[
-          DataCell(CheckboxWidget()),
-          DataCell(Text("Joghurt")),
-          DataCell(Text("200g")),
-          DataCell(Text("Gut&Günstig")),
-        ]),
-        DataRow(cells: <DataCell>[
-          DataCell(CheckboxWidget()),
-          DataCell(Text("Spaghetti")),
-          DataCell(Text("400g")),
-          DataCell(Text("Weizen")),
-        ]),
-        DataRow(cells: <DataCell>[
-          DataCell(CheckboxWidget()),
-          DataCell(Text("Tomatensauce")),
-          DataCell(Text("400ml")),
-          DataCell(Text("Bio")),
-        ])
-      ]),
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: DataTable(
+            columnSpacing: 5,
+            columns: const <DataColumn>[
+              DataColumn(label: Text("")),
+              DataColumn(label: Text("Artikel")),
+              DataColumn(label: Text("Menge")),
+              DataColumn(label: Text("")),
+              DataColumn(label: Text("Details")),
+            ],
+            rows: getArticleRows()),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+              // Todo on exit of bottom sheet
+
+              context: context,
+              builder: (BuildContext context) {
+                return AddItemBottomSheet();
+              }).then((value) {
+            setState(() {
+              addToArticleList(value);
+            });
+          });
+
+          // AddItemStepper
+          // Navigator.push(context,
+          //     MaterialPageRoute(builder: (context) => const AddItemView()));
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
