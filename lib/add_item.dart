@@ -61,23 +61,38 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
               ),
               Padding(
                 padding: EdgeInsets.all(_padding),
-                child: TextFormField(
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  validator: (String? value) {
-                    if (value == null || value.isEmpty) {
-                      return "Artikel eingeben"; // Todo Fix validation
-                    }
-                    return null;
-                  },
-                  onSaved: (newValue) {
-                    _article.name = newValue!;
-                  },
-                  autofocus: true,
-                  textInputAction: TextInputAction.next,
-                  keyboardType: TextInputType.text,
-                  maxLines: 1,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(), labelText: "Artikel"),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (String? value) {
+                          if (value == null || value.isEmpty) {
+                            return "Artikel eingeben"; // Todo Fix validation
+                          }
+                          return null;
+                        },
+                        onSaved: (newValue) {
+                          _article.name = newValue!;
+                        },
+                        autofocus: true,
+                        textInputAction: TextInputAction.next,
+                        keyboardType: TextInputType.text,
+                        maxLines: 1,
+                        decoration: InputDecoration(
+                            border: OutlineInputBorder(), labelText: "Artikel"),
+                      ),
+                    ),
+                    SizedBox(
+                      width: _padding,
+                    ),
+                    ElevatedButton(
+                        // Todo fix fit
+                        onPressed: () {
+                          _submitForm();
+                        },
+                        child: Text("Add")) // Todo fix visual
+                  ],
                 ),
               ),
               Padding(
@@ -134,30 +149,18 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
               ),
               Padding(
                 padding: EdgeInsets.all(_padding),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        textInputAction: TextInputAction.done,
-                        keyboardType: TextInputType.text,
-                        onSaved: (newValue) {
-                          _article.details = newValue!;
-                        },
-                        maxLines: 1,
-                        decoration: InputDecoration(
-                            border: OutlineInputBorder(), labelText: "Details"),
-                      ),
-                    ),
-                    SizedBox(
-                      width: _padding,
-                    ),
-                    ElevatedButton(
-                        // Todo fix fit
-                        onPressed: () {
-                          _submitForm();
-                        },
-                        child: Text("Add")) // Todo fix text
-                  ],
+                child: TextFormField(
+                  textInputAction: TextInputAction.done,
+                  keyboardType: TextInputType.text,
+                  onFieldSubmitted: (value) {
+                    _submitForm();
+                  },
+                  onSaved: (newValue) {
+                    _article.details = newValue!;
+                  },
+                  maxLines: 1,
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(), labelText: "Details"),
                 ),
               ),
             ],
