@@ -27,24 +27,7 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
     FormState? formState = _addItemFormKey.currentState;
     if (formState != null && formState.validate()) {
       formState.save();
-      // log("Name: ${article.name}");
-      // log("Quantity: ${article.quantity}");
-      // log("QuantityUnit: ${article.quantityUnit}");
-      // log("Details: ${article.details}");
       Navigator.pop(context, article);
-      // showDialog<String>(
-      //     context: context,
-      //     builder: (BuildContext context) => AlertDialog(
-      //           title: const Text('Valid'),
-      //           content: Text(
-      //               "Name: ${article.name}, Quantity: ${article.quantity}, QuantityUnit: ${article.quantityUnit}, Details: ${article.details}"),
-      //           actions: <Widget>[
-      //             TextButton(
-      //               onPressed: () => Navigator.pop(context, 'OK'),
-      //               child: const Text('OK'),
-      //             ),
-      //           ],
-      //         ));
     }
   }
 

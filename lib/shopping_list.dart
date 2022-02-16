@@ -1,7 +1,7 @@
 import 'package:easy_shopping_list/article.dart';
 import 'package:flutter/material.dart';
 
-import 'add_item.dart';
+import 'add_article.dart';
 
 class ShoppingList extends StatefulWidget {
   const ShoppingList({Key? key}) : super(key: key);
