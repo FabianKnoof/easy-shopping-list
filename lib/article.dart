@@ -1,6 +1,6 @@
 class Article {
   String name = "";
-  int quantity = 0;
+  int quantity = 1;
   QuantityUnit quantityUnit = QuantityUnit.pieces;
   String details = "";
 

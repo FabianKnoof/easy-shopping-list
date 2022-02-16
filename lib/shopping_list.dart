@@ -14,6 +14,12 @@ class _ShoppingListState extends State<ShoppingList> {
   List<Article> articleList = <Article>[];
 
   void addToArticleList(Article newArticle) {
+    for (Article article in articleList.where((articleInList) =>
+        articleInList.name == newArticle.name &&
+        articleInList.quantityUnit == newArticle.quantityUnit)) {
+      article.quantity += newArticle.quantity;
+      return;
+    }
     articleList.add(newArticle);
   }
 
@@ -23,6 +29,7 @@ class _ShoppingListState extends State<ShoppingList> {
         (DataRow(cells: <DataCell>[
           DataCell(CheckboxWidget()),
           DataCell(Text(article.name)),
+          // Todo don't display quantity and quantityUnit if no quantity is given
           DataCell(Text(article.quantity.toString())),
           DataCell(Text(Article.quantityUnitToString(article.quantityUnit))),
           DataCell(Text(article.details))
