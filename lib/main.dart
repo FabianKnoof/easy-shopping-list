@@ -60,8 +60,18 @@ class _AppViewState extends State<AppView> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const AddItemView()));
+          showModalBottomSheet(
+            // Todo on exit of bottom sheet
+
+              context: context,
+              builder: (BuildContext context) {
+                return AddItemBottomSheet();
+              });
+
+
+          // AddItemStepper
+          // Navigator.push(context,
+          //     MaterialPageRoute(builder: (context) => const AddItemView()));
         },
         child: const Icon(Icons.add),
       ),
