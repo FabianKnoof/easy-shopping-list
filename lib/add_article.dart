@@ -1,5 +1,6 @@
 import 'package:easy_shopping_list/article.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 class AddItemBottomSheet extends StatefulWidget {
   const AddItemBottomSheet({Key? key, this.article}) : super(key: key);
@@ -10,31 +11,35 @@ class AddItemBottomSheet extends StatefulWidget {
 }
 
 class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
-  Article article = Article();
+  Article _article = Article();
 
   final double _padding = 5;
 
   final GlobalKey<FormState> _addItemFormKey = GlobalKey<FormState>();
 
-  QuantityUnit dropdownValue = QuantityUnit.pieces;
-  final List<DropdownMenuItem<QuantityUnit>> dropdownItems =
+  QuantityUnit _dropdownValue = QuantityUnit.pieces;
+  final List<DropdownMenuItem<QuantityUnit>> _dropdownItems =
       QuantityUnit.values.map((QuantityUnit unit) {
     return DropdownMenuItem<QuantityUnit>(
         value: unit, child: Text(Article.quantityUnitToString(unit)));
   }).toList();
 
+  final TextEditingController _typeAheadController = TextEditingController();
+
+  final List<String> _articleSuggestions = ["Bananen", "Spaghetti", "Joghurt"];
+
   void _submitForm() {
     FormState? formState = _addItemFormKey.currentState;
     if (formState != null && formState.validate()) {
       formState.save();
-      Navigator.pop(context, article);
+      Navigator.pop(context, _article);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     if (widget.article != null) {
-      article = widget.article!;
+      _article = widget.article!;
     }
 
     return Container(
@@ -51,25 +56,49 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: TextFormField(
-                        initialValue: article.name,
-                        validator: (String? value) {
-                          if (value == null || value.isEmpty) {
-                            return "Artikel eingeben"; // Todo Fix validation
-                          }
-                          return null;
-                        },
-                        onSaved: (newValue) {
-                          article.name = newValue!;
-                        },
-                        autofocus: true,
-                        textInputAction: TextInputAction.next,
-                        keyboardType: TextInputType.text,
-                        maxLines: 1,
-                        decoration: InputDecoration(
-                            border: OutlineInputBorder(), labelText: "Artikel"),
-                      ),
-                    ),
+                        child: TypeAheadFormField(
+                      hideOnEmpty: true,
+                      hideOnLoading: true,
+                      direction: AxisDirection.up,
+                      onSaved: (String? newValue) {
+                        _article.name = newValue!;
+                      },
+                      onSuggestionSelected: (String suggestion) {
+                        _typeAheadController.text = suggestion;
+                      },
+                      itemBuilder: (context, String suggestion) {
+                        return ListTile(
+                          title: Text(suggestion),
+                        );
+                      },
+                      suggestionsCallback: (pattern) {
+                        if (pattern.isEmpty) {
+                          return const <String>[];
+                        }
+                        return _articleSuggestions
+                            .where((String articleSuggestion) {
+                          return articleSuggestion
+                              .toLowerCase()
+                              .contains(pattern.toLowerCase());
+                        });
+                      },
+                      textFieldConfiguration: TextFieldConfiguration(
+                          controller: _typeAheadController
+                            ..text = _article.name,
+                          autofocus: true,
+                          textInputAction: TextInputAction.next,
+                          keyboardType: TextInputType.text,
+                          maxLines: 1,
+                          decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: "Artikel")),
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "Artikel eingeben";
+                        }
+                        return null;
+                      },
+                    )),
                     SizedBox(
                       width: _padding,
                     ),
@@ -78,7 +107,8 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
                         onPressed: () {
                           _submitForm();
                         },
-                        child: Text("Add")) // Todo fix visual
+                        child: Text("Add"))
+                    // Todo fix visual
                   ],
                 ),
               ),
@@ -89,7 +119,7 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
                     Expanded(
                         flex: 2,
                         child: TextFormField(
-                          initialValue: article.quantity.toString(),
+                          initialValue: _article.quantity.toString(),
                           textInputAction: TextInputAction.next,
                           validator: (value) {
                             if (value!.isNotEmpty) {
@@ -104,7 +134,7 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
                           },
                           onSaved: (newValue) {
                             if (newValue != null && newValue.isNotEmpty) {
-                              article.quantity = int.tryParse(newValue)!;
+                              _article.quantity = int.tryParse(newValue)!;
                             }
                           },
                           keyboardType: TextInputType.number,
@@ -119,12 +149,12 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
                       flex: 1,
                       child: DropdownButtonFormField<QuantityUnit>(
                         // Todo fix focus on dropdown
-                        value: dropdownValue,
-                        items: dropdownItems,
+                        value: _dropdownValue,
+                        items: _dropdownItems,
                         onChanged: (value) {
                           setState(() {
-                            dropdownValue = value!;
-                            article.quantityUnit = value;
+                            _dropdownValue = value!;
+                            _article.quantityUnit = value;
                           });
                         },
                       ),
@@ -135,14 +165,14 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
               Padding(
                 padding: EdgeInsets.all(_padding),
                 child: TextFormField(
-                  initialValue: article.details,
+                  initialValue: _article.details,
                   textInputAction: TextInputAction.done,
                   keyboardType: TextInputType.text,
                   onFieldSubmitted: (value) {
                     _submitForm();
                   },
                   onSaved: (newValue) {
-                    article.details = newValue!;
+                    _article.details = newValue!;
                   },
                   maxLines: 1,
                   decoration: InputDecoration(
