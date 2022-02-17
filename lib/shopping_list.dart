@@ -78,7 +78,9 @@ class _ShoppingListState extends State<ShoppingList> {
                 return AddItemBottomSheet();
               }).then((value) {
             setState(() {
-              addToArticleList(value);
+              if (value != null) {
+                addToArticleList(value);
+              }
             });
           });
 
