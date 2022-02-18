@@ -64,51 +64,7 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
                 padding: EdgeInsets.all(_padding),
                 child: Row(
                   children: [
-                    Expanded(
-                        child: TypeAheadFormField(
-                      hideOnEmpty: true,
-                      hideOnLoading: true,
-                      direction: AxisDirection.up,
-                      onSaved: (String? newValue) {
-                        _article.name =
-                            newValue!; // Todo fix suggestion weirdness
-                      },
-                      onSuggestionSelected: (String suggestion) {
-                        _typeAheadController.text = suggestion;
-                      },
-                      itemBuilder: (context, String suggestion) {
-                        return ListTile(
-                          title: Text(suggestion),
-                        );
-                      },
-                      suggestionsCallback: (pattern) {
-                        if (pattern.isEmpty) {
-                          return const <String>[];
-                        }
-                        return _articleSuggestions
-                            .where((String articleSuggestion) {
-                          return articleSuggestion
-                              .toLowerCase()
-                              .contains(pattern.toLowerCase());
-                        });
-                      },
-                      textFieldConfiguration: TextFieldConfiguration(
-                          controller: _typeAheadController
-                            ..text = _article.name,
-                          autofocus: true,
-                          textInputAction: TextInputAction.next,
-                          keyboardType: TextInputType.text,
-                          maxLines: 1,
-                          decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                              labelText: "Artikel")),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return "Artikel eingeben";
-                        }
-                        return null;
-                      },
-                    )),
+                    Expanded(child: _buildArticleTypeAheadField()),
                     SizedBox(
                       width: _padding,
                     ),
@@ -126,71 +82,124 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
                 padding: EdgeInsets.all(_padding),
                 child: Row(
                   children: [
-                    Expanded(
-                        flex: 2,
-                        child: TextFormField(
-                          initialValue: _article.quantity.toString(),
-                          textInputAction: TextInputAction.next,
-                          validator: (value) {
-                            if (value!.isNotEmpty) {
-                              RegExp commaDecimal = RegExp("(^\\d*[.,]?\\d*\$)",
-                                  caseSensitive: false, multiLine: false);
-                              if (!commaDecimal.hasMatch(value)) {
-                                // Todo adjust regex
-                                return "Mengenangabe ist nicht valide";
-                              }
-                            }
-                            return null;
-                          },
-                          onSaved: (newValue) {
-                            if (newValue != null && newValue.isNotEmpty) {
-                              _article.quantity = int.tryParse(newValue)!;
-                            }
-                          },
-                          keyboardType: TextInputType.number,
-                          maxLines: 1,
-                          decoration: InputDecoration(
-                              border: OutlineInputBorder(), labelText: "Menge"),
-                        )),
+                    Expanded(flex: 2, child: _buildQuantityTextField()),
                     SizedBox(
                       width: _padding,
                     ),
                     Expanded(
                       flex: 1,
-                      child: DropdownButtonFormField<QuantityUnit>(
-                        // Todo fix focus on dropdown
-                        value: _dropdownValue,
-                        items: _dropdownItems,
-                        onChanged: (value) {
-                          setState(() {
-                            _dropdownValue = value!;
-                            _article.quantityUnit = value;
-                          });
-                        },
-                      ),
+                      child: _buildQuantityUnitDropdownButton(),
                     ),
                   ],
                 ),
               ),
               Padding(
                 padding: EdgeInsets.all(_padding),
-                child: TextFormField(
-                  initialValue: _article.details,
-                  textInputAction: TextInputAction.done,
-                  keyboardType: TextInputType.text,
-                  onFieldSubmitted: (value) {
-                    _submitForm();
-                  },
-                  onSaved: (newValue) {
-                    _article.details = newValue!;
-                  },
-                  maxLines: 1,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(), labelText: "Details"),
-                ),
+                child: _buildDetailsTextField(),
               ),
             ],
           )),
+    );
+  }
+
+  TypeAheadFormField<String> _buildArticleTypeAheadField() {
+    return TypeAheadFormField(
+      hideOnEmpty: true,
+      hideOnLoading: true,
+      direction: AxisDirection.up,
+      onSaved: (String? newValue) {
+        _article.name = newValue!; // Todo fix suggestion weirdness
+      },
+      onSuggestionSelected: (String suggestion) {
+        _typeAheadController.text = suggestion;
+      },
+      itemBuilder: (context, String suggestion) {
+        return ListTile(
+          title: Text(suggestion),
+        );
+      },
+      suggestionsCallback: (pattern) {
+        if (pattern.isEmpty) {
+          return const <String>[];
+        }
+        return _articleSuggestions.where((String articleSuggestion) {
+          return articleSuggestion
+              .toLowerCase()
+              .contains(pattern.toLowerCase());
+        });
+      },
+      textFieldConfiguration: TextFieldConfiguration(
+          controller: _typeAheadController..text = _article.name,
+          autofocus: true,
+          textInputAction: TextInputAction.next,
+          keyboardType: TextInputType.text,
+          maxLines: 1,
+          decoration: InputDecoration(
+              border: OutlineInputBorder(), labelText: "Artikel")),
+      validator: (value) {
+        if (value!.isEmpty) {
+          return "Artikel eingeben";
+        }
+        return null;
+      },
+    );
+  }
+
+  TextFormField _buildQuantityTextField() {
+    return TextFormField(
+      initialValue: _article.quantity.toString(),
+      textInputAction: TextInputAction.next,
+      validator: (value) {
+        if (value!.isNotEmpty) {
+          RegExp commaDecimal = RegExp("(^\\d*[.,]?\\d*\$)",
+              caseSensitive: false, multiLine: false);
+          if (!commaDecimal.hasMatch(value)) {
+            // Todo adjust regex
+            return "Mengenangabe ist nicht valide";
+          }
+        }
+        return null;
+      },
+      onSaved: (newValue) {
+        if (newValue != null && newValue.isNotEmpty) {
+          _article.quantity = int.tryParse(newValue)!;
+        }
+      },
+      keyboardType: TextInputType.number,
+      maxLines: 1,
+      decoration:
+          InputDecoration(border: OutlineInputBorder(), labelText: "Menge"),
+    );
+  }
+
+  DropdownButtonFormField<QuantityUnit> _buildQuantityUnitDropdownButton() {
+    return DropdownButtonFormField<QuantityUnit>(
+      // Todo fix focus on dropdown
+      value: _dropdownValue,
+      items: _dropdownItems,
+      onChanged: (value) {
+        setState(() {
+          _dropdownValue = value!;
+          _article.quantityUnit = value;
+        });
+      },
+    );
+  }
+
+  TextFormField _buildDetailsTextField() {
+    return TextFormField(
+      initialValue: _article.details,
+      textInputAction: TextInputAction.done,
+      keyboardType: TextInputType.text,
+      onFieldSubmitted: (value) {
+        _submitForm();
+      },
+      onSaved: (newValue) {
+        _article.details = newValue!;
+      },
+      maxLines: 1,
+      decoration:
+          InputDecoration(border: OutlineInputBorder(), labelText: "Details"),
     );
   }
 }

@@ -58,23 +58,6 @@ class _AppViewState extends State<AppView> {
         selectedItemColor: Colors.amber[800],
         onTap: _onItemTapped,
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     showModalBottomSheet(
-      //         // Todo on exit of bottom sheet
-      //
-      //         context: context,
-      //         builder: (BuildContext context) {
-      //           return AddItemBottomSheet();
-      //         }).then((value) {
-      //     });
-      //
-      //     // AddItemStepper
-      //     // Navigator.push(context,
-      //     //     MaterialPageRoute(builder: (context) => const AddItemView()));
-      //   },
-      //   child: const Icon(Icons.add),
-      // ),
     );
   }
 }

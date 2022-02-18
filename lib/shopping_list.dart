@@ -11,25 +11,25 @@ class ShoppingList extends StatefulWidget {
 }
 
 class _ShoppingListState extends State<ShoppingList> {
-  List<Article> articleList = <Article>[];
+  final List<Article> _articleList = <Article>[];
 
   void addToArticleList(Article? newArticle) {
     if (newArticle == null) return;
-    for (Article article in articleList.where((articleInList) =>
+    for (Article article in _articleList.where((articleInList) =>
         articleInList.name == newArticle.name &&
         articleInList.quantityUnit == newArticle.quantityUnit)) {
       article.quantity += newArticle.quantity;
       return;
     }
-    articleList.add(newArticle);
+    _articleList.add(newArticle);
   }
 
-  List<DataRow> getArticleRows() {
+  List<DataRow> _getArticleRows() {
     return <DataRow>[
-      for (Article article in articleList)
+      for (Article article in _articleList)
         (DataRow(
             onLongPress: () {
-              articleList.remove(article);
+              _articleList.remove(article);
               showModalBottomSheet(
                   context: context,
                   builder: (BuildContext context) {
@@ -67,7 +67,7 @@ class _ShoppingListState extends State<ShoppingList> {
               DataColumn(label: Text("")),
               DataColumn(label: Text("Details")),
             ],
-            rows: getArticleRows()),
+            rows: _getArticleRows()),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -101,7 +101,7 @@ class CheckboxWidget extends StatefulWidget {
 }
 
 class _CheckboxWidgetState extends State<CheckboxWidget> {
-  bool isChecked = false;
+  bool _isChecked = false;
 
   @override
   Widget build(BuildContext context) {
@@ -120,10 +120,10 @@ class _CheckboxWidgetState extends State<CheckboxWidget> {
     return Checkbox(
       checkColor: Colors.white,
       fillColor: MaterialStateProperty.resolveWith(getColor),
-      value: isChecked,
+      value: _isChecked,
       onChanged: (bool? value) {
         setState(() {
-          isChecked = value!;
+          _isChecked = value!;
         });
       },
     );
