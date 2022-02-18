@@ -133,7 +133,7 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
         return _articleSuggestions.where((String articleSuggestion) {
           return articleSuggestion
               .toLowerCase()
-              .contains(pattern.toLowerCase());
+              .startsWith(pattern.toLowerCase());
         });
       },
       validator: (value) {
