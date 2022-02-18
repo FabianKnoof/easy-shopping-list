@@ -55,49 +55,55 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
       constraints: BoxConstraints.expand(),
       child: Form(
           key: _addItemFormKey,
-          child: Column(
-            children: [
-              SizedBox(
-                height: _padding,
-              ),
-              Padding(
-                padding: EdgeInsets.all(_padding),
-                child: Row(
-                  children: [
-                    Expanded(child: _buildArticleTypeAheadField()),
-                    SizedBox(
-                      width: _padding,
-                    ),
-                    ElevatedButton(
-                        // Todo fix fit
-                        onPressed: () {
-                          _submitForm();
-                        },
-                        child: Text("Add"))
-                    // Todo fix visual
-                  ],
+          child: FocusTraversalGroup(
+            policy: OrderedTraversalPolicy(),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: _padding,
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(_padding),
-                child: Row(
-                  children: [
-                    Expanded(flex: 2, child: _buildQuantityTextField()),
-                    SizedBox(
-                      width: _padding,
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: _buildQuantityUnitDropdownButton(),
-                    ),
-                  ],
+                Padding(
+                  padding: EdgeInsets.all(_padding),
+                  child: Row(
+                    children: [
+                      Expanded(
+                          child: FocusTraversalOrder(
+                              order: NumericFocusOrder(1),
+                              child: _buildArticleTypeAheadField())),
+                      SizedBox(
+                        width: _padding,
+                      ),
+                      _buildSubmitButton()
+                    ],
+                  ),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(_padding),
-                child: _buildDetailsTextField(),
-              ),
-            ],
+                Padding(
+                  padding: EdgeInsets.all(_padding),
+                  child: Row(
+                    children: [
+                      Expanded(
+                          flex: 2,
+                          child: FocusTraversalOrder(
+                              order: NumericFocusOrder(2),
+                              child: _buildQuantityTextField())),
+                      SizedBox(
+                        width: _padding,
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: _buildQuantityUnitDropdownButton(),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(_padding),
+                  child: FocusTraversalOrder(
+                      order: NumericFocusOrder(3),
+                      child: _buildDetailsTextField()),
+                ),
+              ],
+            ),
           )),
     );
   }
@@ -108,10 +114,11 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
       hideOnLoading: true,
       direction: AxisDirection.up,
       onSaved: (String? newValue) {
-        _article.name = newValue!; // Todo fix suggestion weirdness
+        _article.name = newValue!;
       },
       onSuggestionSelected: (String suggestion) {
         _typeAheadController.text = suggestion;
+        _article.name = suggestion;
       },
       itemBuilder: (context, String suggestion) {
         return ListTile(
@@ -145,6 +152,14 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
     );
   }
 
+  ElevatedButton _buildSubmitButton() {
+    return ElevatedButton(
+        onPressed: () {
+          _submitForm();
+        },
+        child: Text("Add"));
+  }
+
   TextFormField _buildQuantityTextField() {
     return TextFormField(
       initialValue: _article.quantity.toString(),
@@ -154,7 +169,7 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
           RegExp commaDecimal = RegExp("(^\\d*[.,]?\\d*\$)",
               caseSensitive: false, multiLine: false);
           if (!commaDecimal.hasMatch(value)) {
-            // Todo adjust regex
+            // Todo adjust regex (Maybe some sort of look ahead)
             return "Mengenangabe ist nicht valide";
           }
         }
