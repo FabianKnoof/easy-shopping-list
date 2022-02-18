@@ -4,20 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
-class AddItemBottomSheet extends StatefulWidget {
-  const AddItemBottomSheet({Key? key, this.article}) : super(key: key);
+class AddArticleBottomSheet extends StatefulWidget {
+  const AddArticleBottomSheet({Key? key, this.article}) : super(key: key);
   final Article? article;
 
   @override
-  State<AddItemBottomSheet> createState() => _AddItemBottomSheetState();
+  State<AddArticleBottomSheet> createState() => _AddArticleBottomSheetState();
 }
 
-class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
+class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
   Article _article = Article();
 
   final double _padding = 5;
 
-  final GlobalKey<FormState> _addItemFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _addArticleFormKey = GlobalKey<FormState>();
 
   QuantityUnit _dropdownValue = QuantityUnit.pieces;
   final List<DropdownMenuItem<QuantityUnit>> _dropdownItems =
@@ -39,7 +39,7 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
   }
 
   void _submitForm() {
-    FormState? formState = _addItemFormKey.currentState;
+    FormState? formState = _addArticleFormKey.currentState;
     if (formState != null && formState.validate()) {
       formState.save();
       Navigator.pop(context, _article);
@@ -55,7 +55,7 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
     return Container(
       constraints: BoxConstraints.expand(),
       child: Form(
-          key: _addItemFormKey,
+          key: _addArticleFormKey,
           child: FocusTraversalGroup(
             policy: OrderedTraversalPolicy(),
             child: Column(
