@@ -1,4 +1,5 @@
 import 'package:easy_shopping_list/article.dart';
+import 'package:easy_shopping_list/mongodb_access.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
@@ -26,7 +27,15 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
 
   final TextEditingController _typeAheadController = TextEditingController();
 
-  final List<String> _articleSuggestions = ["Bananen", "Spaghetti", "Joghurt"];
+  List<String> _articleSuggestions = List.empty();
+
+  @override
+  void initState() {
+    MongoDBAccess.getSuggestions().then((value) {
+      _articleSuggestions = value.map((e) => e as String).toList();
+    });
+    super.initState();
+  }
 
   void _submitForm() {
     FormState? formState = _addItemFormKey.currentState;
@@ -61,7 +70,8 @@ class _AddItemBottomSheetState extends State<AddItemBottomSheet> {
                       hideOnLoading: true,
                       direction: AxisDirection.up,
                       onSaved: (String? newValue) {
-                        _article.name = newValue!;
+                        _article.name =
+                            newValue!; // Todo fix suggestion weirdness
                       },
                       onSuggestionSelected: (String suggestion) {
                         _typeAheadController.text = suggestion;
