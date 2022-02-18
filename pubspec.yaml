@@ -38,8 +38,14 @@ dependencies:
   # Textfield suggestions
   flutter_typeahead: ^3.2.4
 
-  # http access
+  # Http access to cloud MongoDB
   http: ^0.13.4
+
+  # Hive db for storing local data
+  hive: ^2.0.4
+  hive_flutter: ^1.1.0
+  hive_generator: ^1.1.2
+  build_runner: ^2.1.7
 
 dev_dependencies:
   flutter_test:
