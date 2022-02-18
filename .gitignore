@@ -123,3 +123,6 @@ app.*.symbols
 
 # secrets
 /lib/secrets.dart
+
+# secrets
+/lib/secrets.dart
