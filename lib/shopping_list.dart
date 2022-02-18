@@ -13,7 +13,8 @@ class ShoppingList extends StatefulWidget {
 class _ShoppingListState extends State<ShoppingList> {
   List<Article> articleList = <Article>[];
 
-  void addToArticleList(Article newArticle) {
+  void addToArticleList(Article? newArticle) {
+    if (newArticle == null) return;
     for (Article article in articleList.where((articleInList) =>
         articleInList.name == newArticle.name &&
         articleInList.quantityUnit == newArticle.quantityUnit)) {
@@ -78,9 +79,7 @@ class _ShoppingListState extends State<ShoppingList> {
                 return AddItemBottomSheet();
               }).then((value) {
             setState(() {
-              if (value != null) {
-                addToArticleList(value);
-              }
+              addToArticleList(value);
             });
           });
 
