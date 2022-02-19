@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:easy_shopping_list/secrets.dart';
 import 'package:http/http.dart' as http;
@@ -29,7 +28,6 @@ class MongoDBAccess {
     var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     List<dynamic> documentsResponse = decodedResponse["documents"];
     List suggestions = documentsResponse.map((e) => e["Apfel"]).toList();
-    log("Get suggestions");
     return suggestions;
   }
 }

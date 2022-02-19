@@ -1,5 +1,5 @@
-import 'package:easy_shopping_list/article.dart';
-import 'package:easy_shopping_list/shopping_list_hive.dart';
+import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
+import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
