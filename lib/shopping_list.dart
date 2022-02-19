@@ -34,7 +34,6 @@ class _ShoppingListState extends State<ShoppingList> {
             onReorder: (oldIndex, newIndex) {
               setState(() {
                 _shoppingListHive.reorderArticle(oldIndex, newIndex);
-                // Note reorder article
               });
             },
           );
@@ -91,7 +90,6 @@ class _ShoppingListState extends State<ShoppingList> {
             }).then((newArticle) {
           setState(() {
             _shoppingListHive.addArticle(newArticle);
-            // Note add article floating button
           });
         });
       },
