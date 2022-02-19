@@ -129,7 +129,7 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
           title: Text(suggestion),
         );
       },
-      suggestionsCallback: (pattern) {
+      suggestionsCallback: (pattern) async {
         if (pattern.isEmpty) {
           return const <String>[];
         }
