@@ -19,14 +19,14 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
 
   final GlobalKey<FormState> _addArticleFormKey = GlobalKey<FormState>();
 
+  final TextEditingController _typeAheadController = TextEditingController();
+
   QuantityUnit _dropdownValue = QuantityUnit.pieces;
   final List<DropdownMenuItem<QuantityUnit>> _dropdownItems =
       QuantityUnit.values.map((QuantityUnit unit) {
     return DropdownMenuItem<QuantityUnit>(
         value: unit, child: Text(Article.quantityUnitToString(unit)));
   }).toList();
-
-  final TextEditingController _typeAheadController = TextEditingController();
 
   List<String> _articleSuggestions = List.empty();
 
@@ -50,6 +50,7 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
   Widget build(BuildContext context) {
     if (widget.article != null) {
       _article = widget.article!;
+      _typeAheadController.text = _article.name;
     }
 
     return Container(
@@ -119,7 +120,7 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
       },
       onSuggestionSelected: (String suggestion) {
         _typeAheadController.text = suggestion;
-        _article.name = suggestion;
+        // _article.name = suggestion;
       },
       itemBuilder: (context, String suggestion) {
         return ListTile(
@@ -143,7 +144,7 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
         return null;
       },
       textFieldConfiguration: TextFieldConfiguration(
-          controller: _typeAheadController..text = _article.name,
+          controller: _typeAheadController,
           autofocus: true,
           textInputAction: TextInputAction.next,
           keyboardType: TextInputType.text,
