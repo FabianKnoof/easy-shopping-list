@@ -1,8 +1,8 @@
-import 'package:easy_shopping_list/db_accesses/mongodb_access.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class AddArticleBottomSheet extends StatefulWidget {
   const AddArticleBottomSheet({Key? key, this.article}) : super(key: key);
@@ -28,15 +28,8 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
         value: unit, child: Text(Article.quantityUnitToString(unit)));
   }).toList();
 
-  List<String> _articleSuggestions = List.empty();
-
-  @override
-  void initState() {
-    MongoDBAccess.getSuggestions().then((value) {
-      _articleSuggestions = value.map((e) => e as String).toList();
-    });
-    super.initState();
-  }
+  final List<String> _articleSuggestions =
+      Hive.box("Suggestions").get("ArticleSuggestions");
 
   void _submitForm() {
     FormState? formState = _addArticleFormKey.currentState;
