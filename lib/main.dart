@@ -7,9 +7,17 @@ import 'package:hive_flutter/adapters.dart';
 import 'article.dart';
 
 void main() async {
-  await Hive.initFlutter();
-  await Hive.openBox<Article>("ShoppingList");
+  await _initHive();
   runApp(const MyApp());
+}
+
+Future<void> _initHive() async {
+  await Hive.initFlutter();
+  Hive.registerAdapter(ArticleAdapter());
+  Hive.registerAdapter(QuantityUnitAdapter());
+  await Hive.openBox<Article>("ShoppingList");
+  // await Hive.openBox<Article>("ShoppingList")
+  //     .then((value) async => await value.clear());
 }
 
 class MyApp extends StatelessWidget {

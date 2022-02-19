@@ -1,7 +1,7 @@
-import 'dart:developer';
-
 import 'package:easy_shopping_list/article.dart';
+import 'package:easy_shopping_list/shopping_list_hive.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'add_article.dart';
 
@@ -15,20 +15,7 @@ class ShoppingList extends StatefulWidget {
 class _ShoppingListState extends State<ShoppingList> {
   final double _padding = 5;
 
-  final List<Article> _articleList =
-      List.generate(5, (index) => Article()..name = "Artikel $index");
-
-  void _addToArticleList(Article? newArticle) {
-    if (newArticle == null) return;
-    for (Article article in _articleList) {
-      if (article.name == newArticle.name &&
-          article.quantityUnit == newArticle.quantityUnit) {
-        article.quantity += newArticle.quantity;
-        return;
-      }
-    }
-    _articleList.add(newArticle);
-  }
+  final ShoppingListHive _shoppingListHive = ShoppingListHive();
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +25,62 @@ class _ShoppingListState extends State<ShoppingList> {
     );
   }
 
+  ValueListenableBuilder _buildShoppingList() {
+    return ValueListenableBuilder<Box>(
+        valueListenable: _shoppingListHive.shoppingListBox.listenable(),
+        builder: (context, box, widget) {
+          return ReorderableListView(
+            children: _buildArticleListTile(),
+            onReorder: (oldIndex, newIndex) {
+              setState(() {
+                _shoppingListHive.reorderArticle(oldIndex, newIndex);
+                // Note reorder article
+              });
+            },
+          );
+        });
+  }
+
+  List<Widget> _buildArticleListTile() {
+    List<Widget> articleListTiles = [];
+    for (int indexKey = 0;
+        indexKey < _shoppingListHive.shoppingListBox.length;
+        ++indexKey) {
+      Article article = _shoppingListHive.shoppingListBox.get(indexKey)!;
+      articleListTiles.add(ListTile(
+        key: Key(indexKey.toString()),
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) {
+              return AddArticleBottomSheet(
+                article: article,
+              );
+            },
+          ).then((newArticle) {
+            _shoppingListHive.replaceArticleAt(indexKey, newArticle);
+          });
+        },
+        title: Row(
+          children: [
+            CheckboxWidget(),
+            Text(article.name),
+            SizedBox(
+              width: _padding,
+            ),
+            Text(article.quantity.toString()),
+            Text(Article.quantityUnitToString(article.quantityUnit)),
+            SizedBox(
+              width: _padding,
+            ),
+            Text(article.details)
+          ],
+        ),
+      ));
+    }
+    return articleListTiles;
+  }
+
   FloatingActionButton _buildAddArticleFloatingButton(BuildContext context) {
     return FloatingActionButton(
       onPressed: () {
@@ -45,63 +88,14 @@ class _ShoppingListState extends State<ShoppingList> {
             context: context,
             builder: (BuildContext context) {
               return AddArticleBottomSheet();
-            }).then((value) {
+            }).then((newArticle) {
           setState(() {
-            _addToArticleList(value);
+            _shoppingListHive.addArticle(newArticle);
+            // Note add article floating button
           });
         });
       },
       child: const Icon(Icons.add),
-    );
-  }
-
-  ReorderableListView _buildShoppingList() {
-    return ReorderableListView(
-      children: <Widget>[
-        for (int index = 0; index < _articleList.length; ++index)
-          _buildArticleListTile(index)
-      ],
-      onReorder: (oldIndex, newIndex) {
-        setState(() {
-          if (oldIndex < newIndex) {
-            newIndex -= 1;
-          }
-          _articleList.insert(newIndex, _articleList.removeAt(oldIndex));
-        });
-      },
-    );
-  }
-
-  ListTile _buildArticleListTile(int index) {
-    Article article = _articleList[index];
-    return ListTile(
-      key: Key(index.toString()),
-      onTap: () {
-        showModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) {
-              return AddArticleBottomSheet();
-            }).then((value) {
-          setState(() {
-            _addToArticleList(value);
-          });
-        });
-      },
-      title: Row(
-        children: [
-          CheckboxWidget(),
-          Text(article.name),
-          SizedBox(
-            width: _padding,
-          ),
-          Text(article.quantity.toString()),
-          Text(Article.quantityUnitToString(article.quantityUnit)),
-          SizedBox(
-            width: _padding,
-          ),
-          Text(article.details)
-        ],
-      ),
     );
   }
 }
