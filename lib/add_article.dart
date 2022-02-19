@@ -51,6 +51,8 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
     if (widget.article != null) {
       _article = widget.article!;
       _typeAheadController.text = _article.name;
+      _typeAheadController.selection = TextSelection.fromPosition(
+          TextPosition(offset: _typeAheadController.text.length));
       _dropdownValue = _article.quantityUnit;
     }
 
