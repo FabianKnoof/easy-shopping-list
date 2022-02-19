@@ -1,5 +1,5 @@
-import 'package:easy_shopping_list/article.dart';
-import 'package:easy_shopping_list/mongodb_access.dart';
+import 'package:easy_shopping_list/db_accesses/mongodb_access.dart';
+import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
@@ -51,6 +51,8 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
     if (widget.article != null) {
       _article = widget.article!;
       _typeAheadController.text = _article.name;
+      _typeAheadController.selection = TextSelection.fromPosition(
+          TextPosition(offset: _typeAheadController.text.length));
       _dropdownValue = _article.quantityUnit;
     }
 
@@ -127,7 +129,7 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
           title: Text(suggestion),
         );
       },
-      suggestionsCallback: (pattern) {
+      suggestionsCallback: (pattern) async {
         if (pattern.isEmpty) {
           return const <String>[];
         }
