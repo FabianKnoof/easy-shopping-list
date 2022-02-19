@@ -1,5 +1,7 @@
 import 'package:easy_shopping_list/article.dart';
+import 'package:easy_shopping_list/shopping_list_hive.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'add_article.dart';
 
@@ -11,84 +13,87 @@ class ShoppingList extends StatefulWidget {
 }
 
 class _ShoppingListState extends State<ShoppingList> {
-  final List<Article> _articleList = <Article>[];
+  final double _padding = 5;
 
-  void addToArticleList(Article? newArticle) {
-    if (newArticle == null) return;
-    for (Article article in _articleList.where((articleInList) =>
-        articleInList.name == newArticle.name &&
-        articleInList.quantityUnit == newArticle.quantityUnit)) {
-      article.quantity += newArticle.quantity;
-      return;
-    }
-    _articleList.add(newArticle);
-  }
-
-  List<DataRow> _getArticleRows() {
-    return <DataRow>[
-      for (Article article in _articleList)
-        (DataRow(
-            onLongPress: () {
-              _articleList.remove(article);
-              showModalBottomSheet(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AddItemBottomSheet(
-                      article: article,
-                    );
-                  }).then((value) {
-                setState(() {
-                  addToArticleList(value);
-                });
-              });
-            },
-            cells: <DataCell>[
-              DataCell(CheckboxWidget()),
-              DataCell(Text(article.name)),
-              // Todo don't display quantity and quantityUnit if no quantity is given
-              DataCell(Text(article.quantity.toString())),
-              DataCell(
-                  Text(Article.quantityUnitToString(article.quantityUnit))),
-              DataCell(Text(article.details))
-            ]))
-    ];
-  }
+  final ShoppingListHive _shoppingListHive = ShoppingListHive();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: DataTable(
-            columnSpacing: 5,
-            columns: const <DataColumn>[
-              DataColumn(label: Text("")),
-              DataColumn(label: Text("Artikel")),
-              DataColumn(label: Text("Menge")),
-              DataColumn(label: Text("")),
-              DataColumn(label: Text("Details")),
-            ],
-            rows: _getArticleRows()),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
+      body: _buildShoppingList(),
+      floatingActionButton: _buildAddArticleFloatingButton(context),
+    );
+  }
+
+  ValueListenableBuilder _buildShoppingList() {
+    return ValueListenableBuilder<Box>(
+        valueListenable: _shoppingListHive.shoppingListBox.listenable(),
+        builder: (context, box, widget) {
+          return ReorderableListView(
+            children: _buildArticleListTile(),
+            onReorder: (oldIndex, newIndex) {
+              setState(() {
+                _shoppingListHive.reorderArticle(oldIndex, newIndex);
+              });
+            },
+          );
+        });
+  }
+
+  List<Widget> _buildArticleListTile() {
+    List<Widget> articleListTiles = [];
+    for (int indexKey = 0;
+        indexKey < _shoppingListHive.shoppingListBox.length;
+        ++indexKey) {
+      Article article = _shoppingListHive.shoppingListBox.get(indexKey)!;
+      articleListTiles.add(ListTile(
+        key: Key(indexKey.toString()),
+        onTap: () {
           showModalBottomSheet(
-              // Todo on exit of bottom sheet
-
-              context: context,
-              builder: (BuildContext context) {
-                return AddItemBottomSheet();
-              }).then((value) {
-            setState(() {
-              addToArticleList(value);
-            });
+            context: context,
+            builder: (context) {
+              return AddArticleBottomSheet(
+                article: article,
+              );
+            },
+          ).then((newArticle) {
+            _shoppingListHive.replaceArticleAt(indexKey, newArticle);
           });
-
-          // AddItemStepper
-          // Navigator.push(context,
-          //     MaterialPageRoute(builder: (context) => const AddItemView()));
         },
-        child: const Icon(Icons.add),
-      ),
+        title: Row(
+          children: [
+            CheckboxWidget(),
+            Text(article.name),
+            SizedBox(
+              width: _padding,
+            ),
+            Text(article.quantity.toString()),
+            Text(Article.quantityUnitToString(article.quantityUnit)),
+            SizedBox(
+              width: _padding,
+            ),
+            Text(article.details)
+          ],
+        ),
+      ));
+    }
+    return articleListTiles;
+  }
+
+  FloatingActionButton _buildAddArticleFloatingButton(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: () {
+        showModalBottomSheet(
+            context: context,
+            builder: (BuildContext context) {
+              return AddArticleBottomSheet();
+            }).then((newArticle) {
+          setState(() {
+            _shoppingListHive.addArticle(newArticle);
+          });
+        });
+      },
+      child: const Icon(Icons.add),
     );
   }
 }

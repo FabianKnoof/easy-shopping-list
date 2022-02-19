@@ -2,9 +2,22 @@ import 'package:easy_shopping_list/meal_list.dart';
 import 'package:easy_shopping_list/options_list.dart';
 import 'package:easy_shopping_list/shopping_list.dart';
 import "package:flutter/material.dart";
+import 'package:hive_flutter/adapters.dart';
 
-void main() {
+import 'article.dart';
+
+void main() async {
+  await _initHive();
   runApp(const MyApp());
+}
+
+Future<void> _initHive() async {
+  await Hive.initFlutter();
+  Hive.registerAdapter(ArticleAdapter());
+  Hive.registerAdapter(QuantityUnitAdapter());
+  await Hive.openBox<Article>("ShoppingList");
+  // await Hive.openBox<Article>("ShoppingList")
+  //     .then((value) async => await value.clear());
 }
 
 class MyApp extends StatelessWidget {

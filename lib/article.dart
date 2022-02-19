@@ -1,7 +1,16 @@
-class Article {
+import 'package:hive/hive.dart';
+
+part 'article.g.dart';
+
+@HiveType(typeId: 0)
+class Article extends HiveObject {
+  @HiveField(0)
   String name = "";
+  @HiveField(1)
   int quantity = 1;
+  @HiveField(2)
   QuantityUnit quantityUnit = QuantityUnit.pieces;
+  @HiveField(3)
   String details = "";
 
   static String quantityUnitToString(QuantityUnit unit) {
@@ -14,6 +23,19 @@ class Article {
         return "ml";
     }
   }
+
+  @override
+  String toString() {
+    return "$name, $quantity ${quantityUnitToString(quantityUnit)}, $details";
+  }
 }
 
-enum QuantityUnit { pieces, gram, milliliter }
+@HiveType(typeId: 1)
+enum QuantityUnit {
+  @HiveField(0)
+  pieces,
+  @HiveField(1)
+  gram,
+  @HiveField(2)
+  milliliter
+}
