@@ -51,6 +51,7 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
     if (widget.article != null) {
       _article = widget.article!;
       _typeAheadController.text = _article.name;
+      _dropdownValue = _article.quantityUnit;
     }
 
     return Container(
@@ -120,7 +121,6 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
       },
       onSuggestionSelected: (String suggestion) {
         _typeAheadController.text = suggestion;
-        // _article.name = suggestion;
       },
       itemBuilder: (context, String suggestion) {
         return ListTile(
