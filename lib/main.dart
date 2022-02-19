@@ -1,3 +1,4 @@
+import 'package:easy_shopping_list/db_accesses/suggestions_mongodb.dart';
 import 'package:easy_shopping_list/meal_list.dart';
 import 'package:easy_shopping_list/options_list.dart';
 import 'package:easy_shopping_list/shopping_list/shopping_list.dart';
@@ -8,16 +9,22 @@ import 'shopping_list/article.dart';
 
 void main() async {
   await _initHive();
+  MongoDBAccess.syncArticleSuggestions();
   runApp(const MyApp());
 }
 
 Future<void> _initHive() async {
   await Hive.initFlutter();
+
+  // Shopping list
   Hive.registerAdapter(ArticleAdapter());
   Hive.registerAdapter(QuantityUnitAdapter());
   await Hive.openBox<Article>("ShoppingList");
   // await Hive.openBox<Article>("ShoppingList")
   //     .then((value) async => await value.clear());
+
+  // Suggestions
+  await Hive.openBox("Suggestions");
 }
 
 class MyApp extends StatelessWidget {
