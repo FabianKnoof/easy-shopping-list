@@ -19,13 +19,6 @@ class _ShoppingListState extends State<ShoppingList> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _buildShoppingList(),
-      floatingActionButton: _buildAddArticleFloatingButton(context),
-    );
-  }
-
-  ValueListenableBuilder _buildShoppingList() {
     return ValueListenableBuilder<Box>(
         valueListenable: _shoppingListHive.shoppingListBox.listenable(),
         builder: (context, box, widget) {
@@ -78,23 +71,6 @@ class _ShoppingListState extends State<ShoppingList> {
       ));
     }
     return articleListTiles;
-  }
-
-  FloatingActionButton _buildAddArticleFloatingButton(BuildContext context) {
-    return FloatingActionButton(
-      onPressed: () {
-        showModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) {
-              return AddArticleBottomSheet();
-            }).then((newArticle) {
-          setState(() {
-            _shoppingListHive.addArticle(newArticle);
-          });
-        });
-      },
-      child: const Icon(Icons.add),
-    );
   }
 }
 

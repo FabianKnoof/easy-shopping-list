@@ -4,9 +4,18 @@ import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:hive/hive.dart';
 
 class ShoppingListHive {
+  static final ShoppingListHive _shoppingListHive =
+      ShoppingListHive._internal();
+
   final shoppingListBox = Hive.box<Article>(
     "ShoppingList",
   );
+
+  factory ShoppingListHive() {
+    return _shoppingListHive;
+  }
+
+  ShoppingListHive._internal();
 
   void addArticle(Article? newArticle) {
     if (newArticle == null) return;

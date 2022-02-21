@@ -1,6 +1,9 @@
+
+import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_mongodb.dart';
 import 'package:easy_shopping_list/meal_list.dart';
 import 'package:easy_shopping_list/options_list.dart';
+import 'package:easy_shopping_list/shopping_list/add_article.dart';
 import 'package:easy_shopping_list/shopping_list/shopping_list.dart';
 import "package:flutter/material.dart";
 import 'package:hive_flutter/adapters.dart';
@@ -77,6 +80,22 @@ class _AppViewState extends State<AppView> {
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
         onTap: _onItemTapped,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (_widgetOptions[_selectedIndex].runtimeType == ShoppingList) {
+            showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) {
+                  return AddArticleBottomSheet();
+                }).then((newArticle) {
+              setState(() {
+                ShoppingListHive().addArticle(newArticle);
+              });
+            });
+          } else {}
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
