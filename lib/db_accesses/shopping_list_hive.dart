@@ -29,7 +29,8 @@ class ShoppingListHive {
     shoppingListBox.put(shoppingListBox.length, newArticle);
   }
 
-  void replaceArticleAt(int indexKey, Article article) {
+  void replaceArticleAt(int? indexKey, Article? article) {
+    if (indexKey == null || article == null) return;
     shoppingListBox.put(indexKey, article);
   }
 
