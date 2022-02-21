@@ -21,6 +21,8 @@ Future<void> _initHive() async {
   Hive.registerAdapter(ArticleAdapter());
   Hive.registerAdapter(QuantityUnitAdapter());
 
+  await Hive.openBox<Article>("ShoppingList");
+  await Hive.openBox<Article>("ShoppingListChecked");
   await Hive.openBox("Suggestions");
 }
 

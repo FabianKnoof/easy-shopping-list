@@ -168,14 +168,26 @@ class _CheckboxWidgetState extends State<CheckboxWidget> {
       checkColor: Colors.white,
       fillColor: MaterialStateProperty.resolveWith(getColor),
       value: _isChecked,
-      onChanged: (bool? value) {
-        setState(() {
-          if (value!) {
-            ShoppingListCheckedHive().checkArticle(widget.indexKey);
-          } else {
-            ShoppingListCheckedHive().uncheckArticle(widget.indexKey);
-          }
-        });
+      onChanged: (bool? value) async {
+        if (value!) {
+          await ShoppingListCheckedHive()
+              .checkArticle(widget.indexKey)
+              .then((indexKey) {
+            ScaffoldMessenger.of(context).clearSnackBars();
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text("Abgehakt"),
+              action: SnackBarAction(
+                label: "Rückgängig",
+                onPressed: () {
+                  ShoppingListCheckedHive().uncheckArticle(indexKey);
+                },
+              ),
+            ));
+          });
+        } else {
+          ShoppingListCheckedHive().uncheckArticle(widget.indexKey);
+        }
+        setState(() {});
       },
     );
   }

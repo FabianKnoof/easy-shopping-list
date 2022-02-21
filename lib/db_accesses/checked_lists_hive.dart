@@ -1,4 +1,3 @@
-
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -19,10 +18,12 @@ class ShoppingListCheckedHive {
 
   final ShoppingListHive _shoppingListHive = ShoppingListHive();
 
-  void checkArticle(int indexKey) {
+  Future<int> checkArticle(int indexKey) async {
     Article article = _shoppingListHive.box.get(indexKey)!;
-    _shoppingListHive.removeArticleAt(indexKey).whenComplete(() {
-      box.add(article);
+    return await _shoppingListHive.removeArticleAt(indexKey).then((value) {
+      return box.add(article).then((value) {
+        return value;
+      });
     });
   }
 
