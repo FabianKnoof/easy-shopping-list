@@ -1,4 +1,3 @@
-
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_mongodb.dart';
 import 'package:easy_shopping_list/meal_list.dart';
@@ -19,14 +18,9 @@ void main() async {
 Future<void> _initHive() async {
   await Hive.initFlutter();
 
-  // Shopping list
   Hive.registerAdapter(ArticleAdapter());
   Hive.registerAdapter(QuantityUnitAdapter());
-  await Hive.openBox<Article>("ShoppingList");
-  // await Hive.openBox<Article>("ShoppingList")
-  //     .then((value) async => await value.clear());
 
-  // Suggestions
   await Hive.openBox("Suggestions");
 }
 
