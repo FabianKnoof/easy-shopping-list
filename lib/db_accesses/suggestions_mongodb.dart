@@ -45,8 +45,9 @@ class MongoDBAccess {
     var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     int version = decodedResponse["document"]["Version"];
 
-    log("Check if suggestions sync ist needed");
-    if (version > Hive.box("Suggestions").get("VersionArticleSuggestions")) {
+    if (version >
+        Hive.box("Suggestions")
+            .get("VersionArticleSuggestions", defaultValue: 0)) {
       log("Suggestions update available");
       Hive.box("Suggestions").put("ArticleSuggestions", await getSuggestions());
       Hive.box("Suggestions").put("VersionArticleSuggestions", version);
