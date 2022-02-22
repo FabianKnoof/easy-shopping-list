@@ -61,7 +61,7 @@ class _ShoppingListState extends State<ShoppingList> {
                     for (int indexKey in _shoppingListCheckedHive.box.keys)
                       ListTile(
                         key: Key(indexKey.toString()),
-                        title: _article(indexKey,
+                        title: _article(
                             _shoppingListCheckedHive.box.get(indexKey)!),
                       )
                   ].toList(),
@@ -107,18 +107,34 @@ class _ShoppingListState extends State<ShoppingList> {
             _shoppingListHive.replaceArticleAt(indexKey, newArticle);
           });
         },
-        title: _article(indexKey, article),
+        title: _article(article),
       ));
     }
     return articleListTiles;
   }
 
-  Row _article(int indexKey, Article article) {
+  Row _article(Article article) {
     return Row(
       children: [
-        CheckboxWidget(
-          indexKey: indexKey,
-          article: article,
+        Checkbox(
+          value: (article.box == ShoppingListCheckedHive().box),
+          onChanged: (value) {
+            if (value!) {
+              ShoppingListCheckedHive().checkArticle(article);
+              ScaffoldMessenger.of(context).clearSnackBars();
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("Abgehakt"),
+                action: SnackBarAction(
+                  label: "Rückgängig",
+                  onPressed: () {
+                    ShoppingListCheckedHive().uncheckArticle(article);
+                  },
+                ),
+              ));
+            } else {
+              ShoppingListCheckedHive().uncheckArticle(article);
+            }
+          },
         ),
         Text(article.name),
         SizedBox(
@@ -131,64 +147,6 @@ class _ShoppingListState extends State<ShoppingList> {
         ),
         Text(article.details)
       ],
-    );
-  }
-}
-
-class CheckboxWidget extends StatefulWidget {
-  const CheckboxWidget(
-      {Key? key, required this.indexKey, required this.article})
-      : super(key: key);
-  final int indexKey;
-  final Article article;
-
-  @override
-  State<CheckboxWidget> createState() => _CheckboxWidgetState();
-}
-
-class _CheckboxWidgetState extends State<CheckboxWidget> {
-  @override
-  Widget build(BuildContext context) {
-    bool _isChecked = !(ShoppingListHive().box.containsKey(widget.indexKey) &&
-        ShoppingListHive().box.get(widget.indexKey) == widget.article);
-
-    Color getColor(Set<MaterialState> states) {
-      const Set<MaterialState> interactiveStates = <MaterialState>{
-        MaterialState.pressed,
-        MaterialState.hovered,
-        MaterialState.focused,
-      };
-      if (states.any(interactiveStates.contains)) {
-        return Colors.blue;
-      }
-      return Colors.red;
-    }
-
-    return Checkbox(
-      checkColor: Colors.white,
-      fillColor: MaterialStateProperty.resolveWith(getColor),
-      value: _isChecked,
-      onChanged: (bool? value) async {
-        if (value!) {
-          await ShoppingListCheckedHive()
-              .checkArticle(widget.indexKey)
-              .then((indexKey) {
-            ScaffoldMessenger.of(context).clearSnackBars();
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text("Abgehakt"),
-              action: SnackBarAction(
-                label: "Rückgängig",
-                onPressed: () {
-                  ShoppingListCheckedHive().uncheckArticle(indexKey);
-                },
-              ),
-            ));
-          });
-        } else {
-          ShoppingListCheckedHive().uncheckArticle(widget.indexKey);
-        }
-        setState(() {});
-      },
     );
   }
 }

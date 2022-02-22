@@ -18,17 +18,13 @@ class ShoppingListCheckedHive {
 
   final ShoppingListHive _shoppingListHive = ShoppingListHive();
 
-  Future<int> checkArticle(int indexKey) async {
-    Article article = _shoppingListHive.box.get(indexKey)!;
-    return await _shoppingListHive.removeArticleAt(indexKey).then((value) {
-      return box.add(article).then((value) {
-        return value;
-      });
-    });
+  void checkArticle(Article article) {
+    ShoppingListHive().removeArticle(article);
+    box.add(article);
   }
 
-  void uncheckArticle(int indexKey) {
-    Article article = box.get(indexKey)!;
-    article.delete().whenComplete(() => _shoppingListHive.addArticle(article));
+  void uncheckArticle(Article article) {
+    article.delete();
+    _shoppingListHive.addArticle(article);
   }
 }

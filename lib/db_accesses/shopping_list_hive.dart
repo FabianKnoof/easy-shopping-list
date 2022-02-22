@@ -56,13 +56,16 @@ class ShoppingListHive {
     }
   }
 
-  Future<void> removeArticleAt(int indexKey) async {
+  void removeArticleAt(int indexKey) {
     Map<dynamic, Article> articleMap = {};
     for (int i = indexKey; i < box.length - 1; ++i) {
       articleMap[i] = box.get(i + 1)!;
     }
-    await box.deleteAll([
-      for (int i = indexKey; i < box.length; ++i) i
-    ]).whenComplete(() => box.putAll(articleMap));
+    box.deleteAll([for (int i = indexKey; i < box.length; ++i) i]);
+    box.putAll(articleMap);
+  }
+
+  void removeArticle(Article article) {
+    removeArticleAt(article.key);
   }
 }
