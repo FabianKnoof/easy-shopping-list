@@ -69,3 +69,30 @@ class ShoppingListHive {
     removeArticleAt(article.key);
   }
 }
+
+class ShoppingListCheckedHive {
+  static final ShoppingListCheckedHive _shoppingListCheckedHive =
+      ShoppingListCheckedHive._internal();
+
+  factory ShoppingListCheckedHive() {
+    return _shoppingListCheckedHive;
+  }
+
+  ShoppingListCheckedHive._internal();
+
+  final Box<Article> box = Hive.box<Article>(
+    "ShoppingListChecked",
+  );
+
+  final ShoppingListHive _shoppingListHive = ShoppingListHive();
+
+  void checkArticle(Article article) {
+    ShoppingListHive().removeArticle(article);
+    box.add(article);
+  }
+
+  void uncheckArticle(Article article) {
+    article.delete();
+    _shoppingListHive.addArticle(article);
+  }
+}
