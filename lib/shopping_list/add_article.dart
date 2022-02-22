@@ -158,7 +158,6 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
 
   TextFormField _buildQuantityTextField() {
     return TextFormField(
-      // initialValue: _article.quantity.toString(),
       textInputAction: TextInputAction.next,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       keyboardType: TextInputType.number,
@@ -167,6 +166,11 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
         ..text = _article.quantity.toString()
         ..selection = TextSelection(
             baseOffset: 0, extentOffset: _article.quantity.toString().length),
+      onChanged: (newValue) {
+        if (newValue.isNotEmpty) {
+          _article.quantity = int.tryParse(newValue)!;
+        }
+      },
       onSaved: (newValue) {
         if (newValue != null && newValue.isNotEmpty) {
           _article.quantity = int.tryParse(newValue)!;
