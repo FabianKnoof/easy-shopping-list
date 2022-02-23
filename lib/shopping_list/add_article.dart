@@ -28,8 +28,8 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
         value: unit, child: Text(Article.quantityUnitToString(unit)));
   }).toList();
 
-  final List<String> _articleSuggestions =
-      Hive.box("Suggestions").get("ArticleSuggestions");
+  final List<String> _articleSuggestions = Hive.box("Suggestions")
+      .get("ArticleSuggestions", defaultValue: <String>[]);
 
   void _submitForm() {
     FormState? formState = _addArticleFormKey.currentState;
@@ -153,7 +153,7 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
         onPressed: () {
           _submitForm();
         },
-        child: Text("Add"));
+        child: Icon(Icons.add));
   }
 
   TextFormField _buildQuantityTextField() {
