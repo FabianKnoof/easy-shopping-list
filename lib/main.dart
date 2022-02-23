@@ -1,6 +1,10 @@
+import 'dart:developer';
+
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_mongodb.dart';
-import 'package:easy_shopping_list/meal_list.dart';
+import 'package:easy_shopping_list/meal_list/add_meal.dart';
+import 'package:easy_shopping_list/meal_list/cooking_list.dart';
+import 'package:easy_shopping_list/meal_list/meal.dart';
 import 'package:easy_shopping_list/options_list.dart';
 import 'package:easy_shopping_list/shopping_list/add_article.dart';
 import 'package:easy_shopping_list/shopping_list/shopping_list.dart';
@@ -12,6 +16,7 @@ import 'shopping_list/article.dart';
 void main() async {
   await _initHive();
   MongoDBAccess.syncArticleSuggestions();
+  // Todo MongoDBAccess meal suggestions
   runApp(const MyApp());
 }
 
@@ -20,9 +25,11 @@ Future<void> _initHive() async {
 
   Hive.registerAdapter(ArticleAdapter());
   Hive.registerAdapter(QuantityUnitAdapter());
+  Hive.registerAdapter(MealAdapter());
 
   await Hive.openBox<Article>("ShoppingList");
   await Hive.openBox<Article>("ShoppingListChecked");
+  await Hive.openBox<Meal>("CookingList");
   await Hive.openBox("Suggestions");
 }
 
@@ -50,7 +57,7 @@ class _AppViewState extends State<AppView> {
 
   static const List<Widget> _widgetOptions = <Widget>[
     ShoppingList(),
-    MealList(),
+    CookingList(),
     OptionsList()
   ];
 
@@ -70,7 +77,7 @@ class _AppViewState extends State<AppView> {
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.list), label: "Einkauf"),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Gerichte"),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Kochen"),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "")
         ],
         currentIndex: _selectedIndex,
@@ -89,7 +96,14 @@ class _AppViewState extends State<AppView> {
                 ShoppingListHive().addArticle(newArticle);
               });
             });
-          } else {}
+          } else if (_widgetOptions[_selectedIndex].runtimeType ==
+              CookingList) {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddMealView(),
+                )).then((newMeal) => log(newMeal.toString()));
+          }
         },
         child: const Icon(Icons.add),
       ),

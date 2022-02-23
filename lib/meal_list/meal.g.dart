@@ -18,7 +18,7 @@ class MealAdapter extends TypeAdapter<Meal> {
     };
     return Meal()
       ..name = fields[0] as String
-      ..quantity = fields[1] as double
+      ..quantity = fields[1] as int
       ..ingredients = (fields[3] as List).cast<Article>();
   }
 

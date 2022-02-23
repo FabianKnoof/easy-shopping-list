@@ -8,7 +8,7 @@ class Meal extends HiveObject {
   @HiveField(0)
   String name = "";
   @HiveField(1)
-  double quantity = 1;
+  int quantity = 1;
   @HiveField(2)
   final String quantityUnit = "Portion(en)";
   @HiveField(3)
