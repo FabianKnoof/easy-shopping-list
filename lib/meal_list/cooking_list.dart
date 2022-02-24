@@ -50,7 +50,7 @@ class _CookingListState extends State<CookingList> {
           ],
           onReorder: (oldIndex, newIndex) {
             setState(() {
-              // Todo reorder meals
+              CookingListHive().reorderMealAt(oldIndex, newIndex);
             });
           },
         );

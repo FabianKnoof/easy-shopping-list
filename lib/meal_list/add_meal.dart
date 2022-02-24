@@ -22,7 +22,8 @@ class _AddMealViewState extends State<AddMealView> {
 
   final double _padding = 5;
 
-  List<Meal> _foundMeals = CookingListHive().box.values.toList(growable: true);
+  List<dynamic> _foundMeals =
+      Hive.box("Suggestions").get("MealSuggestions", defaultValue: []);
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +73,13 @@ class _AddMealViewState extends State<AddMealView> {
               children: [
                 ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(context, meal);
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (context) {
+                          return NewMeal(
+                            meal: meal,
+                          );
+                        },
+                      )).then((value) => Navigator.pop(context, value));
                     },
                     child: Icon(Icons.add)),
                 SizedBox(
@@ -130,11 +137,10 @@ class _AddMealViewState extends State<AddMealView> {
 
   TextField _buildSearchField() {
     return TextField(
-      onChanged: (value) {
+      onChanged: (String value) {
         _meal.name = value;
-        _foundMeals = CookingListHive()
-            .box
-            .values
+        _foundMeals = Hive.box("Suggestions")
+            .get("MealSuggestions", defaultValue: [])
             .where((meal) =>
                 meal.name.toLowerCase().startsWith(value.toLowerCase()))
             .toList();

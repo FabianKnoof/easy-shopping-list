@@ -21,4 +21,21 @@ class CookingListHive {
     if (indexKey == null || meal == null) return;
     box.put(indexKey, meal);
   }
+
+  void reorderMealAt(int oldIndex, int newIndex) {
+    Meal reorderedMeal = box.get(oldIndex)!;
+    if (oldIndex < newIndex) {
+      --newIndex;
+    } else {
+      int tmp = oldIndex;
+      oldIndex = newIndex;
+      newIndex = tmp;
+    }
+    for (int indexKey = oldIndex; indexKey < newIndex; ++indexKey) {
+      Meal nextMeal = box.get(indexKey + 1)!;
+      box.delete(indexKey + 1);
+      box.put(indexKey, nextMeal);
+    }
+    // box.put(newIndex, reorderedMeal);
+  }
 }

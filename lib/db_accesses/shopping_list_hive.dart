@@ -45,9 +45,7 @@ class ShoppingListHive {
       }
       box.put(newIndex, reorderedArticle);
     } else {
-      dev.log("$oldIndex > $newIndex");
       for (int indexKey = oldIndex; indexKey > newIndex; --indexKey) {
-        dev.log("$indexKey");
         Article nextArticle = box.get(indexKey - 1)!;
         box.delete(indexKey - 1);
         box.put(indexKey, nextArticle);
