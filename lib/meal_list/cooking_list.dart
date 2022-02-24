@@ -61,7 +61,7 @@ class _CookingListState extends State<CookingList> {
       onTap: () {
         Navigator.push(context, MaterialPageRoute(
           builder: (context) {
-            return NewMeal(
+            return EditMealView(
               meal: meal,
             );
           },

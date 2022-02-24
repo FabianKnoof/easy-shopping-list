@@ -76,7 +76,7 @@ class _AddMealViewState extends State<AddMealView> {
                     onPressed: () {
                       Navigator.push(context, MaterialPageRoute(
                         builder: (context) {
-                          return NewMeal(
+                          return EditMealView(
                             meal: meal,
                           );
                         },
@@ -128,7 +128,7 @@ class _AddMealViewState extends State<AddMealView> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => NewMeal(
+                builder: (context) => EditMealView(
                   meal: _meal,
                 ),
               )).then((newMeal) => Navigator.pop(context, newMeal));
@@ -153,15 +153,15 @@ class _AddMealViewState extends State<AddMealView> {
   }
 }
 
-class NewMeal extends StatefulWidget {
-  const NewMeal({Key? key, this.meal}) : super(key: key);
+class EditMealView extends StatefulWidget {
+  const EditMealView({Key? key, this.meal}) : super(key: key);
   final Meal? meal;
 
   @override
-  _NewMealState createState() => _NewMealState();
+  _EditMealViewState createState() => _EditMealViewState();
 }
 
-class _NewMealState extends State<NewMeal> {
+class _EditMealViewState extends State<EditMealView> {
   final double _padding = 5;
 
   Meal _meal = Meal();
@@ -190,7 +190,7 @@ class _NewMealState extends State<NewMeal> {
     }
     _quantityController.text = _meal.quantity.toString();
     _quantityController.selection = TextSelection(
-        baseOffset: 0, extentOffset: _meal.quantity.toString().length);
+        baseOffset: 0, extentOffset: _quantityController.text.length);
 
     return Scaffold(
       appBar: AppBar(
@@ -303,6 +303,9 @@ class _NewMealState extends State<NewMeal> {
         return null;
       },
       textFieldConfiguration: TextFieldConfiguration(
+          onChanged: (value) {
+            _meal.name = value;
+          },
           controller: _mealNameController,
           autofocus: true,
           textInputAction: TextInputAction.next,
