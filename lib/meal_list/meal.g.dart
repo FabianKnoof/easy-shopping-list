@@ -17,9 +17,10 @@ class MealAdapter extends TypeAdapter<Meal> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Meal()
-      ..name = fields[0] as String
-      ..quantity = fields[1] as int
-      ..ingredients = (fields[3] as List).cast<Article>();
+      ..name = fields[0] == null ? '' : fields[0] as String
+      ..quantity = fields[1] == null ? 1 : fields[1] as int
+      ..ingredients =
+          fields[3] == null ? [] : (fields[3] as List).cast<Article>();
   }
 
   @override

@@ -1,8 +1,8 @@
+import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 class AddArticleBottomSheet extends StatefulWidget {
   const AddArticleBottomSheet({Key? key, this.article}) : super(key: key);
@@ -27,9 +27,6 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
     return DropdownMenuItem<QuantityUnit>(
         value: unit, child: Text(Article.quantityUnitToString(unit)));
   }).toList();
-
-  final List<String> _articleSuggestions = Hive.box("Suggestions")
-      .get("ArticleSuggestions", defaultValue: <String>[]);
 
   void _submitForm() {
     FormState? formState = _addArticleFormKey.currentState;
@@ -122,15 +119,13 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
           title: Text(suggestion),
         );
       },
-      suggestionsCallback: (pattern) async {
+      suggestionsCallback: (pattern) {
         if (pattern.isEmpty) {
           return const <String>[];
         }
-        return _articleSuggestions.where((String articleSuggestion) {
-          return articleSuggestion
-              .toLowerCase()
-              .startsWith(pattern.toLowerCase());
-        });
+        return ArticleSuggestionsHive().box.values.where((Article article) {
+          return article.name.toLowerCase().startsWith(pattern.toLowerCase());
+        }).map((article) => article.name);
       },
       validator: (value) {
         if (value!.isEmpty) {

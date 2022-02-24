@@ -16,7 +16,7 @@ import 'shopping_list/article.dart';
 
 void main() async {
   await _initHive();
-  MongoDBAccess.syncArticleSuggestions();
+  // MongoDBAccess.syncArticleSuggestions();
   // Todo MongoDBAccess meal suggestions
   runApp(const MyApp());
 }
@@ -32,6 +32,8 @@ Future<void> _initHive() async {
   await Hive.openBox<Article>("ShoppingListChecked");
   await Hive.openBox<Meal>("CookingList");
   await Hive.openBox("Suggestions");
+  await Hive.openBox<Article>("ArticleSuggestions");
+  await Hive.openBox<Meal>("MealSuggestions");
 }
 
 class MyApp extends StatelessWidget {
@@ -71,7 +73,9 @@ class _AppViewState extends State<AppView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Easy Shopping List"),),
+      appBar: AppBar(
+        title: Text("Easy Shopping List"),
+      ),
       body: IndexedStack(
         children: _widgetOptions,
         index: _selectedIndex,

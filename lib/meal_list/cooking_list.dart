@@ -16,8 +16,6 @@ class CookingList extends StatefulWidget {
 class _CookingListState extends State<CookingList> {
   final double _padding = 5;
 
-  final CookingListHive _cookingListHive = CookingListHive();
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -34,11 +32,11 @@ class _CookingListState extends State<CookingList> {
 
   ValueListenableBuilder<Box<dynamic>> _buildCookingList() {
     return ValueListenableBuilder<Box>(
-      valueListenable: _cookingListHive.box.listenable(),
+      valueListenable: CookingListHive().box.listenable(),
       builder: (context, value, child) {
         return ReorderableListView(
           children: [
-            for (Meal meal in _cookingListHive.box.values)
+            for (Meal meal in CookingListHive().box.values)
               ExpansionTile(
                 key: Key(meal.key.toString()),
                 title: _buildMeal(meal),
@@ -105,7 +103,7 @@ class _CookingListState extends State<CookingList> {
             width: _padding,
           ),
           Text(ingredient.quantity.toString()),
-          Text(Article.quantityUnitToString(ingredient.quantityUnit)),
+          Text(ingredient.quantityUnitAsString()),
           SizedBox(
             width: _padding,
           ),

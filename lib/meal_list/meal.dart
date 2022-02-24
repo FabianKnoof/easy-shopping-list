@@ -5,13 +5,13 @@ part 'meal.g.dart';
 
 @HiveType(typeId: 2)
 class Meal extends HiveObject {
-  @HiveField(0)
+  @HiveField(0, defaultValue: "")
   String name = "";
-  @HiveField(1)
+  @HiveField(1, defaultValue: 1)
   int quantity = 1;
-  @HiveField(2)
+  @HiveField(2, defaultValue: "Portion(en)")
   final String quantityUnit = "Portion(en)";
-  @HiveField(3)
+  @HiveField(3, defaultValue: [])
   List<Article> ingredients = [];
 
   @override

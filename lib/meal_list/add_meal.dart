@@ -1,4 +1,5 @@
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
+import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
 import 'package:easy_shopping_list/shopping_list/add_article.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:flutter/cupertino.dart';
@@ -22,8 +23,8 @@ class _AddMealViewState extends State<AddMealView> {
 
   final double _padding = 5;
 
-  List<dynamic> _foundMeals =
-      Hive.box("Suggestions").get("MealSuggestions", defaultValue: []);
+  List<Meal> _foundMeals =
+      MealSuggestionsHive().box.values.toList(growable: true);
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +112,7 @@ class _AddMealViewState extends State<AddMealView> {
             width: _padding,
           ),
           Text(ingredient.quantity.toString()),
-          Text(Article.quantityUnitToString(ingredient.quantityUnit)),
+          Text(ingredient.quantityUnitAsString()),
           SizedBox(
             width: _padding,
           ),
@@ -139,8 +140,9 @@ class _AddMealViewState extends State<AddMealView> {
     return TextField(
       onChanged: (String value) {
         _meal.name = value;
-        _foundMeals = Hive.box("Suggestions")
-            .get("MealSuggestions", defaultValue: [])
+        _foundMeals = MealSuggestionsHive()
+            .box
+            .values
             .where((meal) =>
                 meal.name.toLowerCase().startsWith(value.toLowerCase()))
             .toList();
@@ -169,9 +171,6 @@ class _NewMealState extends State<NewMeal> {
   final TextEditingController _mealNameController = TextEditingController();
 
   final TextEditingController _quantityController = TextEditingController();
-
-  final List<String> _mealSuggestions =
-      Hive.box("Suggestions").get("MealSuggestions", defaultValue: <String>[]);
 
   void _submitForm() {
     FormState? formState = _addMealFormKey.currentState;
@@ -290,9 +289,12 @@ class _NewMealState extends State<NewMeal> {
         if (pattern.isNotEmpty) {
           return const <String>[];
         }
-        return _mealSuggestions.where((String mealSuggestion) {
-          return mealSuggestion.toLowerCase().startsWith(pattern.toLowerCase());
-        });
+        return MealSuggestionsHive()
+            .box
+            .values
+            .where((meal) =>
+                meal.name.toLowerCase().startsWith(pattern.toLowerCase()))
+            .map((article) => article.name);
       },
       validator: (value) {
         if (value!.isEmpty) {
@@ -400,7 +402,7 @@ class _NewMealState extends State<NewMeal> {
             width: _padding,
           ),
           Text(ingredient.quantity.toString()),
-          Text(Article.quantityUnitToString(ingredient.quantityUnit)),
+          Text(ingredient.quantityUnitAsString()),
           SizedBox(
             width: _padding,
           ),
