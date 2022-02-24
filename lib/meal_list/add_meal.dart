@@ -44,94 +44,103 @@ class _AddMealViewState extends State<AddMealView> {
                   height: _padding,
                 ),
                 Expanded(
-                  child: TextField(
-                    onChanged: (value) {
-                      _meal.name = value;
-                      _foundMeals = CookingListHive()
-                          .box
-                          .values
-                          .where((meal) => meal.name
-                              .toLowerCase()
-                              .startsWith(value.toLowerCase()))
-                          .toList();
-                    },
-                    decoration: InputDecoration(
-                        labelText: "Gericht", border: OutlineInputBorder()),
-                  ),
+                  child: _buildSearchField(),
                 ),
                 SizedBox(
                   width: _padding,
                 ),
-                ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => NewMeal(
-                              meal: _meal,
-                            ),
-                          )).then((newMeal) => Navigator.pop(context, newMeal));
-                    },
-                    child: Text("Neues Gericht"))
+                _buildNewMealButton(context)
               ],
             ),
           ),
           SizedBox(
             height: _padding,
           ),
-          ExpansionPanelList(
-            expansionCallback: (panelIndex, isExpanded) {
-              // Todo on expand
-            },
-            children: [
-              for (Meal meal in _foundMeals)
-                ExpansionPanel(
-                    headerBuilder: (context, isExpanded) {
-                      return Row(
-                        children: [
-                          Text(meal.name),
-                          SizedBox(
-                            width: _padding,
-                          ),
-                          Text(meal.quantity.toString()),
-                          Text(meal.quantityUnit)
-                        ],
-                      );
-                    },
-                    body: ListView(
-                      shrinkWrap: true,
-                      children: [
-                        for (Article ingredient in meal.ingredients)
-                          ListTile(
-                            title: Row(
-                              children: [
-                                Checkbox(
-                                  value: false,
-                                  // Todo ingredient shopping list checkbox
-                                  onChanged: (value) {
-                                    // Todo change value of checkbox / check/uncheck
-                                  },
-                                ),
-                                Text(ingredient.name),
-                                SizedBox(
-                                  width: _padding,
-                                ),
-                                Text(ingredient.quantity.toString()),
-                                Text(Article.quantityUnitToString(
-                                    ingredient.quantityUnit)),
-                                SizedBox(
-                                  width: _padding,
-                                ),
-                                Text(ingredient.details)
-                              ],
-                            ),
-                          )
-                      ],
-                    ))
-            ],
-          )
+          _buildFoundMealsExpansionList()
         ],
       ),
+    );
+  }
+
+  ListView _buildFoundMealsExpansionList() {
+    return ListView(
+      shrinkWrap: true,
+      children: [
+        for (Meal meal in _foundMeals)
+          ExpansionTile(
+            title: Row(
+              children: [
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context, meal);
+                    },
+                    child: Icon(Icons.add)),
+                SizedBox(
+                  width: _padding,
+                ),
+                Text(meal.name),
+                SizedBox(
+                  width: _padding,
+                ),
+                Text(meal.quantity.toString()),
+                Text(meal.quantityUnit)
+              ],
+            ),
+            children: [
+              for (Article ingredient in meal.ingredients)
+                _buildMealIngredientTile(ingredient)
+            ],
+          )
+      ],
+    );
+  }
+
+  ListTile _buildMealIngredientTile(Article ingredient) {
+    return ListTile(
+      title: Row(
+        children: [
+          Text(ingredient.name),
+          SizedBox(
+            width: _padding,
+          ),
+          Text(ingredient.quantity.toString()),
+          Text(Article.quantityUnitToString(ingredient.quantityUnit)),
+          SizedBox(
+            width: _padding,
+          ),
+          Text(ingredient.details)
+        ],
+      ),
+    );
+  }
+
+  ElevatedButton _buildNewMealButton(BuildContext context) {
+    return ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => NewMeal(
+                  meal: _meal,
+                ),
+              )).then((newMeal) => Navigator.pop(context, newMeal));
+        },
+        child: Text("Neues Gericht"));
+  }
+
+  TextField _buildSearchField() {
+    return TextField(
+      onChanged: (value) {
+        _meal.name = value;
+        _foundMeals = CookingListHive()
+            .box
+            .values
+            .where((meal) =>
+                meal.name.toLowerCase().startsWith(value.toLowerCase()))
+            .toList();
+      },
+      decoration:
+          InputDecoration(labelText: "Gericht", border: OutlineInputBorder()),
     );
   }
 }
@@ -158,6 +167,14 @@ class _NewMealState extends State<NewMeal> {
   final List<String> _mealSuggestions =
       Hive.box("Suggestions").get("MealSuggestions", defaultValue: <String>[]);
 
+  void _submitForm() {
+    FormState? formState = _addMealFormKey.currentState;
+    if (formState != null && formState.validate()) {
+      formState.save();
+      Navigator.pop(context, _meal);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.meal != null) {
@@ -165,10 +182,10 @@ class _NewMealState extends State<NewMeal> {
       _mealNameController.text = _meal.name;
       _mealNameController.selection = TextSelection.fromPosition(
           TextPosition(offset: _mealNameController.text.length));
-      _quantityController.text = _meal.quantity.toString();
-      _quantityController.selection = TextSelection(
-          baseOffset: 0, extentOffset: _meal.quantity.toString().length);
     }
+    _quantityController.text = _meal.quantity.toString();
+    _quantityController.selection = TextSelection(
+        baseOffset: 0, extentOffset: _meal.quantity.toString().length);
 
     return Scaffold(
       appBar: AppBar(
@@ -213,7 +230,14 @@ class _NewMealState extends State<NewMeal> {
                         SizedBox(
                           width: _padding,
                         ),
-                        Expanded(flex: 2, child: Text(_meal.quantityUnit))
+                        Expanded(flex: 2, child: Text(_meal.quantityUnit)),
+                        SizedBox(
+                          width: _padding,
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: _buildChangeIngredientQuantityButton(),
+                        )
                       ],
                     ),
                   ),
@@ -249,6 +273,7 @@ class _NewMealState extends State<NewMeal> {
       },
       onSuggestionSelected: (String suggestion) {
         _mealNameController.text = suggestion;
+        // Todo meal suggestion selection
       },
       itemBuilder: (context, String itemData) {
         return ListTile(
@@ -279,23 +304,12 @@ class _NewMealState extends State<NewMeal> {
     );
   }
 
-  InputDecoration _textFieldInputDecoration(String labelText) =>
-      InputDecoration(border: OutlineInputBorder(), labelText: labelText);
-
   ElevatedButton _buildSubmitButton() {
     return ElevatedButton(
         onPressed: () {
           _submitForm();
         },
         child: Icon(Icons.add));
-  }
-
-  void _submitForm() {
-    FormState? formState = _addMealFormKey.currentState;
-    if (formState != null && formState.validate()) {
-      formState.save();
-      Navigator.pop(context, _meal);
-    }
   }
 
   TextFormField _buildQuantityTextField() {
@@ -323,6 +337,22 @@ class _NewMealState extends State<NewMeal> {
     );
   }
 
+  ElevatedButton _buildChangeIngredientQuantityButton() {
+    return ElevatedButton(
+        onPressed: () {
+          setState(() {
+            for (Article ingredient in _meal.ingredients) {
+              ingredient.quantity = (ingredient.quantity /
+                      _meal.quantity *
+                      int.tryParse(_quantityController.text)!)
+                  .round();
+            }
+            _meal.quantity = int.tryParse(_quantityController.text)!;
+          });
+        },
+        child: Text("Zutaten Mengen anpassen"));
+  }
+
   ListView _buildIngredientsList() {
     return ListView(
       shrinkWrap: true,
@@ -331,26 +361,6 @@ class _NewMealState extends State<NewMeal> {
           _buildIngredientListTile(ingredient)
       ],
     );
-  }
-
-  ElevatedButton _buildAddArticleButton() {
-    return ElevatedButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            builder: (context) {
-              return AddArticleBottomSheet();
-            },
-          ).then((value) {
-            if (value != null) {
-              setState(() {
-                // Note Add article quantity if article already in ingredients?
-                _meal.ingredients.insert(0, value);
-              });
-            }
-          });
-        },
-        child: Text("Zutat hinzufügen"));
   }
 
   ListTile _buildIngredientListTile(Article ingredient) {
@@ -393,4 +403,27 @@ class _NewMealState extends State<NewMeal> {
       ),
     );
   }
+
+  ElevatedButton _buildAddArticleButton() {
+    return ElevatedButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) {
+              return AddArticleBottomSheet();
+            },
+          ).then((value) {
+            if (value != null) {
+              setState(() {
+                // Note Add article quantity if article already in ingredients?
+                _meal.ingredients.insert(0, value);
+              });
+            }
+          });
+        },
+        child: Text("Zutat hinzufügen"));
+  }
+
+  InputDecoration _textFieldInputDecoration(String labelText) =>
+      InputDecoration(border: OutlineInputBorder(), labelText: labelText);
 }

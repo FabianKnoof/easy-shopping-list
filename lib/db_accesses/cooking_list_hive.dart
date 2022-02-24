@@ -11,4 +11,14 @@ class CookingListHive {
   CookingListHive._internal();
 
   final Box<Meal> box = Hive.box<Meal>("CookingList");
+
+  void addMeal(Meal? newMeal) {
+    if (newMeal == null) return;
+    box.put(box.length, newMeal);
+  }
+
+  void replaceMeal(int? indexKey, Meal? meal) {
+    if (indexKey == null || meal == null) return;
+    box.put(indexKey, meal);
+  }
 }

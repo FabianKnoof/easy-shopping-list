@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_mongodb.dart';
 import 'package:easy_shopping_list/meal_list/add_meal.dart';
@@ -70,6 +71,7 @@ class _AppViewState extends State<AppView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text("Easy Shopping List"),),
       body: IndexedStack(
         children: _widgetOptions,
         index: _selectedIndex,
@@ -102,7 +104,7 @@ class _AppViewState extends State<AppView> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => AddMealView(),
-                )).then((newMeal) => log(newMeal.toString()));
+                )).then((newMeal) => CookingListHive().addMeal(newMeal));
           }
         },
         child: const Icon(Icons.add),
