@@ -1,7 +1,9 @@
+import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
-import 'package:easy_shopping_list/db_accesses/suggestions_mongodb.dart';
-import 'package:easy_shopping_list/meal_list.dart';
-import 'package:easy_shopping_list/options_list.dart';
+import 'package:easy_shopping_list/meal_list/add_meal.dart';
+import 'package:easy_shopping_list/meal_list/cooking_list.dart';
+import 'package:easy_shopping_list/meal_list/meal.dart';
+import 'package:easy_shopping_list/options/options_view.dart';
 import 'package:easy_shopping_list/shopping_list/add_article.dart';
 import 'package:easy_shopping_list/shopping_list/shopping_list.dart';
 import "package:flutter/material.dart";
@@ -11,7 +13,8 @@ import 'shopping_list/article.dart';
 
 void main() async {
   await _initHive();
-  MongoDBAccess.syncArticleSuggestions();
+  // MongoDBAccess.syncArticleSuggestions();
+  // Todo MongoDBAccess meal suggestions
   runApp(const MyApp());
 }
 
@@ -20,10 +23,14 @@ Future<void> _initHive() async {
 
   Hive.registerAdapter(ArticleAdapter());
   Hive.registerAdapter(QuantityUnitAdapter());
+  Hive.registerAdapter(MealAdapter());
 
   await Hive.openBox<Article>("ShoppingList");
   await Hive.openBox<Article>("ShoppingListChecked");
+  await Hive.openBox<Meal>("CookingList");
   await Hive.openBox("Suggestions");
+  await Hive.openBox<Article>("ArticleSuggestions");
+  await Hive.openBox<Meal>("MealSuggestions");
 }
 
 class MyApp extends StatelessWidget {
@@ -50,8 +57,8 @@ class _AppViewState extends State<AppView> {
 
   static const List<Widget> _widgetOptions = <Widget>[
     ShoppingList(),
-    MealList(),
-    OptionsList()
+    CookingList(),
+    OptionsView()
   ];
 
   void _onItemTapped(int index) {
@@ -63,6 +70,9 @@ class _AppViewState extends State<AppView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Easy Shopping List"),
+      ),
       body: IndexedStack(
         children: _widgetOptions,
         index: _selectedIndex,
@@ -70,29 +80,39 @@ class _AppViewState extends State<AppView> {
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.list), label: "Einkauf"),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Gerichte"),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Kochen"),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "")
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
         onTap: _onItemTapped,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (_widgetOptions[_selectedIndex].runtimeType == ShoppingList) {
-            showModalBottomSheet(
-                context: context,
-                builder: (BuildContext context) {
-                  return AddArticleBottomSheet();
-                }).then((newArticle) {
-              setState(() {
-                ShoppingListHive().addArticle(newArticle);
-              });
-            });
-          } else {}
-        },
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: _selectedIndex != 2
+          ? FloatingActionButton(
+              onPressed: () {
+                if (_widgetOptions[_selectedIndex].runtimeType ==
+                    ShoppingList) {
+                  showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AddArticleBottomSheet();
+                      }).then((newArticle) {
+                    setState(() {
+                      ShoppingListHive().addArticle(newArticle);
+                    });
+                  });
+                } else if (_widgetOptions[_selectedIndex].runtimeType ==
+                    CookingList) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddMealView(),
+                      )).then((newMeal) => CookingListHive().addMeal(newMeal));
+                }
+              },
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 }

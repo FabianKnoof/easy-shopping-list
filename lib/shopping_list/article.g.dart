@@ -17,16 +17,18 @@ class ArticleAdapter extends TypeAdapter<Article> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Article()
-      ..name = fields[0] as String
-      ..quantity = fields[1] as int
-      ..quantityUnit = fields[2] as QuantityUnit
-      ..details = fields[3] as String;
+      ..name = fields[0] == null ? '' : fields[0] as String
+      ..quantity = fields[1] == null ? 1 : fields[1] as int
+      ..quantityUnit =
+          fields[2] == null ? QuantityUnit.pieces : fields[2] as QuantityUnit
+      ..details = fields[3] == null ? '' : fields[3] as String
+      ..isIngredient = fields[4] == null ? true : fields[4] as bool;
   }
 
   @override
   void write(BinaryWriter writer, Article obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -34,7 +36,9 @@ class ArticleAdapter extends TypeAdapter<Article> {
       ..writeByte(2)
       ..write(obj.quantityUnit)
       ..writeByte(3)
-      ..write(obj.details);
+      ..write(obj.details)
+      ..writeByte(4)
+      ..write(obj.isIngredient);
   }
 
   @override
@@ -91,3 +95,28 @@ class QuantityUnitAdapter extends TypeAdapter<QuantityUnit> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+Article _$ArticleFromJson(Map<String, dynamic> json) => Article()
+  ..name = json['name'] as String
+  ..quantity = json['quantity'] as int
+  ..quantityUnit = $enumDecode(_$QuantityUnitEnumMap, json['quantityUnit'])
+  ..details = json['details'] as String
+  ..isIngredient = json['isIngredient'] as bool;
+
+Map<String, dynamic> _$ArticleToJson(Article instance) => <String, dynamic>{
+      'name': instance.name,
+      'quantity': instance.quantity,
+      'quantityUnit': _$QuantityUnitEnumMap[instance.quantityUnit],
+      'details': instance.details,
+      'isIngredient': instance.isIngredient,
+    };
+
+const _$QuantityUnitEnumMap = {
+  QuantityUnit.pieces: 'pieces',
+  QuantityUnit.gram: 'gram',
+  QuantityUnit.milliliter: 'milliliter',
+};

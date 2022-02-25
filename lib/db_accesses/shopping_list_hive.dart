@@ -45,9 +45,7 @@ class ShoppingListHive {
       }
       box.put(newIndex, reorderedArticle);
     } else {
-      dev.log("$oldIndex > $newIndex");
       for (int indexKey = oldIndex; indexKey > newIndex; --indexKey) {
-        dev.log("$indexKey");
         Article nextArticle = box.get(indexKey - 1)!;
         box.delete(indexKey - 1);
         box.put(indexKey, nextArticle);
@@ -67,5 +65,32 @@ class ShoppingListHive {
 
   void removeArticle(Article article) {
     removeArticleAt(article.key);
+  }
+}
+
+class ShoppingListCheckedHive {
+  static final ShoppingListCheckedHive _shoppingListCheckedHive =
+      ShoppingListCheckedHive._internal();
+
+  factory ShoppingListCheckedHive() {
+    return _shoppingListCheckedHive;
+  }
+
+  ShoppingListCheckedHive._internal();
+
+  final Box<Article> box = Hive.box<Article>(
+    "ShoppingListChecked",
+  );
+
+  final ShoppingListHive _shoppingListHive = ShoppingListHive();
+
+  void checkArticle(Article article) {
+    ShoppingListHive().removeArticle(article);
+    box.add(article);
+  }
+
+  void uncheckArticle(Article article) {
+    article.delete();
+    _shoppingListHive.addArticle(article);
   }
 }

@@ -1,4 +1,3 @@
-import 'package:easy_shopping_list/db_accesses/checked_lists_hive.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:flutter/material.dart';
@@ -16,10 +15,6 @@ class ShoppingList extends StatefulWidget {
 class _ShoppingListState extends State<ShoppingList> {
   final double _padding = 5;
 
-  final ShoppingListHive _shoppingListHive = ShoppingListHive();
-  final ShoppingListCheckedHive _shoppingListCheckedHive =
-      ShoppingListCheckedHive();
-
   bool _checkedShoppingListExpanded = false;
 
   @override
@@ -36,7 +31,7 @@ class _ShoppingListState extends State<ShoppingList> {
 
   ValueListenableBuilder<Box<Article>> _buildShoppingListChecked() {
     return ValueListenableBuilder(
-      valueListenable: _shoppingListCheckedHive.box.listenable(),
+      valueListenable: ShoppingListCheckedHive().box.listenable(),
       builder: (context, value, child) {
         return ExpansionPanelList(
           expansionCallback: (panelIndex, isExpanded) {
@@ -52,17 +47,17 @@ class _ShoppingListState extends State<ShoppingList> {
                   return ListTile(
                     title: Text("Abgehakt"),
                     leading: Icon(Icons.checklist),
-                    trailing: Text("(${_shoppingListCheckedHive.box.length})"),
+                    trailing: Text("(${ShoppingListCheckedHive().box.length})"),
                   );
                 },
                 body: ListView(
                   shrinkWrap: true,
                   children: [
-                    for (int indexKey in _shoppingListCheckedHive.box.keys)
+                    for (int indexKey in ShoppingListCheckedHive().box.keys)
                       ListTile(
                         key: Key(indexKey.toString()),
                         title: _article(
-                            _shoppingListCheckedHive.box.get(indexKey)!),
+                            ShoppingListCheckedHive().box.get(indexKey)!),
                       )
                   ].toList(),
                 ))
@@ -74,13 +69,13 @@ class _ShoppingListState extends State<ShoppingList> {
 
   ValueListenableBuilder<Box<dynamic>> _buildShoppingList() {
     return ValueListenableBuilder<Box>(
-        valueListenable: _shoppingListHive.box.listenable(),
+        valueListenable: ShoppingListHive().box.listenable(),
         builder: (context, box, widget) {
           return ReorderableListView(
             children: _buildArticleListTile(),
             onReorder: (oldIndex, newIndex) {
               setState(() {
-                _shoppingListHive.reorderArticleAt(oldIndex, newIndex);
+                ShoppingListHive().reorderArticleAt(oldIndex, newIndex);
               });
             },
           );
@@ -90,9 +85,9 @@ class _ShoppingListState extends State<ShoppingList> {
   List<Widget> _buildArticleListTile() {
     List<Widget> articleListTiles = [];
     for (int indexKey = 0;
-        indexKey < _shoppingListHive.box.length;
+        indexKey < ShoppingListHive().box.length;
         ++indexKey) {
-      Article article = _shoppingListHive.box.get(indexKey)!;
+      Article article = ShoppingListHive().box.get(indexKey)!;
       articleListTiles.add(ListTile(
         key: Key(indexKey.toString()),
         onTap: () {
@@ -104,7 +99,7 @@ class _ShoppingListState extends State<ShoppingList> {
               );
             },
           ).then((newArticle) {
-            _shoppingListHive.replaceArticleAt(indexKey, newArticle);
+            ShoppingListHive().replaceArticleAt(indexKey, newArticle);
           });
         },
         title: _article(article),
@@ -141,7 +136,7 @@ class _ShoppingListState extends State<ShoppingList> {
           width: _padding,
         ),
         Text(article.quantity.toString()),
-        Text(Article.quantityUnitToString(article.quantityUnit)),
+        Text(article.quantityUnitAsString()),
         SizedBox(
           width: _padding,
         ),

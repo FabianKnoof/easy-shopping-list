@@ -1,9 +1,74 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:easy_shopping_list/meal_list/meal.dart';
 import 'package:easy_shopping_list/secrets.dart';
+import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
+
+class SuggestionsMongoDB {
+  static final String _url =
+      "https://data.mongodb-api.com/app/data-jtfko/endpoint/data/beta/action/";
+
+  static final Map<String, String> _headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Request-Headers': '*',
+    'api-key': apiKeyMongoDB
+    // Todo don't do this
+  };
+
+  static final Map<dynamic, dynamic> _bodySuggestions = {
+    "dataSource": "ESLDB",
+    "database": "Suggestions",
+  };
+
+  static Map<dynamic, dynamic> _getBodyWithCollection(String collection) {
+    Map<dynamic, dynamic> newBody = _bodySuggestions;
+    newBody["collection"] = collection;
+    return newBody;
+  }
+
+  static Future<Map> _httpPost(
+      String action, Map<dynamic, dynamic> body) async {
+    return await http
+        .post(Uri.parse(_url + action),
+            headers: _headers, body: jsonEncode(body))
+        .then((response) => jsonDecode(utf8.decode(response.bodyBytes))) as Map;
+  }
+
+  static Future<bool> insertUserMealSuggestion(Meal meal) async {
+    Map<dynamic, dynamic> body = _getBodyWithCollection("UserMealSuggestions");
+    // Note case insensitivity
+    body["filter"] = {"name": meal.name};
+    var httpResponse = await _httpPost("findOne", body);
+    body.remove("filter");
+    if (httpResponse["document"] != null) return false;
+
+    body["document"] = meal.toJson();
+    _httpPost("insertOne", body);
+    body.remove("document");
+    return true;
+  }
+
+  static Future<bool> insertUserArticleSuggestion(Article article) async {
+    Map<dynamic, dynamic> body =
+        _getBodyWithCollection("UserArticleSuggestions");
+    // Note case insensitivity
+    body["filter"] = {"article": article.name};
+    var httpResponse = await _httpPost("findOne", body);
+    body.remove("filter");
+    if (httpResponse["document"] != null) return false;
+
+    body["document"] = {
+      "article": article.name,
+      "isIngredient": article.isIngredient
+    };
+    _httpPost("insertOne", body);
+    body.remove("document");
+    return true;
+  }
+}
 
 class MongoDBAccess {
   static final String _url =
