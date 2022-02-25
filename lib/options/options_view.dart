@@ -44,61 +44,63 @@ class _OptionsViewState extends State<OptionsView> {
         Card(
           child: ListTile(
             title: Text("Gericht vorschlagen"),
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(
-                builder: (context) {
-                  return EditMealView();
-                },
-              )).then((meal) {
-                if (meal == null) return;
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: Text("${meal.name} als Vorschlag absenden?"),
-                      actions: [
-                        TextButton(
-                            onPressed: () {
-                              Navigator.pop(context, false);
-                            },
-                            child: Text("Nein")),
-                        TextButton(
-                            onPressed: () {
-                              Navigator.pop(context, true);
-                            },
-                            child: Text("Ja"))
-                      ],
-                    );
-                  },
-                ).then((userAnswer) async {
-                  if (userAnswer) {
-                    if (!await SuggestionsMongoDB.insertUserMealSuggestion(
-                        meal)) {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: Text(
-                                "Gericht ist bereits als Vorschlag eingeangen"),
-                            actions: [
-                              TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text("Ok"))
-                            ],
-                          );
-                        },
-                      );
-                    }
-                  }
-                });
-              });
+            onTap: () async {
+              await _userMealSuggestionAction(context);
             },
           ),
         )
       ],
     );
+  }
+
+  Future<void> _userMealSuggestionAction(BuildContext context) async {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) {
+        return EditMealView();
+      },
+    )).then((meal) {
+      if (meal == null) return;
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text("${meal.name} als Vorschlag absenden?"),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: Text("Nein")),
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  child: Text("Ja"))
+            ],
+          );
+        },
+      ).then((userAnswer) async {
+        if (userAnswer) {
+          if (!await SuggestionsMongoDB.insertUserMealSuggestion(meal)) {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text("Gericht ist bereits als Vorschlag eingeangen"),
+                  actions: [
+                    TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text("Ok"))
+                  ],
+                );
+              },
+            );
+          }
+        }
+      });
+    });
   }
 
   Future<void> _userArticleSuggestionAction(BuildContext context) async {
