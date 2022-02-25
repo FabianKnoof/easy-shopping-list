@@ -22,7 +22,7 @@ class ArticleAdapter extends TypeAdapter<Article> {
       ..quantityUnit =
           fields[2] == null ? QuantityUnit.pieces : fields[2] as QuantityUnit
       ..details = fields[3] == null ? '' : fields[3] as String
-      ..ingredient = fields[4] == null ? true : fields[4] as bool;
+      ..isIngredient = fields[4] == null ? true : fields[4] as bool;
   }
 
   @override
@@ -38,7 +38,7 @@ class ArticleAdapter extends TypeAdapter<Article> {
       ..writeByte(3)
       ..write(obj.details)
       ..writeByte(4)
-      ..write(obj.ingredient);
+      ..write(obj.isIngredient);
   }
 
   @override
@@ -95,3 +95,28 @@ class QuantityUnitAdapter extends TypeAdapter<QuantityUnit> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+Article _$ArticleFromJson(Map<String, dynamic> json) => Article()
+  ..name = json['name'] as String
+  ..quantity = json['quantity'] as int
+  ..quantityUnit = $enumDecode(_$QuantityUnitEnumMap, json['quantityUnit'])
+  ..details = json['details'] as String
+  ..isIngredient = json['isIngredient'] as bool;
+
+Map<String, dynamic> _$ArticleToJson(Article instance) => <String, dynamic>{
+      'name': instance.name,
+      'quantity': instance.quantity,
+      'quantityUnit': _$QuantityUnitEnumMap[instance.quantityUnit],
+      'details': instance.details,
+      'isIngredient': instance.isIngredient,
+    };
+
+const _$QuantityUnitEnumMap = {
+  QuantityUnit.pieces: 'pieces',
+  QuantityUnit.gram: 'gram',
+  QuantityUnit.milliliter: 'milliliter',
+};

@@ -19,6 +19,7 @@ class MealAdapter extends TypeAdapter<Meal> {
     return Meal()
       ..name = fields[0] == null ? '' : fields[0] as String
       ..quantity = fields[1] == null ? 1 : fields[1] as int
+      ..quantityUnit = fields[2] == null ? 'Portion(en)' : fields[2] as String
       ..ingredients =
           fields[3] == null ? [] : (fields[3] as List).cast<Article>();
   }
@@ -47,3 +48,22 @@ class MealAdapter extends TypeAdapter<Meal> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+Meal _$MealFromJson(Map<String, dynamic> json) => Meal()
+  ..name = json['name'] as String
+  ..quantity = json['quantity'] as int
+  ..quantityUnit = json['quantityUnit'] as String
+  ..ingredients = (json['ingredients'] as List<dynamic>)
+      .map((e) => Article.fromJson(e as Map<String, dynamic>))
+      .toList();
+
+Map<String, dynamic> _$MealToJson(Meal instance) => <String, dynamic>{
+      'name': instance.name,
+      'quantity': instance.quantity,
+      'quantityUnit': instance.quantityUnit,
+      'ingredients': instance.ingredients.map((e) => e.toJson()).toList(),
+    };

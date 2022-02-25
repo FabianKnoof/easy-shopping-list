@@ -1,12 +1,9 @@
-import 'dart:developer';
-
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
-import 'package:easy_shopping_list/db_accesses/suggestions_mongodb.dart';
 import 'package:easy_shopping_list/meal_list/add_meal.dart';
 import 'package:easy_shopping_list/meal_list/cooking_list.dart';
 import 'package:easy_shopping_list/meal_list/meal.dart';
-import 'package:easy_shopping_list/options_list.dart';
+import 'package:easy_shopping_list/options/options_view.dart';
 import 'package:easy_shopping_list/shopping_list/add_article.dart';
 import 'package:easy_shopping_list/shopping_list/shopping_list.dart';
 import "package:flutter/material.dart";
@@ -61,7 +58,7 @@ class _AppViewState extends State<AppView> {
   static const List<Widget> _widgetOptions = <Widget>[
     ShoppingList(),
     CookingList(),
-    OptionsList()
+    OptionsView()
   ];
 
   void _onItemTapped(int index) {

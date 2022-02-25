@@ -1,7 +1,9 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 part 'article.g.dart';
 
+@JsonSerializable(explicitToJson: true)
 @HiveType(typeId: 0)
 class Article extends HiveObject {
   @HiveField(0, defaultValue: "")
@@ -13,7 +15,14 @@ class Article extends HiveObject {
   @HiveField(3, defaultValue: "")
   String details = "";
   @HiveField(4, defaultValue: true)
-  bool ingredient = true;
+  bool isIngredient = true;
+
+  Article();
+
+  factory Article.fromJson(Map<String, dynamic> json) =>
+      _$ArticleFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ArticleToJson(this);
 
   static String quantityUnitToString(QuantityUnit quantityUnit) {
     switch (quantityUnit) {
@@ -45,10 +54,13 @@ class Article extends HiveObject {
 
 @HiveType(typeId: 1)
 enum QuantityUnit {
+  @JsonValue("pieces")
   @HiveField(0)
   pieces,
+  @JsonValue("gram")
   @HiveField(1)
   gram,
+  @JsonValue("milliliter")
   @HiveField(2)
   milliliter
 }
