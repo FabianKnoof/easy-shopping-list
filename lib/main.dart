@@ -87,29 +87,32 @@ class _AppViewState extends State<AppView> {
         selectedItemColor: Colors.amber[800],
         onTap: _onItemTapped,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (_widgetOptions[_selectedIndex].runtimeType == ShoppingList) {
-            showModalBottomSheet(
-                context: context,
-                builder: (BuildContext context) {
-                  return AddArticleBottomSheet();
-                }).then((newArticle) {
-              setState(() {
-                ShoppingListHive().addArticle(newArticle);
-              });
-            });
-          } else if (_widgetOptions[_selectedIndex].runtimeType ==
-              CookingList) {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AddMealView(),
-                )).then((newMeal) => CookingListHive().addMeal(newMeal));
-          }
-        },
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: _selectedIndex != 2
+          ? FloatingActionButton(
+              onPressed: () {
+                if (_widgetOptions[_selectedIndex].runtimeType ==
+                    ShoppingList) {
+                  showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AddArticleBottomSheet();
+                      }).then((newArticle) {
+                    setState(() {
+                      ShoppingListHive().addArticle(newArticle);
+                    });
+                  });
+                } else if (_widgetOptions[_selectedIndex].runtimeType ==
+                    CookingList) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddMealView(),
+                      )).then((newMeal) => CookingListHive().addMeal(newMeal));
+                }
+              },
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 }
