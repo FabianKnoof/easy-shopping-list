@@ -192,7 +192,6 @@ class _EditMealViewState extends State<EditMealView> {
     }
     _mealNameController.text = _meal.name;
     _quantityController.text = _meal.quantity.toString();
-    // Note test quantity selection not selecting all on first focus
   }
 
   @override
@@ -366,6 +365,28 @@ class _EditMealViewState extends State<EditMealView> {
         child: Text("Zutaten Mengen anpassen"));
   }
 
+  ElevatedButton _buildAddArticleButton() {
+    return ElevatedButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) {
+              return AddArticleBottomSheet(
+                suggestOnlyIngredients: true,
+              );
+            },
+          ).then((newIngredient) {
+            if (newIngredient != null) {
+              setState(() {
+                // Note Add article quantity if article already in ingredients?
+                _meal.ingredients.insert(0, newIngredient);
+              });
+            }
+          });
+        },
+        child: Text("Zutat hinzufügen"));
+  }
+
   ListView _buildIngredientsList() {
     return ListView(
       shrinkWrap: true,
@@ -419,26 +440,6 @@ class _EditMealViewState extends State<EditMealView> {
         ],
       ),
     );
-  }
-
-  ElevatedButton _buildAddArticleButton() {
-    return ElevatedButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            builder: (context) {
-              return AddArticleBottomSheet();
-            },
-          ).then((newIngredient) {
-            if (newIngredient != null) {
-              setState(() {
-                // Note Add article quantity if article already in ingredients?
-                _meal.ingredients.insert(0, newIngredient);
-              });
-            }
-          });
-        },
-        child: Text("Zutat hinzufügen"));
   }
 
   InputDecoration _textFieldInputDecoration(String labelText) =>

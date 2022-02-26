@@ -5,8 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 class AddArticleBottomSheet extends StatefulWidget {
-  const AddArticleBottomSheet({Key? key, this.article}) : super(key: key);
+  const AddArticleBottomSheet(
+      {Key? key, this.article, this.suggestOnlyIngredients})
+      : super(key: key);
   final Article? article;
+  final bool? suggestOnlyIngredients;
 
   @override
   State<AddArticleBottomSheet> createState() => _AddArticleBottomSheetState();
@@ -14,6 +17,8 @@ class AddArticleBottomSheet extends StatefulWidget {
 
 class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
   Article _article = Article();
+
+  bool _suggestOnlyIngredients = false;
 
   final double _padding = 5;
 
@@ -46,6 +51,9 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
     _typeAheadController.text = _article.name;
     _quantityTextController.text = _article.quantity.toString();
     _dropdownValue = _article.quantityUnit;
+    if (widget.suggestOnlyIngredients != null) {
+      _suggestOnlyIngredients = widget.suggestOnlyIngredients!;
+    }
   }
 
   @override
@@ -112,11 +120,6 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
       hideOnEmpty: true,
       hideOnLoading: true,
       direction: AxisDirection.up,
-      onSaved: (newValue) {
-        if (newValue != null) {
-          _article.name = newValue.trim();
-        }
-      },
       onSuggestionSelected: (String suggestion) {
         _typeAheadController.text = suggestion;
       },
@@ -131,7 +134,9 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
           return const <String>[];
         }
         return ArticleSuggestionsHive().box.values.where((Article article) {
-          return article.name.toLowerCase().startsWith(pattern.toLowerCase());
+          return article.name.toLowerCase().startsWith(pattern.toLowerCase()) &&
+              (!_suggestOnlyIngredients ||
+                  article.isIngredient); // Note may need to correct this
         }).map((article) => article.name);
       },
       validator: (value) {
@@ -139,6 +144,9 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
           return "Artikel eingeben";
         }
         return null;
+      },
+      onSaved: (newValue) {
+        _article.name = newValue!.trim();
       },
       textFieldConfiguration: TextFieldConfiguration(
           controller: _typeAheadController,
