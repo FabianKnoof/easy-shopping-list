@@ -1,12 +1,11 @@
-import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
+import 'dart:developer';
+
 import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
 import 'package:easy_shopping_list/shopping_list/add_article.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 import 'meal.dart';
 
@@ -181,17 +180,26 @@ class _EditMealViewState extends State<EditMealView> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
     if (widget.meal != null) {
       _meal = widget.meal!;
-      _mealNameController.text = _meal.name;
-      _mealNameController.selection = TextSelection.fromPosition(
-          TextPosition(offset: _mealNameController.text.length));
     }
+    _mealNameController.text = _meal.name;
     _quantityController.text = _meal.quantity.toString();
+
+    log("initState ${_quantityController.text}");
+
+    _mealNameController.selection = TextSelection.fromPosition(
+        TextPosition(offset: _mealNameController.text.length));
     _quantityController.selection = TextSelection(
         baseOffset: 0, extentOffset: _quantityController.text.length);
+    // Note test quantity selection not selecting all on first focus
 
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Gericht"),
@@ -274,7 +282,9 @@ class _EditMealViewState extends State<EditMealView> {
       hideOnEmpty: true,
       hideOnLoading: true,
       onSaved: (newValue) {
-        _meal.name = newValue!;
+        if (newValue != null) {
+          _meal.name = newValue.trim();
+        }
       },
       onSuggestionSelected: (String suggestion) {
         _mealNameController.text = suggestion;
@@ -286,7 +296,7 @@ class _EditMealViewState extends State<EditMealView> {
         );
       },
       suggestionsCallback: (pattern) {
-        if (pattern.isNotEmpty) {
+        if (pattern.isEmpty) {
           return const <String>[];
         }
         return MealSuggestionsHive()
@@ -297,15 +307,12 @@ class _EditMealViewState extends State<EditMealView> {
             .map((article) => article.name);
       },
       validator: (value) {
-        if (value!.isEmpty) {
+        if (value == null || value.trim().isEmpty) {
           return "Gericht eingeben";
         }
         return null;
       },
       textFieldConfiguration: TextFieldConfiguration(
-          onChanged: (value) {
-            _meal.name = value;
-          },
           controller: _mealNameController,
           autofocus: true,
           textInputAction: TextInputAction.next,
@@ -330,16 +337,13 @@ class _EditMealViewState extends State<EditMealView> {
       keyboardType: TextInputType.number,
       maxLines: 1,
       controller: _quantityController,
-      onChanged: (quantityText) {
-        if (quantityText.isNotEmpty) {
-          _quantityController.text = quantityText;
+      onSaved: (newValue) {
+        if (newValue != null) {
+          _meal.quantity = int.tryParse(newValue.trim())!;
         }
       },
-      onSaved: (newValue) {
-        _meal.quantity = int.tryParse(newValue!)!;
-      },
       validator: (value) {
-        if (value == null || value.isEmpty) {
+        if (value == null || value.trim().isEmpty) {
           return "Menge angeben";
         }
         return null;
@@ -355,7 +359,7 @@ class _EditMealViewState extends State<EditMealView> {
             for (Article ingredient in _meal.ingredients) {
               ingredient.quantity = (ingredient.quantity /
                       _meal.quantity *
-                      int.tryParse(_quantityController.text)!)
+                      int.tryParse(_quantityController.text.trim())!)
                   .round();
             }
             _meal.quantity = int.tryParse(_quantityController.text)!;
@@ -384,8 +388,12 @@ class _EditMealViewState extends State<EditMealView> {
               article: ingredient,
             );
           },
-        ).then((value) {
-          if (value != null) ingredient = value;
+        ).then((newIngredient) {
+          if (newIngredient != null) {
+            setState(() {
+              ingredient = newIngredient;
+            });
+          }
         });
       },
       title: Row(
@@ -423,11 +431,11 @@ class _EditMealViewState extends State<EditMealView> {
             builder: (context) {
               return AddArticleBottomSheet();
             },
-          ).then((value) {
-            if (value != null) {
+          ).then((newIngredient) {
+            if (newIngredient != null) {
               setState(() {
                 // Note Add article quantity if article already in ingredients?
-                _meal.ingredients.insert(0, value);
+                _meal.ingredients.insert(0, newIngredient);
               });
             }
           });
