@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
 import 'package:easy_shopping_list/shopping_list/add_article.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
@@ -26,11 +24,16 @@ class _AddMealViewState extends State<AddMealView> {
       MealSuggestionsHive().box.values.toList(growable: true);
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+
     if (widget.meal != null) {
       _meal = widget.meal!;
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Gericht wählen"),
@@ -63,6 +66,38 @@ class _AddMealViewState extends State<AddMealView> {
     );
   }
 
+  TextField _buildSearchField() {
+    return TextField(
+      onChanged: (value) {
+        value = value.trim();
+        if (value.isEmpty) return;
+        _meal.name = value;
+        _foundMeals = MealSuggestionsHive()
+            .box
+            .values
+            .where((meal) =>
+                meal.name.toLowerCase().startsWith(value.toLowerCase()))
+            .toList();
+      },
+      decoration:
+          InputDecoration(labelText: "Gericht", border: OutlineInputBorder()),
+    );
+  }
+
+  ElevatedButton _buildNewMealButton(BuildContext context) {
+    return ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => EditMealView(
+                  meal: _meal,
+                ),
+              )).then((newMeal) => Navigator.pop(context, newMeal));
+        },
+        child: Text("Neues Gericht"));
+  }
+
   ListView _buildFoundMealsExpansionList() {
     return ListView(
       shrinkWrap: true,
@@ -79,7 +114,7 @@ class _AddMealViewState extends State<AddMealView> {
                             meal: meal,
                           );
                         },
-                      )).then((value) => Navigator.pop(context, value));
+                      )).then((newMeal) => Navigator.pop(context, newMeal));
                     },
                     child: Icon(Icons.add)),
                 SizedBox(
@@ -120,36 +155,6 @@ class _AddMealViewState extends State<AddMealView> {
       ),
     );
   }
-
-  ElevatedButton _buildNewMealButton(BuildContext context) {
-    return ElevatedButton(
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => EditMealView(
-                  meal: _meal,
-                ),
-              )).then((newMeal) => Navigator.pop(context, newMeal));
-        },
-        child: Text("Neues Gericht"));
-  }
-
-  TextField _buildSearchField() {
-    return TextField(
-      onChanged: (String value) {
-        _meal.name = value;
-        _foundMeals = MealSuggestionsHive()
-            .box
-            .values
-            .where((meal) =>
-                meal.name.toLowerCase().startsWith(value.toLowerCase()))
-            .toList();
-      },
-      decoration:
-          InputDecoration(labelText: "Gericht", border: OutlineInputBorder()),
-    );
-  }
 }
 
 class EditMealView extends StatefulWidget {
@@ -181,21 +186,13 @@ class _EditMealViewState extends State<EditMealView> {
 
   @override
   void initState() {
+    super.initState();
     if (widget.meal != null) {
       _meal = widget.meal!;
     }
     _mealNameController.text = _meal.name;
     _quantityController.text = _meal.quantity.toString();
-
-    log("initState ${_quantityController.text}");
-
-    _mealNameController.selection = TextSelection.fromPosition(
-        TextPosition(offset: _mealNameController.text.length));
-    _quantityController.selection = TextSelection(
-        baseOffset: 0, extentOffset: _quantityController.text.length);
     // Note test quantity selection not selecting all on first focus
-
-    super.initState();
   }
 
   @override
@@ -281,11 +278,6 @@ class _EditMealViewState extends State<EditMealView> {
     return TypeAheadFormField(
       hideOnEmpty: true,
       hideOnLoading: true,
-      onSaved: (newValue) {
-        if (newValue != null) {
-          _meal.name = newValue.trim();
-        }
-      },
       onSuggestionSelected: (String suggestion) {
         _mealNameController.text = suggestion;
         // Todo meal suggestion selection
@@ -296,6 +288,7 @@ class _EditMealViewState extends State<EditMealView> {
         );
       },
       suggestionsCallback: (pattern) {
+        pattern = pattern.trim();
         if (pattern.isEmpty) {
           return const <String>[];
         }
@@ -311,6 +304,9 @@ class _EditMealViewState extends State<EditMealView> {
           return "Gericht eingeben";
         }
         return null;
+      },
+      onSaved: (newValue) {
+        _meal.name = newValue!.trim();
       },
       textFieldConfiguration: TextFieldConfiguration(
           controller: _mealNameController,
@@ -337,16 +333,18 @@ class _EditMealViewState extends State<EditMealView> {
       keyboardType: TextInputType.number,
       maxLines: 1,
       controller: _quantityController,
-      onSaved: (newValue) {
-        if (newValue != null) {
-          _meal.quantity = int.tryParse(newValue.trim())!;
-        }
+      onTap: () {
+        _quantityController.selection = TextSelection(
+            baseOffset: 0, extentOffset: _quantityController.text.length);
       },
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
           return "Menge angeben";
         }
         return null;
+      },
+      onSaved: (newValue) {
+        _meal.quantity = int.tryParse(newValue!.trim())!;
       },
       decoration: _textFieldInputDecoration("Menge"),
     );
