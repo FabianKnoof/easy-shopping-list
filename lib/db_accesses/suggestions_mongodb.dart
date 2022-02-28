@@ -72,10 +72,24 @@ class SuggestionsMongoDB {
       log("Meal suggestions update available");
       await MealSuggestionsHive().box.clear();
       MealSuggestionsHive().box.addAll(await _getMealSuggestions());
+      VersionsSuggestionsHive().box.put("mealSuggestions", version["mealSuggestions"]);
+      log("Meal suggestions updated");
     }
   }
 
-  static _getMealSuggestions() {}
+  static _getMealSuggestions() async {
+    Map<dynamic, dynamic> body = _getBodyWithCollection("MealSuggestions");
+    body["projection"] = {"_id": 0};
+    List<dynamic> response = (await _httpPost("find", body))[0];
+    body.remove("projection");
+
+    List<Meal> mealSuggestions = [];
+    for (Map<String, dynamic> meal in response){
+      mealSuggestions.add(Meal.fromJson(meal));
+    }
+
+    return mealSuggestions;
+  }
 
   static Future<Iterable<Article>> _getArticleSuggestions() async {
     Map<dynamic, dynamic> body = _getBodyWithCollection("ArticleSuggestions");
