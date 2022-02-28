@@ -20,8 +20,7 @@ class _AddMealViewState extends State<AddMealView> {
 
   final double _padding = 5;
 
-  List<Meal> _foundMeals =
-      MealSuggestionsHive().box.values.toList(growable: true);
+  List<Meal> _foundMeals = MealSuggestionsHive().getMeals();
 
   @override
   void initState() {
@@ -69,15 +68,18 @@ class _AddMealViewState extends State<AddMealView> {
   TextField _buildSearchField() {
     return TextField(
       onChanged: (value) {
-        value = value.trim();
-        if (value.isEmpty) return;
-        _meal.name = value;
-        _foundMeals = MealSuggestionsHive()
-            .box
-            .values
-            .where((meal) =>
-                meal.name.toLowerCase().startsWith(value.toLowerCase()))
-            .toList();
+        setState(() {
+          value = value.trim();
+          if (value.isEmpty) {
+            _foundMeals = MealSuggestionsHive().getMeals();
+          }
+          _meal.name = value;
+          _foundMeals = MealSuggestionsHive()
+              .getMeals()
+              .where((meal) =>
+                  meal.name.toLowerCase().startsWith(value.toLowerCase()))
+              .toList();
+        });
       },
       decoration:
           InputDecoration(labelText: "Gericht", border: OutlineInputBorder()),
