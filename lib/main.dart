@@ -1,6 +1,7 @@
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
+import 'package:easy_shopping_list/db_accesses/suggestions_mongodb.dart';
 import 'package:easy_shopping_list/meal_list/add_meal.dart';
 import 'package:easy_shopping_list/meal_list/cooking_list.dart';
 import 'package:easy_shopping_list/meal_list/meal.dart';
@@ -14,8 +15,7 @@ import 'shopping_list/article.dart';
 
 void main() async {
   await _initHive();
-  // MongoDBAccess.syncArticleSuggestions();
-  // Todo MongoDBAccess meal suggestions
+  SuggestionsMongoDB.syncSuggestions();
   runApp(const MyApp());
 }
 

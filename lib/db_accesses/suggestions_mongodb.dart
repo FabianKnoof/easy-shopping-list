@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
 import 'package:easy_shopping_list/meal_list/meal.dart';
 import 'package:easy_shopping_list/secrets.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
@@ -29,21 +30,77 @@ class SuggestionsMongoDB {
     return newBody;
   }
 
-  static Future<Map> _httpPost(
+  static Future<List<dynamic>> _httpPost(
       String action, Map<dynamic, dynamic> body) async {
-    return await http
+    Map<dynamic, dynamic> response = await http
         .post(Uri.parse(_url + action),
             headers: _headers, body: jsonEncode(body))
         .then((response) => jsonDecode(utf8.decode(response.bodyBytes))) as Map;
+    return response.values.toList();
+  }
+
+  static Future<void> syncSuggestions() async {
+    Map<dynamic, dynamic> body = _getBodyWithCollection("VersionsSuggestions");
+    body["projection"] = {
+      "_id": 0,
+      "articleSuggestions": 1,
+      "mealSuggestions": 1
+    };
+    List<dynamic> response = (await _httpPost("find", body))[0];
+    body.remove("projection");
+
+    Map<dynamic, dynamic> version = {};
+    for (var element in response) {
+      version[element.keys.toList()[0]] = element.values.toList()[0];
+    }
+
+    if (version["articleSuggestions"] >
+        VersionsSuggestionsHive()
+            .box
+            .get("articleSuggestions", defaultValue: 0)) {
+      log("Article suggestions update available");
+      await ArticleSuggestionsHive().box.clear();
+      ArticleSuggestionsHive().box.addAll(await _getArticleSuggestions());
+      VersionsSuggestionsHive()
+          .box
+          .put("articleSuggestions", version["articleSuggestions"]);
+
+      log("Article suggestions updated");
+    }
+    if (version["mealSuggestions"] >
+        VersionsSuggestionsHive().box.get("mealSuggestions", defaultValue: 0)) {
+      log("Meal suggestions update available");
+      await MealSuggestionsHive().box.clear();
+      MealSuggestionsHive().box.addAll(await _getMealSuggestions());
+    }
+  }
+
+  static _getMealSuggestions() {}
+
+  static Future<Iterable<Article>> _getArticleSuggestions() async {
+    Map<dynamic, dynamic> body = _getBodyWithCollection("ArticleSuggestions");
+    body["projection"] = {"_id": 0};
+    List<dynamic> response = (await _httpPost("find", body))[0];
+    body.remove("projection");
+
+    List<Article> articleSuggestions = [];
+    for (Map<String, dynamic> article in response) {
+      articleSuggestions.add(Article()
+        ..name = article["article"]
+        ..isIngredient = article["isIngredient"]);
+    }
+    return articleSuggestions;
   }
 
   static Future<bool> insertUserMealSuggestion(Meal meal) async {
     Map<dynamic, dynamic> body = _getBodyWithCollection("UserMealSuggestions");
     // Note case insensitivity
+    // Note check if meal already exists in Suggestion List
     body["filter"] = {"name": meal.name};
-    var httpResponse = await _httpPost("findOne", body);
+    List<dynamic> httpResponse = await _httpPost("findOne", body);
     body.remove("filter");
-    if (httpResponse["document"] != null) return false;
+
+    if (httpResponse[0] != null) return false;
 
     body["document"] = meal.toJson();
     _httpPost("insertOne", body);
@@ -55,10 +112,12 @@ class SuggestionsMongoDB {
     Map<dynamic, dynamic> body =
         _getBodyWithCollection("UserArticleSuggestions");
     // Note case insensitivity
+    // Note check if article already exists in Suggestion List
     body["filter"] = {"article": article.name};
-    var httpResponse = await _httpPost("findOne", body);
+    List<dynamic> httpResponse = await _httpPost("findOne", body);
     body.remove("filter");
-    if (httpResponse["document"] != null) return false;
+
+    if (httpResponse[0] != null) return false;
 
     body["document"] = {
       "article": article.name,
