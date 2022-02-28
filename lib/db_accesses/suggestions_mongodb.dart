@@ -72,7 +72,9 @@ class SuggestionsMongoDB {
       log("Meal suggestions update available");
       await MealSuggestionsHive().box.clear();
       MealSuggestionsHive().box.addAll(await _getMealSuggestions());
-      VersionsSuggestionsHive().box.put("mealSuggestions", version["mealSuggestions"]);
+      VersionsSuggestionsHive()
+          .box
+          .put("mealSuggestions", version["mealSuggestions"]);
       log("Meal suggestions updated");
     }
   }
@@ -84,7 +86,7 @@ class SuggestionsMongoDB {
     body.remove("projection");
 
     List<Meal> mealSuggestions = [];
-    for (Map<String, dynamic> meal in response){
+    for (Map<String, dynamic> meal in response) {
       mealSuggestions.add(Meal.fromJson(meal));
     }
 
@@ -113,7 +115,6 @@ class SuggestionsMongoDB {
     body["filter"] = {"name": meal.name};
     List<dynamic> httpResponse = await _httpPost("findOne", body);
     body.remove("filter");
-
     if (httpResponse[0] != null) return false;
 
     body["document"] = meal.toJson();
@@ -130,7 +131,6 @@ class SuggestionsMongoDB {
     body["filter"] = {"article": article.name};
     List<dynamic> httpResponse = await _httpPost("findOne", body);
     body.remove("filter");
-
     if (httpResponse[0] != null) return false;
 
     body["document"] = {
