@@ -53,6 +53,14 @@ class _OptionsViewState extends State<OptionsView> {
               await _userMealSuggestionAction(context);
             },
           ),
+        ),
+        Card(
+          child: ListTile(
+            title: Text("Lokalen Speicher leeren"),
+            onTap: () async {
+              await _clearAllHives(context);
+            },
+          ),
         )
       ],
     );
@@ -184,6 +192,41 @@ class _OptionsViewState extends State<OptionsView> {
           }
         }
       });
+    });
+  }
+
+  _clearAllHives(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Alle Listen leeren?"),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.pop(context, false);
+                },
+                child: Text("Nein")),
+            TextButton(
+                onPressed: () {
+                  Navigator.pop(context, true);
+                },
+                child: Text("Ja"))
+          ],
+        );
+      },
+    ).then((userAnswer) {
+      if (userAnswer) {
+        ShoppingListHive().box.clear();
+        ShoppingListCheckedHive().box.clear();
+
+        CookingListHive().box.clear();
+        CookingListCheckedHive().box.clear();
+
+        VersionsSuggestionsHive().box.clear();
+        ArticleSuggestionsHive().box.clear();
+        MealSuggestionsHive().box.clear();
+      }
     });
   }
 }
