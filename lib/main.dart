@@ -1,5 +1,7 @@
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
+import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
+import 'package:easy_shopping_list/db_accesses/suggestions_mongodb.dart';
 import 'package:easy_shopping_list/meal_list/add_meal.dart';
 import 'package:easy_shopping_list/meal_list/cooking_list.dart';
 import 'package:easy_shopping_list/meal_list/meal.dart';
@@ -13,8 +15,7 @@ import 'shopping_list/article.dart';
 
 void main() async {
   await _initHive();
-  // MongoDBAccess.syncArticleSuggestions();
-  // Todo MongoDBAccess meal suggestions
+  SuggestionsMongoDB.syncSuggestions();
   runApp(const MyApp());
 }
 
@@ -25,12 +26,15 @@ Future<void> _initHive() async {
   Hive.registerAdapter(QuantityUnitAdapter());
   Hive.registerAdapter(MealAdapter());
 
-  await Hive.openBox<Article>("ShoppingList");
-  await Hive.openBox<Article>("ShoppingListChecked");
-  await Hive.openBox<Meal>("CookingList");
-  await Hive.openBox("Suggestions");
-  await Hive.openBox<Article>("ArticleSuggestions");
-  await Hive.openBox<Meal>("MealSuggestions");
+  await Hive.openBox<Article>(ShoppingListHive.boxName);
+  await Hive.openBox<Article>(ShoppingListCheckedHive.boxName);
+
+  await Hive.openBox<Meal>(CookingListHive.boxName);
+  await Hive.openBox<Meal>(CookingListCheckedHive.boxName);
+
+  await Hive.openBox<int>(VersionsSuggestionsHive.boxName);
+  await Hive.openBox<Article>(ArticleSuggestionsHive.boxName);
+  await Hive.openBox<Meal>(MealSuggestionsHive.boxName);
 }
 
 class MyApp extends StatelessWidget {

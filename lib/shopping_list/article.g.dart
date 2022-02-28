@@ -65,6 +65,10 @@ class QuantityUnitAdapter extends TypeAdapter<QuantityUnit> {
         return QuantityUnit.gram;
       case 2:
         return QuantityUnit.milliliter;
+      case 3:
+        return QuantityUnit.teaspoon;
+      case 4:
+        return QuantityUnit.tablespoon;
       default:
         return QuantityUnit.pieces;
     }
@@ -81,6 +85,12 @@ class QuantityUnitAdapter extends TypeAdapter<QuantityUnit> {
         break;
       case QuantityUnit.milliliter:
         writer.writeByte(2);
+        break;
+      case QuantityUnit.teaspoon:
+        writer.writeByte(3);
+        break;
+      case QuantityUnit.tablespoon:
+        writer.writeByte(4);
         break;
     }
   }
@@ -119,4 +129,6 @@ const _$QuantityUnitEnumMap = {
   QuantityUnit.pieces: 'pieces',
   QuantityUnit.gram: 'gram',
   QuantityUnit.milliliter: 'milliliter',
+  QuantityUnit.teaspoon: 'teaspoon',
+  QuantityUnit.tablespoon: 'tablespoon',
 };

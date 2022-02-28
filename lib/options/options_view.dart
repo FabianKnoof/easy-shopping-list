@@ -1,3 +1,5 @@
+import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
+import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_mongodb.dart';
 import 'package:easy_shopping_list/meal_list/add_meal.dart';
@@ -30,7 +32,10 @@ class _OptionsViewState extends State<OptionsView> {
         ),
         Card(
           child: ListTile(
-            title: Text("Alle Listen leeren"),
+            title: Text("Abgehakt Listen leeren"),
+            onTap: () {
+              _clearCheckedListsAction(context);
+            },
           ),
         ),
         Card(
@@ -51,6 +56,34 @@ class _OptionsViewState extends State<OptionsView> {
         )
       ],
     );
+  }
+
+  void _clearCheckedListsAction(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Abgehakte Einkaufs- und Kochliste leeren?"),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.pop(context, false);
+                },
+                child: Text("Nein")),
+            TextButton(
+                onPressed: () {
+                  Navigator.pop(context, true);
+                },
+                child: Text("Ja"))
+          ],
+        );
+      },
+    ).then((userAnswer) {
+      if (userAnswer) {
+        ShoppingListCheckedHive().box.clear();
+        CookingListCheckedHive().box.clear();
+      }
+    });
   }
 
   Future<void> _userMealSuggestionAction(BuildContext context) async {

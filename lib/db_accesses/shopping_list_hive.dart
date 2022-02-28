@@ -1,5 +1,3 @@
-import 'dart:developer' as dev;
-
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:hive/hive.dart';
 
@@ -13,9 +11,9 @@ class ShoppingListHive {
 
   ShoppingListHive._internal();
 
-  final Box<Article> box = Hive.box<Article>(
-    "ShoppingList",
-  );
+  static final String boxName = "ShoppingList";
+
+  final Box<Article> box = Hive.box<Article>(boxName);
 
   void addArticle(Article? newArticle) {
     if (newArticle == null) return;
@@ -78,9 +76,9 @@ class ShoppingListCheckedHive {
 
   ShoppingListCheckedHive._internal();
 
-  final Box<Article> box = Hive.box<Article>(
-    "ShoppingListChecked",
-  );
+  static final String boxName = "ShoppingListChecked";
+
+  final Box<Article> box = Hive.box<Article>(boxName);
 
   final ShoppingListHive _shoppingListHive = ShoppingListHive();
 

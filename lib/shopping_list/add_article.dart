@@ -5,8 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 class AddArticleBottomSheet extends StatefulWidget {
-  const AddArticleBottomSheet({Key? key, this.article}) : super(key: key);
+  const AddArticleBottomSheet(
+      {Key? key, this.article, this.suggestOnlyIngredients})
+      : super(key: key);
   final Article? article;
+  final bool? suggestOnlyIngredients;
 
   @override
   State<AddArticleBottomSheet> createState() => _AddArticleBottomSheetState();
@@ -15,11 +18,14 @@ class AddArticleBottomSheet extends StatefulWidget {
 class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
   Article _article = Article();
 
+  bool _suggestOnlyIngredients = false;
+
   final double _padding = 5;
 
   final GlobalKey<FormState> _addArticleFormKey = GlobalKey<FormState>();
 
   final TextEditingController _typeAheadController = TextEditingController();
+  final TextEditingController _quantityTextController = TextEditingController();
 
   QuantityUnit _dropdownValue = QuantityUnit.pieces;
   final List<DropdownMenuItem<QuantityUnit>> _dropdownItems =
@@ -37,15 +43,21 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
     if (widget.article != null) {
       _article = widget.article!;
-      _typeAheadController.text = _article.name;
-      _typeAheadController.selection = TextSelection.fromPosition(
-          TextPosition(offset: _typeAheadController.text.length));
-      _dropdownValue = _article.quantityUnit;
     }
+    _typeAheadController.text = _article.name;
+    _quantityTextController.text = _article.quantity.toString();
+    _dropdownValue = _article.quantityUnit;
+    if (widget.suggestOnlyIngredients != null) {
+      _suggestOnlyIngredients = widget.suggestOnlyIngredients!;
+    }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Container(
       constraints: BoxConstraints.expand(),
       child: Form(
@@ -108,9 +120,6 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
       hideOnEmpty: true,
       hideOnLoading: true,
       direction: AxisDirection.up,
-      onSaved: (String? newValue) {
-        _article.name = newValue!;
-      },
       onSuggestionSelected: (String suggestion) {
         _typeAheadController.text = suggestion;
       },
@@ -120,18 +129,24 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
         );
       },
       suggestionsCallback: (pattern) {
+        pattern = pattern.trim();
         if (pattern.isEmpty) {
           return const <String>[];
         }
         return ArticleSuggestionsHive().box.values.where((Article article) {
-          return article.name.toLowerCase().startsWith(pattern.toLowerCase());
+          return article.name.toLowerCase().startsWith(pattern.toLowerCase()) &&
+              (!_suggestOnlyIngredients ||
+                  article.isIngredient); // Note may need to correct this
         }).map((article) => article.name);
       },
       validator: (value) {
-        if (value!.isEmpty) {
+        if (value == null || value.trim().isEmpty) {
           return "Artikel eingeben";
         }
         return null;
+      },
+      onSaved: (newValue) {
+        _article.name = newValue!.trim();
       },
       textFieldConfiguration: TextFieldConfiguration(
           controller: _typeAheadController,
@@ -157,17 +172,19 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       keyboardType: TextInputType.number,
       maxLines: 1,
-      controller: TextEditingController()
-        ..text = _article.quantity.toString()
-        ..selection = TextSelection(
-            baseOffset: 0, extentOffset: _article.quantity.toString().length),
-      onChanged: (newValue) {
-        if (newValue.isNotEmpty) {
-          _article.quantity = int.tryParse(newValue)!;
+      controller: _quantityTextController,
+      onTap: () {
+        _quantityTextController.selection = TextSelection(
+            baseOffset: 0, extentOffset: _quantityTextController.text.length);
+      },
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return "Menge angeben";
         }
+        return null;
       },
       onSaved: (newValue) {
-        if (newValue != null && newValue.isNotEmpty) {
+        if (newValue != null && newValue.trim().isNotEmpty) {
           _article.quantity = int.tryParse(newValue)!;
         }
       },
@@ -198,7 +215,9 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
         _submitForm();
       },
       onSaved: (newValue) {
-        _article.details = newValue!;
+        if (newValue != null && newValue.trim().isNotEmpty) {
+          _article.details = newValue;
+        }
       },
       decoration: _textFieldInputDecoration("Details"),
     );

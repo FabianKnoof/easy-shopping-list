@@ -32,6 +32,10 @@ class Article extends HiveObject {
         return "g";
       case QuantityUnit.milliliter:
         return "ml";
+      case QuantityUnit.teaspoon:
+        return "tl";
+      case QuantityUnit.tablespoon:
+        return "el";
     }
   }
 
@@ -43,6 +47,10 @@ class Article extends HiveObject {
         return "g";
       case QuantityUnit.milliliter:
         return "ml";
+      case QuantityUnit.teaspoon:
+        return "tl";
+      case QuantityUnit.tablespoon:
+        return "el";
     }
   }
 
@@ -62,5 +70,12 @@ enum QuantityUnit {
   gram,
   @JsonValue("milliliter")
   @HiveField(2)
-  milliliter
+  milliliter,
+  @JsonValue("teaspoon")
+  @HiveField(3)
+  teaspoon,
+  @JsonValue("tablespoon")
+  @HiveField(4)
+  tablespoon
+
 }

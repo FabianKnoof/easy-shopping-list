@@ -10,7 +10,9 @@ class CookingListHive {
 
   CookingListHive._internal();
 
-  final Box<Meal> box = Hive.box<Meal>("CookingList");
+  static final String boxName = "CookingList";
+
+  final Box<Meal> box = Hive.box<Meal>(boxName);
 
   void addMeal(Meal? newMeal) {
     if (newMeal == null) return;
@@ -37,5 +39,21 @@ class CookingListHive {
       box.put(indexKey, nextMeal);
     }
     // box.put(newIndex, reorderedMeal);
+    // Todo fix reorder
   }
+}
+
+class CookingListCheckedHive {
+  static final CookingListCheckedHive _cookingListCheckedHive =
+      CookingListCheckedHive._internal();
+
+  factory CookingListCheckedHive() {
+    return _cookingListCheckedHive;
+  }
+
+  CookingListCheckedHive._internal();
+
+  static final String boxName = "CookingListChecked";
+
+  final Box<Meal> box = Hive.box<Meal>(boxName);
 }
