@@ -1,4 +1,5 @@
 import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
+import 'package:easy_shopping_list/general_use_functions.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,7 +16,8 @@ class AddArticleBottomSheet extends StatefulWidget {
   State<AddArticleBottomSheet> createState() => _AddArticleBottomSheetState();
 }
 
-class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
+class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
+    with buildTemplates {
   Article _article = Article();
 
   bool _suggestOnlyIngredients = false;
@@ -155,7 +157,7 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
           textInputAction: TextInputAction.next,
           keyboardType: TextInputType.text,
           maxLines: 1,
-          decoration: _textFieldInputDecoration("Artikel")),
+          decoration: textFieldInputDecoration("Artikel")),
     );
   }
 
@@ -185,7 +187,7 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
           _article.quantity = 0;
         }
       },
-      decoration: _textFieldInputDecoration("Menge"),
+      decoration: textFieldInputDecoration("Menge"),
     );
   }
 
@@ -216,10 +218,7 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
           _article.details = newValue;
         }
       },
-      decoration: _textFieldInputDecoration("Details"),
+      decoration: textFieldInputDecoration("Details"),
     );
   }
-
-  InputDecoration _textFieldInputDecoration(String labelText) =>
-      InputDecoration(border: OutlineInputBorder(), labelText: labelText);
 }

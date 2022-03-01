@@ -1,4 +1,5 @@
 import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
+import 'package:easy_shopping_list/general_use_functions.dart';
 import 'package:easy_shopping_list/shopping_list/add_article.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,7 @@ class AddMealView extends StatefulWidget {
   _AddMealViewState createState() => _AddMealViewState();
 }
 
-class _AddMealViewState extends State<AddMealView> {
+class _AddMealViewState extends State<AddMealView> with buildTemplates {
   final double _padding = 5;
 
   List<Meal> _foundMeals =
@@ -50,7 +51,7 @@ class _AddMealViewState extends State<AddMealView> {
           SizedBox(
             height: _padding,
           ),
-          _buildFoundMealsExpansionList()
+          Flexible(fit: FlexFit.loose, child: _buildFoundMealsExpansionList())
         ],
       ),
     );
@@ -78,8 +79,7 @@ class _AddMealViewState extends State<AddMealView> {
               .toList();
         });
       },
-      decoration:
-          InputDecoration(labelText: "Gericht", border: OutlineInputBorder()),
+      decoration: textFieldInputDecoration("Gericht"),
     );
   }
 
@@ -103,23 +103,20 @@ class _AddMealViewState extends State<AddMealView> {
       children: [
         for (Meal meal in _foundMeals)
           ExpansionTile(
+            leading: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (context) {
+                      return EditMealView(
+                        meal: meal,
+                      );
+                    },
+                  )).then((newMeal) => Navigator.pop(context, newMeal));
+                },
+                child: Icon(Icons.add)),
             title: Row(
               children: [
-                ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(
-                        builder: (context) {
-                          return EditMealView(
-                            meal: meal,
-                          );
-                        },
-                      )).then((newMeal) => Navigator.pop(context, newMeal));
-                    },
-                    child: Icon(Icons.add)),
-                SizedBox(
-                  width: _padding,
-                ),
-                Text(meal.name),
+                Flexible(fit: FlexFit.loose, child: Text(meal.name)),
                 SizedBox(
                   width: _padding,
                 ),
@@ -138,21 +135,8 @@ class _AddMealViewState extends State<AddMealView> {
 
   ListTile _buildMealIngredientTile(Article ingredient) {
     return ListTile(
-      title: Row(
-        children: [
-          Text(ingredient.name),
-          SizedBox(
-            width: _padding,
-          ),
-          Text(ingredient.quantity.toString()),
-          Text(ingredient.quantityUnitAsString()),
-          SizedBox(
-            width: _padding,
-          ),
-          Text(ingredient.details)
-        ],
-      ),
-    );
+        // Note maybe add a lead icon or sth
+        title: articleColumn(ingredient));
   }
 }
 
@@ -164,7 +148,7 @@ class EditMealView extends StatefulWidget {
   _EditMealViewState createState() => _EditMealViewState();
 }
 
-class _EditMealViewState extends State<EditMealView> {
+class _EditMealViewState extends State<EditMealView> with buildTemplates {
   final double _padding = 5;
 
   Meal _meal = Meal();
@@ -312,7 +296,7 @@ class _EditMealViewState extends State<EditMealView> {
           textInputAction: TextInputAction.next,
           keyboardType: TextInputType.text,
           maxLines: 1,
-          decoration: _textFieldInputDecoration("Gericht")),
+          decoration: textFieldInputDecoration("Gericht")),
     );
   }
 
@@ -344,7 +328,7 @@ class _EditMealViewState extends State<EditMealView> {
       onSaved: (newValue) {
         _meal.quantity = int.tryParse(newValue!.trim())!;
       },
-      decoration: _textFieldInputDecoration("Menge"),
+      decoration: textFieldInputDecoration("Menge"),
     );
   }
 
@@ -398,49 +382,29 @@ class _EditMealViewState extends State<EditMealView> {
 
   ListTile _buildIngredientListTile(Article ingredient) {
     return ListTile(
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          builder: (context) {
-            return AddArticleBottomSheet(
-              article: ingredient,
-            );
-          },
-        ).then((newIngredient) {
-          if (newIngredient != null) {
-            setState(() {
-              ingredient = newIngredient;
-            });
-          }
-        });
-      },
-      title: Row(
-        children: [
-          ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _meal.ingredients.remove(ingredient);
-                });
-              },
-              child: Icon(Icons.delete)),
-          SizedBox(
-            width: _padding,
-          ),
-          Text(ingredient.name),
-          SizedBox(
-            width: _padding,
-          ),
-          Text(ingredient.quantity.toString()),
-          Text(ingredient.quantityUnitAsString()),
-          SizedBox(
-            width: _padding,
-          ),
-          Text(ingredient.details),
-        ],
-      ),
-    );
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) {
+              return AddArticleBottomSheet(
+                article: ingredient,
+              );
+            },
+          ).then((newIngredient) {
+            if (newIngredient != null) {
+              setState(() {
+                ingredient = newIngredient;
+              });
+            }
+          });
+        },
+        leading: ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _meal.ingredients.remove(ingredient);
+              });
+            },
+            child: Icon(Icons.delete)),
+        title: articleColumn(ingredient));
   }
-
-  InputDecoration _textFieldInputDecoration(String labelText) =>
-      InputDecoration(border: OutlineInputBorder(), labelText: labelText);
 }

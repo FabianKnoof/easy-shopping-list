@@ -1,4 +1,5 @@
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
+import 'package:easy_shopping_list/general_use_functions.dart';
 import 'package:easy_shopping_list/meal_list/add_meal.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,7 @@ class CookingList extends StatefulWidget {
   _CookingListState createState() => _CookingListState();
 }
 
-class _CookingListState extends State<CookingList> {
+class _CookingListState extends State<CookingList> with buildTemplates {
   final double _padding = 5;
 
   @override
@@ -75,41 +76,31 @@ class _CookingListState extends State<CookingList> {
           // Todo edit checkbox
         },
       ),
-      title: Row(
-        children: [
-          Text(meal.name),
-          SizedBox(
-            width: _padding,
-          ),
-          Text(meal.quantity.toString()),
-          Text(meal.quantityUnit)
-        ],
-      ),
+      title: _buildMealTitle(meal),
+    );
+  }
+
+  Row _buildMealTitle(Meal meal) {
+    return Row(
+      children: [
+        Flexible(fit: FlexFit.loose, child: Text(meal.name)),
+        SizedBox(
+          width: _padding,
+        ),
+        Text(meal.quantity.toString()),
+        Text(meal.quantityUnit)
+      ],
     );
   }
 
   ListTile _buildIngredient(Article ingredient) {
     return ListTile(
-      leading: Checkbox(
-        value: false, // Todo ingredient shopping list checkbox
-        onChanged: (value) {
-          // Todo change value of checkbox / check/uncheck
-        },
-      ),
-      title: Row(
-        children: [
-          Text(ingredient.name),
-          SizedBox(
-            width: _padding,
-          ),
-          Text(ingredient.quantity.toString()),
-          Text(ingredient.quantityUnitAsString()),
-          SizedBox(
-            width: _padding,
-          ),
-          Text(ingredient.details)
-        ],
-      ),
-    );
+        leading: Checkbox(
+          value: false, // Todo ingredient shopping list checkbox
+          onChanged: (value) {
+            // Todo change value of checkbox / check/uncheck
+          },
+        ),
+        title: articleColumn(ingredient));
   }
 }
