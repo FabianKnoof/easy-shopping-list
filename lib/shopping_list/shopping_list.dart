@@ -115,28 +115,34 @@ class _ShoppingListState extends State<ShoppingList> {
   Column _article(Article article) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
-          children: [
-            Flexible(
-              fit: FlexFit.loose,
-              child: Text(
-                article.name,
+        Flexible(
+          fit: FlexFit.loose,
+          child: Row(
+            children: [
+              Flexible(
+                fit: FlexFit.loose,
+                child: Text(
+                  article.name,
+                ),
               ),
-            ),
-            if (article.quantity != 0) ...[
-              SizedBox(
-                width: _padding,
-              ),
-              Text(article.quantity.toString()),
-              Text(article.quantityUnitAsString()),
-              Text(article.details)
-            ]
-          ],
+              if (article.quantity != 0) ...[
+                SizedBox(
+                  width: _padding,
+                ),
+                Text(article.quantity.toString()),
+                Text(article.quantityUnitAsString()),
+              ]
+            ],
+          ),
         ),
         if (article.details.isNotEmpty)
-          Text(
-            article.details,
+          Flexible(
+            fit: FlexFit.loose,
+            child: Text(
+              article.details,
+            ),
           )
       ],
     );
