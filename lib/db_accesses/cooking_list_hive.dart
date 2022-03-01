@@ -33,17 +33,19 @@ class CookingListHive {
     Meal reorderedMeal = cookingListBox.get(oldIndex)!;
     if (oldIndex < newIndex) {
       --newIndex;
+      for (int indexKey = oldIndex; indexKey < newIndex; ++indexKey) {
+        Meal nextMeal = cookingListBox.get(indexKey + 1)!;
+        cookingListBox.delete(indexKey + 1);
+        cookingListBox.put(indexKey, nextMeal);
+      }
+      cookingListBox.put(newIndex, reorderedMeal);
     } else {
-      int tmp = oldIndex;
-      oldIndex = newIndex;
-      newIndex = tmp;
+      for (int indexKey = oldIndex; indexKey > newIndex; --indexKey) {
+        Meal nextMeal = cookingListBox.get(indexKey - 1)!;
+        cookingListBox.delete(indexKey - 1);
+        cookingListBox.put(indexKey, nextMeal);
+      }
+      cookingListBox.put(newIndex, reorderedMeal);
     }
-    for (int indexKey = oldIndex; indexKey < newIndex; ++indexKey) {
-      Meal nextMeal = cookingListBox.get(indexKey + 1)!;
-      cookingListBox.delete(indexKey + 1);
-      cookingListBox.put(indexKey, nextMeal);
-    }
-    // box.put(newIndex, reorderedMeal);
-    // Todo fix reorder
   }
 }
