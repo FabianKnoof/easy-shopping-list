@@ -32,10 +32,10 @@ class _ShoppingListState extends State<ShoppingList> {
           leading: Icon(Icons.checklist),
           title: Text("Abgehakt (${ShoppingListCheckedHive().box.length})"),
           children: [
-            for (int indexKey in ShoppingListCheckedHive().box.keys)
+            for (Article article in ShoppingListCheckedHive().box.values)
               ListTile(
-                key: Key(indexKey.toString()),
-                title: _article(ShoppingListCheckedHive().box.get(indexKey)!),
+                leading: _buildCheckbox(article),
+                title: _article(article),
               )
           ],
         );
@@ -81,30 +81,34 @@ class _ShoppingListState extends State<ShoppingList> {
             ShoppingListHive().replaceArticleAt(indexKey, newArticle);
           });
         },
-        leading: Checkbox(
-          value: (article.box == ShoppingListCheckedHive().box),
-          onChanged: (value) {
-            if (value!) {
-              ShoppingListCheckedHive().checkArticle(article);
-              ScaffoldMessenger.of(context).clearSnackBars();
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text("Abgehakt"),
-                action: SnackBarAction(
-                  label: "Rückgängig",
-                  onPressed: () {
-                    ShoppingListCheckedHive().uncheckArticle(article);
-                  },
-                ),
-              ));
-            } else {
-              ShoppingListCheckedHive().uncheckArticle(article);
-            }
-          },
-        ),
+        leading: _buildCheckbox(article),
         title: _article(article),
       ));
     }
     return articleListTiles;
+  }
+
+  Checkbox _buildCheckbox(Article article) {
+    return Checkbox(
+      value: (article.box == ShoppingListCheckedHive().box),
+      onChanged: (value) {
+        if (value!) {
+          ShoppingListCheckedHive().checkArticle(article);
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("Abgehakt"),
+            action: SnackBarAction(
+              label: "Rückgängig",
+              onPressed: () {
+                ShoppingListCheckedHive().uncheckArticle(article);
+              },
+            ),
+          ));
+        } else {
+          ShoppingListCheckedHive().uncheckArticle(article);
+        }
+      },
+    );
   }
 
   Column _article(Article article) {
