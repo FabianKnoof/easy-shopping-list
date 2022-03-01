@@ -1,6 +1,5 @@
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -21,7 +20,7 @@ class _ShoppingListState extends State<ShoppingList> {
     // Note needs testing and maybe different solution to shrinkWrap
     return ListView(
       shrinkWrap: true,
-      children: [_buildShoppingListChecked(), _buildShoppingList()],
+      children: [_buildShoppingList(), _buildShoppingListChecked()],
     );
   }
 
@@ -38,7 +37,7 @@ class _ShoppingListState extends State<ShoppingList> {
                 leading: _buildCheckbox(article),
                 title: _article(article),
               )
-          ],
+          ].reversed.toList(),
         );
       },
     );
@@ -49,6 +48,7 @@ class _ShoppingListState extends State<ShoppingList> {
         valueListenable: ShoppingListHive().box.listenable(),
         builder: (context, box, widget) {
           return ReorderableListView(
+            reverse: true,
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
             children: _buildArticleListTile(),
