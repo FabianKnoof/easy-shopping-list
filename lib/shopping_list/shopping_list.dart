@@ -15,17 +15,12 @@ class ShoppingList extends StatefulWidget {
 class _ShoppingListState extends State<ShoppingList> {
   final double _padding = 5;
 
-  bool _checkedShoppingListExpanded = false;
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildShoppingListChecked(),
-        Expanded(
-          child: _buildShoppingList(),
-        ),
-      ],
+    // Note needs testing and maybe different solution to shrinkWrap
+    return ListView(
+      shrinkWrap: true,
+      children: [_buildShoppingListChecked(), _buildShoppingList()],
     );
   }
 
@@ -33,34 +28,15 @@ class _ShoppingListState extends State<ShoppingList> {
     return ValueListenableBuilder(
       valueListenable: ShoppingListCheckedHive().box.listenable(),
       builder: (context, value, child) {
-        return ExpansionPanelList(
-          expansionCallback: (panelIndex, isExpanded) {
-            setState(() {
-              _checkedShoppingListExpanded = !_checkedShoppingListExpanded;
-            });
-          },
+        return ExpansionTile(
+          leading: Icon(Icons.checklist),
+          title: Text("Abgehakt (${ShoppingListCheckedHive().box.length})"),
           children: [
-            ExpansionPanel(
-                isExpanded: _checkedShoppingListExpanded,
-                canTapOnHeader: true,
-                headerBuilder: (context, isExpanded) {
-                  return ListTile(
-                    title: Text("Abgehakt"),
-                    leading: Icon(Icons.checklist),
-                    trailing: Text("(${ShoppingListCheckedHive().box.length})"),
-                  );
-                },
-                body: ListView(
-                  shrinkWrap: true,
-                  children: [
-                    for (int indexKey in ShoppingListCheckedHive().box.keys)
-                      ListTile(
-                        key: Key(indexKey.toString()),
-                        title: _article(
-                            ShoppingListCheckedHive().box.get(indexKey)!),
-                      )
-                  ].toList(),
-                ))
+            for (int indexKey in ShoppingListCheckedHive().box.keys)
+              ListTile(
+                key: Key(indexKey.toString()),
+                title: _article(ShoppingListCheckedHive().box.get(indexKey)!),
+              )
           ],
         );
       },
@@ -72,6 +48,8 @@ class _ShoppingListState extends State<ShoppingList> {
         valueListenable: ShoppingListHive().box.listenable(),
         builder: (context, box, widget) {
           return ReorderableListView(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
             children: _buildArticleListTile(),
             onReorder: (oldIndex, newIndex) {
               setState(() {
@@ -103,16 +81,7 @@ class _ShoppingListState extends State<ShoppingList> {
             ShoppingListHive().replaceArticleAt(indexKey, newArticle);
           });
         },
-        title: _article(article),
-      ));
-    }
-    return articleListTiles;
-  }
-
-  Row _article(Article article) {
-    return Row(
-      children: [
-        Checkbox(
+        leading: Checkbox(
           value: (article.box == ShoppingListCheckedHive().box),
           onChanged: (value) {
             if (value!) {
@@ -132,16 +101,30 @@ class _ShoppingListState extends State<ShoppingList> {
             }
           },
         ),
-        Text(article.name),
-        SizedBox(
-          width: _padding,
+        title: _article(article),
+      ));
+    }
+    return articleListTiles;
+  }
+
+  Column _article(Article article) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              article.name,
+            ),
+            SizedBox(
+              width: _padding,
+            ),
+            Text(article.quantity.toString()),
+            Text(article.quantityUnitAsString()),
+            Text(article.details)
+          ],
         ),
-        Text(article.quantity.toString()),
-        Text(article.quantityUnitAsString()),
-        SizedBox(
-          width: _padding,
-        ),
-        Text(article.details)
+        if (article.details.isNotEmpty) Text(article.details)
       ],
     );
   }

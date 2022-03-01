@@ -75,6 +75,7 @@ class _AppViewState extends State<AppView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        // Note maybe use a "SliverAppBar"
         title: Text("Easy Shopping List"),
       ),
       body: IndexedStack(
