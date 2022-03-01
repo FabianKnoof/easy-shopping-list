@@ -114,29 +114,14 @@ class _AddMealViewState extends State<AddMealView> with buildTemplates {
                   )).then((newMeal) => Navigator.pop(context, newMeal));
                 },
                 child: Icon(Icons.add)),
-            title: Row(
-              children: [
-                Flexible(fit: FlexFit.loose, child: Text(meal.name)),
-                SizedBox(
-                  width: _padding,
-                ),
-                Text(meal.quantity.toString()),
-                Text(meal.quantityUnit)
-              ],
-            ),
+            title: mealRow(meal),
             children: [
               for (Article ingredient in meal.ingredients)
-                _buildMealIngredientTile(ingredient)
+                ListTile(title: articleColumn(ingredient))
             ],
           )
       ],
     );
-  }
-
-  ListTile _buildMealIngredientTile(Article ingredient) {
-    return ListTile(
-        // Note maybe add a lead icon or sth
-        title: articleColumn(ingredient));
   }
 }
 
