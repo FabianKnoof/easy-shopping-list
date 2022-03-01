@@ -27,6 +27,12 @@ class ShoppingListHive {
     box.put(box.length, newArticle);
   }
 
+  void addArticles(List<Article> newArticles) {
+    for (Article newArticle in newArticles) {
+      addArticle(newArticle);
+    }
+  }
+
   void replaceArticleAt(int? indexKey, Article? article) {
     if (indexKey == null || article == null) return;
     box.put(indexKey, article);

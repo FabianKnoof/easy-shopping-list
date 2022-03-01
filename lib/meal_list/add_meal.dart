@@ -8,29 +8,19 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'meal.dart';
 
 class AddMealView extends StatefulWidget {
-  const AddMealView({Key? key, this.meal}) : super(key: key);
-  final Meal? meal;
+  const AddMealView({Key? key}) : super(key: key);
 
   @override
   _AddMealViewState createState() => _AddMealViewState();
 }
 
 class _AddMealViewState extends State<AddMealView> {
-  Meal _meal = Meal();
-
   final double _padding = 5;
 
   List<Meal> _foundMeals =
-      MealSuggestionsHive().box.values.toList(growable: true);
+      MealSuggestionsHive().box.values.map((e) => e.getCopy()).toList();
 
-  @override
-  void initState() {
-    super.initState();
-
-    if (widget.meal != null) {
-      _meal = widget.meal!;
-    }
-  }
+  final TextEditingController _searchFieldController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -68,16 +58,25 @@ class _AddMealViewState extends State<AddMealView> {
 
   TextField _buildSearchField() {
     return TextField(
+      controller: _searchFieldController,
       onChanged: (value) {
-        value = value.trim();
-        if (value.isEmpty) return;
-        _meal.name = value;
-        _foundMeals = MealSuggestionsHive()
-            .box
-            .values
-            .where((meal) =>
-                meal.name.toLowerCase().startsWith(value.toLowerCase()))
-            .toList();
+        setState(() {
+          value = value.trim();
+          if (value.isEmpty) {
+            _foundMeals = MealSuggestionsHive()
+                .box
+                .values
+                .map((e) => e.getCopy())
+                .toList();
+          }
+          _foundMeals = MealSuggestionsHive()
+              .box
+              .values
+              .where((meal) =>
+                  meal.name.toLowerCase().startsWith(value.toLowerCase()))
+              .map((e) => e.getCopy())
+              .toList();
+        });
       },
       decoration:
           InputDecoration(labelText: "Gericht", border: OutlineInputBorder()),
@@ -91,7 +90,7 @@ class _AddMealViewState extends State<AddMealView> {
               context,
               MaterialPageRoute(
                 builder: (context) => EditMealView(
-                  meal: _meal,
+                  meal: Meal()..name = _searchFieldController.text,
                 ),
               )).then((newMeal) => Navigator.pop(context, newMeal));
         },

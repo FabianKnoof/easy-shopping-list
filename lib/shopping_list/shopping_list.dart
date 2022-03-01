@@ -1,5 +1,6 @@
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -15,17 +16,12 @@ class ShoppingList extends StatefulWidget {
 class _ShoppingListState extends State<ShoppingList> {
   final double _padding = 5;
 
-  bool _checkedShoppingListExpanded = false;
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildShoppingListChecked(),
-        Expanded(
-          child: _buildShoppingList(),
-        ),
-      ],
+    // Note needs testing and maybe different solution to shrinkWrap
+    return ListView(
+      shrinkWrap: true,
+      children: [_buildShoppingListChecked(), _buildShoppingList()],
     );
   }
 
@@ -33,34 +29,15 @@ class _ShoppingListState extends State<ShoppingList> {
     return ValueListenableBuilder(
       valueListenable: ShoppingListCheckedHive().box.listenable(),
       builder: (context, value, child) {
-        return ExpansionPanelList(
-          expansionCallback: (panelIndex, isExpanded) {
-            setState(() {
-              _checkedShoppingListExpanded = !_checkedShoppingListExpanded;
-            });
-          },
+        return ExpansionTile(
+          leading: Icon(Icons.checklist),
+          title: Text("Abgehakt (${ShoppingListCheckedHive().box.length})"),
           children: [
-            ExpansionPanel(
-                isExpanded: _checkedShoppingListExpanded,
-                canTapOnHeader: true,
-                headerBuilder: (context, isExpanded) {
-                  return ListTile(
-                    title: Text("Abgehakt"),
-                    leading: Icon(Icons.checklist),
-                    trailing: Text("(${ShoppingListCheckedHive().box.length})"),
-                  );
-                },
-                body: ListView(
-                  shrinkWrap: true,
-                  children: [
-                    for (int indexKey in ShoppingListCheckedHive().box.keys)
-                      ListTile(
-                        key: Key(indexKey.toString()),
-                        title: _article(
-                            ShoppingListCheckedHive().box.get(indexKey)!),
-                      )
-                  ].toList(),
-                ))
+            for (Article article in ShoppingListCheckedHive().box.values)
+              ListTile(
+                leading: _buildCheckbox(article),
+                title: _article(article),
+              )
           ],
         );
       },
@@ -72,6 +49,8 @@ class _ShoppingListState extends State<ShoppingList> {
         valueListenable: ShoppingListHive().box.listenable(),
         builder: (context, box, widget) {
           return ReorderableListView(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
             children: _buildArticleListTile(),
             onReorder: (oldIndex, newIndex) {
               setState(() {
@@ -83,6 +62,7 @@ class _ShoppingListState extends State<ShoppingList> {
   }
 
   List<Widget> _buildArticleListTile() {
+    // Todo / Note Use separate ingredients hive which is in sync with ingredients of cooking list and shopping list
     List<Widget> articleListTiles = [];
     for (int indexKey = 0;
         indexKey < ShoppingListHive().box.length;
@@ -102,45 +82,62 @@ class _ShoppingListState extends State<ShoppingList> {
             ShoppingListHive().replaceArticleAt(indexKey, newArticle);
           });
         },
+        leading: _buildCheckbox(article),
         title: _article(article),
       ));
     }
     return articleListTiles;
   }
 
-  Row _article(Article article) {
-    return Row(
+  Checkbox _buildCheckbox(Article article) {
+    return Checkbox(
+      value: (article.box == ShoppingListCheckedHive().box),
+      onChanged: (value) {
+        if (value!) {
+          ShoppingListCheckedHive().checkArticle(article);
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("Abgehakt"),
+            action: SnackBarAction(
+              label: "Rückgängig",
+              onPressed: () {
+                ShoppingListCheckedHive().uncheckArticle(article);
+              },
+            ),
+          ));
+        } else {
+          ShoppingListCheckedHive().uncheckArticle(article);
+        }
+      },
+    );
+  }
+
+  Column _article(Article article) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Checkbox(
-          value: (article.box == ShoppingListCheckedHive().box),
-          onChanged: (value) {
-            if (value!) {
-              ShoppingListCheckedHive().checkArticle(article);
-              ScaffoldMessenger.of(context).clearSnackBars();
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text("Abgehakt"),
-                action: SnackBarAction(
-                  label: "Rückgängig",
-                  onPressed: () {
-                    ShoppingListCheckedHive().uncheckArticle(article);
-                  },
-                ),
-              ));
-            } else {
-              ShoppingListCheckedHive().uncheckArticle(article);
-            }
-          },
+        Row(
+          children: [
+            Flexible(
+              fit: FlexFit.loose,
+              child: Text(
+                article.name,
+              ),
+            ),
+            if (article.quantity != 0) ...[
+              SizedBox(
+                width: _padding,
+              ),
+              Text(article.quantity.toString()),
+              Text(article.quantityUnitAsString()),
+              Text(article.details)
+            ]
+          ],
         ),
-        Text(article.name),
-        SizedBox(
-          width: _padding,
-        ),
-        Text(article.quantity.toString()),
-        Text(article.quantityUnitAsString()),
-        SizedBox(
-          width: _padding,
-        ),
-        Text(article.details)
+        if (article.details.isNotEmpty)
+          Text(
+            article.details,
+          )
       ],
     );
   }

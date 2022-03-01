@@ -8,8 +8,8 @@ part 'article.g.dart';
 class Article extends HiveObject {
   @HiveField(0, defaultValue: "")
   String name = "";
-  @HiveField(1, defaultValue: 1)
-  int quantity = 1;
+  @HiveField(1, defaultValue: 0)
+  int quantity = 0;
   @HiveField(2, defaultValue: QuantityUnit.pieces)
   QuantityUnit quantityUnit = QuantityUnit.pieces;
   @HiveField(3, defaultValue: "")
@@ -54,6 +54,15 @@ class Article extends HiveObject {
     }
   }
 
+  Article getCopy() {
+    return Article()
+      ..name = name
+      ..quantity = quantity
+      ..quantityUnit = quantityUnit
+      ..details = details
+      ..isIngredient = isIngredient;
+  }
+
   @override
   String toString() {
     return "$name, $quantity ${quantityUnitAsString()}, $details";
@@ -77,5 +86,4 @@ enum QuantityUnit {
   @JsonValue("tablespoon")
   @HiveField(4)
   tablespoon
-
 }
