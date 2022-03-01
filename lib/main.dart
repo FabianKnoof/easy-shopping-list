@@ -29,8 +29,8 @@ Future<void> _initHive() async {
   await Hive.openBox<Article>(ShoppingListHive.boxName);
   await Hive.openBox<Article>(ShoppingListCheckedHive.boxName);
 
-  await Hive.openBox<Meal>(CookingListHive.boxName);
-  await Hive.openBox<Meal>(CookingListCheckedHive.boxName);
+  await Hive.openBox<Meal>(CookingListHive.cookingListBoxName);
+  await Hive.openBox<Meal>(CookingListHive.cookingListCheckedBoxName);
 
   await Hive.openBox<int>(VersionsSuggestionsHive.boxName);
   await Hive.openBox<Article>(ArticleSuggestionsHive.boxName);

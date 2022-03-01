@@ -89,7 +89,7 @@ class _OptionsViewState extends State<OptionsView> {
     ).then((userAnswer) {
       if (userAnswer) {
         ShoppingListCheckedHive().box.clear();
-        CookingListCheckedHive().box.clear();
+        CookingListHive().cookingListCheckedBox.clear();
       }
     });
   }
@@ -220,8 +220,8 @@ class _OptionsViewState extends State<OptionsView> {
         ShoppingListHive().box.clear();
         ShoppingListCheckedHive().box.clear();
 
-        CookingListHive().box.clear();
-        CookingListCheckedHive().box.clear();
+        CookingListHive().cookingListBox.clear();
+        CookingListHive().cookingListCheckedBox.clear();
 
         VersionsSuggestionsHive().box.clear();
         ArticleSuggestionsHive().box.clear();

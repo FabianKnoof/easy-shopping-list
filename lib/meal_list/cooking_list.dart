@@ -33,11 +33,11 @@ class _CookingListState extends State<CookingList> with buildTemplates {
 
   ValueListenableBuilder<Box<dynamic>> _buildCookingList() {
     return ValueListenableBuilder<Box>(
-      valueListenable: CookingListHive().box.listenable(),
+      valueListenable: CookingListHive().cookingListBox.listenable(),
       builder: (context, value, child) {
         return ReorderableListView(
           children: [
-            for (Meal meal in CookingListHive().box.values)
+            for (Meal meal in CookingListHive().cookingListBox.values)
               ExpansionTile(
                 key: Key(meal.key.toString()),
                 title: _buildMeal(meal),

@@ -10,22 +10,27 @@ class CookingListHive {
 
   CookingListHive._internal();
 
-  static final String boxName = "CookingList";
+  static final String cookingListBoxName = "CookingList";
 
-  final Box<Meal> box = Hive.box<Meal>(boxName);
+  final Box<Meal> cookingListBox = Hive.box<Meal>(cookingListBoxName);
+
+  static final String cookingListCheckedBoxName = "CookingListChecked";
+
+  final Box<Meal> cookingListCheckedBox =
+      Hive.box<Meal>(cookingListCheckedBoxName);
 
   void addMeal(Meal? newMeal) {
     if (newMeal == null) return;
-    box.put(box.length, newMeal);
+    cookingListBox.put(cookingListBox.length, newMeal);
   }
 
   void replaceMeal(int? indexKey, Meal? meal) {
     if (indexKey == null || meal == null) return;
-    box.put(indexKey, meal);
+    cookingListBox.put(indexKey, meal);
   }
 
   void reorderMealAt(int oldIndex, int newIndex) {
-    Meal reorderedMeal = box.get(oldIndex)!;
+    Meal reorderedMeal = cookingListBox.get(oldIndex)!;
     if (oldIndex < newIndex) {
       --newIndex;
     } else {
@@ -34,26 +39,11 @@ class CookingListHive {
       newIndex = tmp;
     }
     for (int indexKey = oldIndex; indexKey < newIndex; ++indexKey) {
-      Meal nextMeal = box.get(indexKey + 1)!;
-      box.delete(indexKey + 1);
-      box.put(indexKey, nextMeal);
+      Meal nextMeal = cookingListBox.get(indexKey + 1)!;
+      cookingListBox.delete(indexKey + 1);
+      cookingListBox.put(indexKey, nextMeal);
     }
     // box.put(newIndex, reorderedMeal);
     // Todo fix reorder
   }
-}
-
-class CookingListCheckedHive {
-  static final CookingListCheckedHive _cookingListCheckedHive =
-      CookingListCheckedHive._internal();
-
-  factory CookingListCheckedHive() {
-    return _cookingListCheckedHive;
-  }
-
-  CookingListCheckedHive._internal();
-
-  static final String boxName = "CookingListChecked";
-
-  final Box<Meal> box = Hive.box<Meal>(boxName);
 }
