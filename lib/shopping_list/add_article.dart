@@ -17,7 +17,7 @@ class AddArticleBottomSheet extends StatefulWidget {
 }
 
 class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
-    with buildTemplates {
+    with BuildTemplates {
   Article _article = Article();
 
   bool _suggestOnlyIngredients = false;

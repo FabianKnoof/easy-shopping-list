@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'meal_list/meal.dart';
 
-mixin buildTemplates {
+mixin BuildTemplates {
   final double _padding = 5;
 
   Row mealRow(Meal meal) {

@@ -15,7 +15,7 @@ class AddMealView extends StatefulWidget {
   _AddMealViewState createState() => _AddMealViewState();
 }
 
-class _AddMealViewState extends State<AddMealView> with buildTemplates {
+class _AddMealViewState extends State<AddMealView> with BuildTemplates {
   final double _padding = 5;
 
   List<Meal> _foundMeals =
@@ -133,7 +133,7 @@ class EditMealView extends StatefulWidget {
   _EditMealViewState createState() => _EditMealViewState();
 }
 
-class _EditMealViewState extends State<EditMealView> with buildTemplates {
+class _EditMealViewState extends State<EditMealView> with BuildTemplates {
   final double _padding = 5;
 
   Meal _meal = Meal();
