@@ -1,4 +1,5 @@
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
+import 'package:easy_shopping_list/general_use_functions.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -12,9 +13,7 @@ class ShoppingList extends StatefulWidget {
   State<ShoppingList> createState() => _ShoppingListState();
 }
 
-class _ShoppingListState extends State<ShoppingList> {
-  final double _padding = 5;
-
+class _ShoppingListState extends State<ShoppingList> with buildTemplates {
   @override
   Widget build(BuildContext context) {
     // Note needs testing and maybe different solution to shrinkWrap
@@ -35,7 +34,7 @@ class _ShoppingListState extends State<ShoppingList> {
             for (Article article in ShoppingListCheckedHive().box.values)
               ListTile(
                 leading: _buildCheckbox(article),
-                title: _article(article),
+                title: articleColumn(article),
               )
           ].reversed.toList(),
         );
@@ -83,7 +82,7 @@ class _ShoppingListState extends State<ShoppingList> {
           });
         },
         leading: _buildCheckbox(article),
-        title: _article(article),
+        title: articleColumn(article),
       ));
     }
     return articleListTiles;
@@ -109,42 +108,6 @@ class _ShoppingListState extends State<ShoppingList> {
           ShoppingListCheckedHive().uncheckArticle(article);
         }
       },
-    );
-  }
-
-  Column _article(Article article) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Flexible(
-          fit: FlexFit.loose,
-          child: Row(
-            children: [
-              Flexible(
-                fit: FlexFit.loose,
-                child: Text(
-                  article.name,
-                ),
-              ),
-              if (article.quantity != 0) ...[
-                SizedBox(
-                  width: _padding,
-                ),
-                Text(article.quantity.toString()),
-                Text(article.quantityUnitAsString()),
-              ]
-            ],
-          ),
-        ),
-        if (article.details.isNotEmpty)
-          Flexible(
-            fit: FlexFit.loose,
-            child: Text(
-              article.details,
-            ),
-          )
-      ],
     );
   }
 }

@@ -61,6 +61,8 @@ class AppView extends StatefulWidget {
 class _AppViewState extends State<AppView> {
   int _selectedIndex = 0;
 
+  double padding = 5;
+
   static const List<Widget> _widgetOptions = <Widget>[
     ShoppingList(),
     CookingList(),
