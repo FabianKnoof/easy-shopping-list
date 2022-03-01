@@ -48,4 +48,24 @@ class CookingListHive {
       cookingListBox.put(newIndex, reorderedMeal);
     }
   }
+
+  void removeMealAt(int indexKey) {
+    Map<dynamic, Meal> mealMap = {};
+    for (int i = indexKey; i < cookingListBox.length - 1; ++i) {
+      mealMap[i] = cookingListBox.get(i + 1)!;
+    }
+    cookingListBox
+        .deleteAll([for (int i = indexKey; i < cookingListBox.length; ++i) i]);
+    cookingListBox.putAll(mealMap);
+  }
+
+  void checkMeal(Meal meal) {
+    removeMealAt(meal.key);
+    cookingListCheckedBox.add(meal);
+  }
+
+  void uncheckMeal(Meal meal) {
+    meal.delete();
+    addMeal(meal);
+  }
 }
