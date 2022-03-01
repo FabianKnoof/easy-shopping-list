@@ -101,9 +101,7 @@ class _AppViewState extends State<AppView> {
                       builder: (BuildContext context) {
                         return AddArticleBottomSheet();
                       }).then((newArticle) {
-                    setState(() {
-                      ShoppingListHive().addArticle(newArticle);
-                    });
+                    ShoppingListHive().addArticle(newArticle);
                   });
                 } else if (_widgetOptions[_selectedIndex].runtimeType ==
                     CookingList) {
@@ -111,7 +109,12 @@ class _AppViewState extends State<AppView> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => AddMealView(),
-                      )).then((newMeal) => CookingListHive().addMeal(newMeal));
+                      )).then((newMeal) {
+                    if (newMeal.runtimeType == Meal) {
+                      newMeal as Meal;
+                      CookingListHive().addMeal(newMeal);
+                    }
+                  });
                 }
               },
               child: const Icon(Icons.add),

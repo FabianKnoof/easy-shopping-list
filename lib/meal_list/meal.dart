@@ -22,6 +22,14 @@ class Meal extends HiveObject {
 
   Map<String, dynamic> toJson() => _$MealToJson(this);
 
+  Meal getCopy() {
+    return Meal()
+      ..name = name
+      ..quantity = quantity
+      ..quantityUnit = quantityUnit
+      ..ingredients = ingredients;
+  }
+
   @override
   String toString() {
     return "$name $quantity$quantityUnit $ingredients";

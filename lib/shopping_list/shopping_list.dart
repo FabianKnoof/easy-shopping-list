@@ -83,6 +83,7 @@ class _ShoppingListState extends State<ShoppingList> {
   }
 
   List<Widget> _buildArticleListTile() {
+    // Todo / Note Use separate ingredients hive which is in sync with ingredients of cooking list and shopping list
     List<Widget> articleListTiles = [];
     for (int indexKey = 0;
         indexKey < ShoppingListHive().box.length;

@@ -54,6 +54,15 @@ class Article extends HiveObject {
     }
   }
 
+  Article getCopy() {
+    return Article()
+      ..name = name
+      ..quantity = quantity
+      ..quantityUnit = quantityUnit
+      ..details = details
+      ..isIngredient = isIngredient;
+  }
+
   @override
   String toString() {
     return "$name, $quantity ${quantityUnitAsString()}, $details";
@@ -77,5 +86,4 @@ enum QuantityUnit {
   @JsonValue("tablespoon")
   @HiveField(4)
   tablespoon
-
 }

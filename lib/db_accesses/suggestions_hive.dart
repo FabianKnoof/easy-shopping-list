@@ -45,16 +45,4 @@ class MealSuggestionsHive {
   static final String boxName = "MealSuggestions";
 
   final Box<Meal> box = Hive.box<Meal>(boxName);
-
-  List<Meal> getMeals() {
-    List<Meal> meals = [];
-    for (Meal meal in box.values) {
-      meals.add(Meal()
-        ..name = meal.name
-        ..quantity = meal.quantity
-        ..quantityUnit = meal.quantityUnit
-        ..ingredients = meal.ingredients);
-    }
-    return meals;
-  }
 }
