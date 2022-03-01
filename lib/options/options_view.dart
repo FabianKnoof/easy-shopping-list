@@ -4,7 +4,6 @@ import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_mongodb.dart';
 import 'package:easy_shopping_list/meal_list/add_meal.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class OptionsView extends StatefulWidget {
@@ -88,7 +87,7 @@ class _OptionsViewState extends State<OptionsView> {
       },
     ).then((userAnswer) {
       if (userAnswer) {
-        ShoppingListCheckedHive().box.clear();
+        ShoppingListHive().shoppingListCheckedBox.clear();
         CookingListHive().cookingListCheckedBox.clear();
       }
     });
@@ -217,8 +216,8 @@ class _OptionsViewState extends State<OptionsView> {
       },
     ).then((userAnswer) {
       if (userAnswer) {
-        ShoppingListHive().box.clear();
-        ShoppingListCheckedHive().box.clear();
+        ShoppingListHive().shoppingListBox.clear();
+        ShoppingListHive().shoppingListCheckedBox.clear();
 
         CookingListHive().cookingListBox.clear();
         CookingListHive().cookingListCheckedBox.clear();

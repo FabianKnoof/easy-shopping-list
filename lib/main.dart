@@ -26,8 +26,8 @@ Future<void> _initHive() async {
   Hive.registerAdapter(QuantityUnitAdapter());
   Hive.registerAdapter(MealAdapter());
 
-  await Hive.openBox<Article>(ShoppingListHive.boxName);
-  await Hive.openBox<Article>(ShoppingListCheckedHive.boxName);
+  await Hive.openBox<Article>(ShoppingListHive.shoppingListBoxName);
+  await Hive.openBox<Article>(ShoppingListHive.shoppingListCheckedBoxName);
 
   await Hive.openBox<Meal>(CookingListHive.cookingListBoxName);
   await Hive.openBox<Meal>(CookingListHive.cookingListCheckedBoxName);

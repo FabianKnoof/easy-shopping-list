@@ -25,13 +25,15 @@ class _ShoppingListState extends State<ShoppingList> with buildTemplates {
 
   ValueListenableBuilder<Box<Article>> _buildShoppingListChecked() {
     return ValueListenableBuilder(
-      valueListenable: ShoppingListCheckedHive().box.listenable(),
+      valueListenable: ShoppingListHive().shoppingListBox.listenable(),
       builder: (context, value, child) {
         return ExpansionTile(
           leading: Icon(Icons.checklist),
-          title: Text("Abgehakt (${ShoppingListCheckedHive().box.length})"),
+          title: Text(
+              "Abgehakt (${ShoppingListHive().shoppingListCheckedBox.length})"),
           children: [
-            for (Article article in ShoppingListCheckedHive().box.values)
+            for (Article article
+                in ShoppingListHive().shoppingListCheckedBox.values)
               ListTile(
                 leading: _buildCheckbox(article),
                 title: articleColumn(article),
@@ -44,7 +46,7 @@ class _ShoppingListState extends State<ShoppingList> with buildTemplates {
 
   ValueListenableBuilder<Box<dynamic>> _buildShoppingList() {
     return ValueListenableBuilder<Box>(
-        valueListenable: ShoppingListHive().box.listenable(),
+        valueListenable: ShoppingListHive().shoppingListBox.listenable(),
         builder: (context, box, widget) {
           return ReorderableListView(
             reverse: true,
@@ -64,9 +66,9 @@ class _ShoppingListState extends State<ShoppingList> with buildTemplates {
     // Todo / Note Use separate ingredients hive which is in sync with ingredients of cooking list and shopping list
     List<Widget> articleListTiles = [];
     for (int indexKey = 0;
-        indexKey < ShoppingListHive().box.length;
+        indexKey < ShoppingListHive().shoppingListBox.length;
         ++indexKey) {
-      Article article = ShoppingListHive().box.get(indexKey)!;
+      Article article = ShoppingListHive().shoppingListBox.get(indexKey)!;
       articleListTiles.add(ListTile(
         key: Key(indexKey.toString()),
         onTap: () {
@@ -90,22 +92,22 @@ class _ShoppingListState extends State<ShoppingList> with buildTemplates {
 
   Checkbox _buildCheckbox(Article article) {
     return Checkbox(
-      value: (article.box == ShoppingListCheckedHive().box),
+      value: (article.box == ShoppingListHive().shoppingListCheckedBox),
       onChanged: (value) {
         if (value!) {
-          ShoppingListCheckedHive().checkArticle(article);
+          ShoppingListHive().checkArticle(article);
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Abgehakt"),
             action: SnackBarAction(
               label: "Rückgängig",
               onPressed: () {
-                ShoppingListCheckedHive().uncheckArticle(article);
+                ShoppingListHive().uncheckArticle(article);
               },
             ),
           ));
         } else {
-          ShoppingListCheckedHive().uncheckArticle(article);
+          ShoppingListHive().uncheckArticle(article);
         }
       },
     );
