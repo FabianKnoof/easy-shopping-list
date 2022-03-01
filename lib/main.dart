@@ -42,8 +42,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: "Easy shopping list",
+      theme: ThemeData.dark(),
+      // darkTheme: ThemeData.dark(),
       home: AppView(),
     );
   }
