@@ -49,7 +49,8 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
       _article = widget.article!;
     }
     _typeAheadController.text = _article.name;
-    _quantityTextController.text = _article.quantity.toString();
+    _quantityTextController.text =
+        _article.quantity == 0 ? "" : _article.quantity.toString();
     _dropdownValue = _article.quantityUnit;
     if (widget.suggestOnlyIngredients != null) {
       _suggestOnlyIngredients = widget.suggestOnlyIngredients!;
@@ -177,15 +178,11 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet> {
         _quantityTextController.selection = TextSelection(
             baseOffset: 0, extentOffset: _quantityTextController.text.length);
       },
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return "Menge angeben";
-        }
-        return null;
-      },
       onSaved: (newValue) {
         if (newValue != null && newValue.trim().isNotEmpty) {
           _article.quantity = int.tryParse(newValue)!;
+        } else if (newValue != null && newValue.trim().isEmpty) {
+          _article.quantity = 0;
         }
       },
       decoration: _textFieldInputDecoration("Menge"),

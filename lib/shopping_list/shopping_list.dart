@@ -1,5 +1,6 @@
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -117,18 +118,26 @@ class _ShoppingListState extends State<ShoppingList> {
       children: [
         Row(
           children: [
-            Text(
-              article.name,
+            Flexible(
+              fit: FlexFit.loose,
+              child: Text(
+                article.name,
+              ),
             ),
-            SizedBox(
-              width: _padding,
-            ),
-            Text(article.quantity.toString()),
-            Text(article.quantityUnitAsString()),
-            Text(article.details)
+            if (article.quantity != 0) ...[
+              SizedBox(
+                width: _padding,
+              ),
+              Text(article.quantity.toString()),
+              Text(article.quantityUnitAsString()),
+              Text(article.details)
+            ]
           ],
         ),
-        if (article.details.isNotEmpty) Text(article.details)
+        if (article.details.isNotEmpty)
+          Text(
+            article.details,
+          )
       ],
     );
   }

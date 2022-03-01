@@ -8,8 +8,8 @@ part 'article.g.dart';
 class Article extends HiveObject {
   @HiveField(0, defaultValue: "")
   String name = "";
-  @HiveField(1, defaultValue: 1)
-  int quantity = 1;
+  @HiveField(1, defaultValue: 0)
+  int quantity = 0;
   @HiveField(2, defaultValue: QuantityUnit.pieces)
   QuantityUnit quantityUnit = QuantityUnit.pieces;
   @HiveField(3, defaultValue: "")
