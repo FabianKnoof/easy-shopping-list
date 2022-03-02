@@ -100,26 +100,8 @@ class _OptionsViewState extends State<OptionsView> {
       },
     )).then((meal) {
       if (meal == null) return;
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text("${meal.name} als Vorschlag absenden?"),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context, false);
-                  },
-                  child: Text("Nein")),
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context, true);
-                  },
-                  child: Text("Ja"))
-            ],
-          );
-        },
-      ).then((userAnswer) async {
+      _getUserAnswer(context, "${meal.name} als Vorschlag absenden?")
+          .then((userAnswer) async {
         if (userAnswer) {
           if (!await SuggestionsMongoDB.insertUserMealSuggestion(meal)) {
             showDialog(
@@ -151,26 +133,8 @@ class _OptionsViewState extends State<OptionsView> {
       },
     ).then((article) {
       if (article == null) return;
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text("${article.name} als Vorschlag absenden?"),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context, false);
-                  },
-                  child: Text("Nein")),
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context, true);
-                  },
-                  child: Text("Ja"))
-            ],
-          );
-        },
-      ).then((userAnswer) async {
+      _getUserAnswer(context, "${article.name} als Vorschlag absenden?")
+          .then((userAnswer) async {
         if (userAnswer) {
           if (!await SuggestionsMongoDB.insertUserArticleSuggestion(article)) {
             showDialog(
@@ -195,11 +159,27 @@ class _OptionsViewState extends State<OptionsView> {
   }
 
   _clearAllHives(BuildContext context) {
-    showDialog(
+    _getUserAnswer(context, "Alle Listen leeren?").then((userAnswer) {
+      if (userAnswer) {
+        ShoppingListHive().shoppingListBox.clear();
+        ShoppingListHive().shoppingListCheckedBox.clear();
+
+        CookingListHive().cookingListBox.clear();
+        CookingListHive().cookingListCheckedBox.clear();
+
+        VersionsSuggestionsHive().box.clear();
+        ArticleSuggestionsHive().box.clear();
+        MealSuggestionsHive().box.clear();
+      }
+    });
+  }
+
+  Future<dynamic> _getUserAnswer(BuildContext context, String question) {
+    return showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Alle Listen leeren?"),
+          title: Text(question),
           actions: [
             TextButton(
                 onPressed: () {
@@ -214,19 +194,7 @@ class _OptionsViewState extends State<OptionsView> {
           ],
         );
       },
-    ).then((userAnswer) {
-      if (userAnswer) {
-        ShoppingListHive().shoppingListBox.clear();
-        ShoppingListHive().shoppingListCheckedBox.clear();
-
-        CookingListHive().cookingListBox.clear();
-        CookingListHive().cookingListCheckedBox.clear();
-
-        VersionsSuggestionsHive().box.clear();
-        ArticleSuggestionsHive().box.clear();
-        MealSuggestionsHive().box.clear();
-      }
-    });
+    );
   }
 }
 

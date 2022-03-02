@@ -1,3 +1,4 @@
+
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:hive/hive.dart';
 
@@ -13,23 +14,27 @@ class ShoppingListHive {
 
   static final String shoppingListBoxName = "ShoppingList";
 
-  final Box<Article> shoppingListBox = Hive.box<Article>(shoppingListBoxName);
+  final Box<ArticleEntry> shoppingListBox =
+      Hive.box<ArticleEntry>(shoppingListBoxName);
 
   static final String shoppingListCheckedBoxName = "ShoppingListChecked";
 
-  final Box<Article> shoppingListCheckedBox =
-      Hive.box<Article>(shoppingListCheckedBoxName);
+  final Box<ArticleEntry> shoppingListCheckedBox =
+      Hive.box<ArticleEntry>(shoppingListCheckedBoxName);
 
   void addArticle(Article? newArticle) {
     if (newArticle == null) return;
-    for (Article article in shoppingListBox.values) {
-      if (article.name == newArticle.name &&
-          article.quantityUnit == newArticle.quantityUnit) {
-        article.quantity += newArticle.quantity;
+    for (ArticleEntry articleEntry in shoppingListBox.values) {
+      if (articleEntry.name == newArticle.name &&
+          articleEntry.quantityUnit == newArticle.quantityUnit) {
+        articleEntry.addArticle(newArticle);
         return;
       }
     }
-    shoppingListBox.put(shoppingListBox.length, newArticle);
+    shoppingListBox.put(
+        shoppingListBox.length,
+        ArticleEntry(newArticle.name, newArticle.quantity,
+            newArticle.quantityUnit, newArticle.details, [newArticle]));
   }
 
   void addArticles(List<Article> newArticles) {
@@ -38,52 +43,74 @@ class ShoppingListHive {
     }
   }
 
-  void replaceArticleAt(int? indexKey, Article? article) {
-    if (indexKey == null || article == null) return;
-    shoppingListBox.put(indexKey, article);
+  void replaceArticleEntryAt(int? indexKey, ArticleEntry? articleEntry) {
+    if (indexKey == null || articleEntry == null) return;
+    shoppingListBox.put(indexKey, articleEntry);
   }
 
-  void reorderArticleAt(int oldIndex, int newIndex) {
-    Article reorderedArticle = shoppingListBox.get(oldIndex)!;
+  void reorderArticleEntryAt(int oldIndex, int newIndex) {
+    ArticleEntry reorderedArticleEntry = shoppingListBox.get(oldIndex)!;
     if (oldIndex < newIndex) {
       --newIndex;
       for (int indexKey = oldIndex; indexKey < newIndex; ++indexKey) {
-        Article nextArticle = shoppingListBox.get(indexKey + 1)!;
+        ArticleEntry nextArticleEntry = shoppingListBox.get(indexKey + 1)!;
         shoppingListBox.delete(indexKey + 1);
-        shoppingListBox.put(indexKey, nextArticle);
+        shoppingListBox.put(indexKey, nextArticleEntry);
       }
-      shoppingListBox.put(newIndex, reorderedArticle);
+      shoppingListBox.put(newIndex, reorderedArticleEntry);
     } else {
       for (int indexKey = oldIndex; indexKey > newIndex; --indexKey) {
-        Article nextArticle = shoppingListBox.get(indexKey - 1)!;
+        ArticleEntry nextArticleEntry = shoppingListBox.get(indexKey - 1)!;
         shoppingListBox.delete(indexKey - 1);
-        shoppingListBox.put(indexKey, nextArticle);
+        shoppingListBox.put(indexKey, nextArticleEntry);
       }
-      shoppingListBox.put(newIndex, reorderedArticle);
+      shoppingListBox.put(newIndex, reorderedArticleEntry);
     }
   }
 
-  void removeArticleAt(int indexKey) {
-    Map<dynamic, Article> articleMap = {};
+  void removeArticleEntryAt(int indexKey) {
+    Map<dynamic, ArticleEntry> articleEntryMap = {};
     for (int i = indexKey; i < shoppingListBox.length - 1; ++i) {
-      articleMap[i] = shoppingListBox.get(i + 1)!;
+      articleEntryMap[i] = shoppingListBox.get(i + 1)!;
     }
     shoppingListBox
         .deleteAll([for (int i = indexKey; i < shoppingListBox.length; ++i) i]);
-    shoppingListBox.putAll(articleMap);
+    shoppingListBox.putAll(articleEntryMap);
   }
 
-  void removeArticle(Article article) {
-    removeArticleAt(article.key);
+  void removeArticleEntry(ArticleEntry articleEntry) {
+    removeArticleEntryAt(articleEntry.key);
   }
 
-  void checkArticle(Article article) {
-    removeArticle(article);
-    shoppingListCheckedBox.add(article);
+  void checkArticleEntry(ArticleEntry articleEntry) {
+    removeArticleEntry(articleEntry);
+    shoppingListCheckedBox.add(articleEntry);
   }
 
-  void uncheckArticle(Article article) {
-    article.delete();
-    addArticle(article);
+  void uncheckArticleEntry(ArticleEntry articleEntry) {
+    articleEntry.delete();
+    addArticles(articleEntry.articles);
   }
+
+// void checkIngredient(Article ingredient) {
+//   for (Article article in shoppingListBox.values) {
+//     if (article.name == ingredient.name &&
+//         article.quantityUnit == ingredient.quantityUnit) {
+//       log("${article.quantity == ingredient.quantity}");
+//       if (article.quantity == ingredient.quantity) {
+//         checkArticleEntry(article);
+//       } else {
+//         article.quantity -= ingredient.quantity;
+//         article.save();
+//       }
+//       return;
+//     }
+//   }
+// }
+//
+// void uncheckIngredient(Article ingredient) {
+//   for (Article ingredient in shoppingListBox.values) {
+//     log(ingredient.toString());
+//   }
+// }
 }

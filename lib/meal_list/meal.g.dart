@@ -8,7 +8,7 @@ part of 'meal.dart';
 
 class MealAdapter extends TypeAdapter<Meal> {
   @override
-  final int typeId = 2;
+  final int typeId = 3;
 
   @override
   Meal read(BinaryReader reader) {

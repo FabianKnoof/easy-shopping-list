@@ -23,7 +23,7 @@ class _ShoppingListState extends State<ShoppingList> with BuildTemplates {
     );
   }
 
-  ValueListenableBuilder<Box<Article>> _buildShoppingListChecked() {
+  ValueListenableBuilder<Box<ArticleEntry>> _buildShoppingListChecked() {
     return ValueListenableBuilder(
       valueListenable: ShoppingListHive().shoppingListBox.listenable(),
       builder: (context, value, child) {
@@ -32,11 +32,11 @@ class _ShoppingListState extends State<ShoppingList> with BuildTemplates {
           title: Text(
               "Abgehakt (${ShoppingListHive().shoppingListCheckedBox.length})"),
           children: [
-            for (Article article
+            for (ArticleEntry articleEntry
                 in ShoppingListHive().shoppingListCheckedBox.values)
               ListTile(
-                leading: _buildCheckbox(article),
-                title: articleColumn(article),
+                leading: _buildCheckbox(articleEntry),
+                title: articleColumn(articleEntry.getAsArticle()),
               )
           ].reversed.toList(),
         );
@@ -52,62 +52,73 @@ class _ShoppingListState extends State<ShoppingList> with BuildTemplates {
             reverse: true,
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
-            children: _buildArticleListTile(),
+            children: _buildArticleEntryListTile(),
             onReorder: (oldIndex, newIndex) {
               setState(() {
-                ShoppingListHive().reorderArticleAt(oldIndex, newIndex);
+                ShoppingListHive().reorderArticleEntryAt(oldIndex, newIndex);
               });
             },
           );
         });
   }
 
-  List<Widget> _buildArticleListTile() {
+  List<Widget> _buildArticleEntryListTile() {
     // Todo / Note Use separate ingredients hive which is in sync with ingredients of cooking list and shopping list
-    List<Widget> articleListTiles = [];
+    List<Widget> articleEntryListTiles = [];
     for (int indexKey = 0;
         indexKey < ShoppingListHive().shoppingListBox.length;
         ++indexKey) {
-      Article article = ShoppingListHive().shoppingListBox.get(indexKey)!;
-      articleListTiles.add(ListTile(
+      ArticleEntry articleEntry =
+          ShoppingListHive().shoppingListBox.get(indexKey)!;
+      articleEntryListTiles.add(ListTile(
         key: Key(indexKey.toString()),
+        leading: _buildCheckbox(articleEntry),
+        title: articleColumn(articleEntry.getAsArticle()),
         onTap: () {
           showModalBottomSheet(
             context: context,
             builder: (context) {
               return AddArticleBottomSheet(
-                article: article,
+                article: articleEntry.getAsArticle(),
               );
             },
           ).then((newArticle) {
-            ShoppingListHive().replaceArticleAt(indexKey, newArticle);
+            if (newArticle.runtimeType == Article) {
+              newArticle as Article;
+              ShoppingListHive().replaceArticleEntryAt(
+                  indexKey,
+                  ArticleEntry(
+                      newArticle.name,
+                      newArticle.quantity,
+                      newArticle.quantityUnit,
+                      newArticle.details,
+                      [newArticle]));
+            }
           });
         },
-        leading: _buildCheckbox(article),
-        title: articleColumn(article),
       ));
     }
-    return articleListTiles;
+    return articleEntryListTiles;
   }
 
-  Checkbox _buildCheckbox(Article article) {
+  Checkbox _buildCheckbox(ArticleEntry articleEntry) {
     return Checkbox(
-      value: (article.box == ShoppingListHive().shoppingListCheckedBox),
+      value: (articleEntry.box == ShoppingListHive().shoppingListCheckedBox),
       onChanged: (value) {
         if (value!) {
-          ShoppingListHive().checkArticle(article);
+          ShoppingListHive().checkArticleEntry(articleEntry);
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Abgehakt"),
             action: SnackBarAction(
               label: "Rückgängig",
               onPressed: () {
-                ShoppingListHive().uncheckArticle(article);
+                ShoppingListHive().uncheckArticleEntry(articleEntry);
               },
             ),
           ));
         } else {
-          ShoppingListHive().uncheckArticle(article);
+          ShoppingListHive().uncheckArticleEntry(articleEntry);
         }
       },
     );

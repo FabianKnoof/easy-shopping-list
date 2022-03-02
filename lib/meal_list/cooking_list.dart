@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
+import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/general_use_functions.dart';
 import 'package:easy_shopping_list/meal_list/add_meal.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
@@ -82,6 +85,7 @@ class _CookingListState extends State<CookingList> with BuildTemplates {
       value: (meal.box == CookingListHive().cookingListCheckedBox),
       onChanged: (value) {
         if (value!) {
+          // Todo Check ingredients
           CookingListHive().checkMeal(meal);
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -110,6 +114,7 @@ class _CookingListState extends State<CookingList> with BuildTemplates {
             );
           },
         )).then((value) {
+          // Todo replace ingredients
           CookingListHive().replaceMeal(meal.key, value);
         });
       },
@@ -120,8 +125,17 @@ class _CookingListState extends State<CookingList> with BuildTemplates {
   ListTile _buildIngredient(Article ingredient) {
     return ListTile(
         leading: Checkbox(
-          value: false, // Todo ingredient shopping list checkbox
+          value: ingredient.isChecked, // Todo ingredient shopping list checkbox
           onChanged: (value) {
+            setState(() {
+              if (value!) {
+                ingredient.isChecked = true;
+                // ShoppingListHive().checkIngredient(ingredient);
+              } else {
+                ingredient.isChecked = false;
+                // ShoppingListHive().uncheckIngredient(ingredient);
+              }
+            });
             // Todo change value of checkbox / check/uncheck
           },
         ),

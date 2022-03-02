@@ -16,6 +16,9 @@ class Article extends HiveObject {
   String details = "";
   @HiveField(4, defaultValue: true)
   bool isIngredient = true;
+  @JsonKey(ignore: true)
+  @HiveField(5, defaultValue: false)
+  bool isChecked = false;
 
   Article();
 
@@ -60,7 +63,8 @@ class Article extends HiveObject {
       ..quantity = quantity
       ..quantityUnit = quantityUnit
       ..details = details
-      ..isIngredient = isIngredient;
+      ..isIngredient = isIngredient
+      ..isChecked = isChecked;
   }
 
   @override
@@ -70,6 +74,65 @@ class Article extends HiveObject {
 }
 
 @HiveType(typeId: 1)
+class ArticleEntry extends HiveObject {
+  @HiveField(0, defaultValue: "")
+  String name = "";
+  @HiveField(1, defaultValue: 0)
+  int quantity = 0;
+  @HiveField(2, defaultValue: QuantityUnit.pieces)
+  QuantityUnit quantityUnit = QuantityUnit.pieces;
+  @HiveField(3, defaultValue: "")
+  String details = "";
+  @HiveField(4, defaultValue: [])
+  List<Article> articles = [];
+
+  ArticleEntry(
+      this.name, this.quantity, this.quantityUnit, this.details, this.articles);
+
+  void addArticle(Article article) {
+    articles.add(article);
+    quantity += article.quantity;
+    details += details.isEmpty ? article.details : ", ${article.details}";
+
+    save();
+  }
+
+  void removeArticle(Article article) {
+    articles.remove(article);
+    quantity -= article.quantity;
+    details.replaceAll(article.details, "");
+    details.replaceAll(",,", ",");
+    if (quantity <= 0 || articles.isEmpty) {
+      delete();
+    }
+    save();
+  }
+
+  Article getAsArticle() {
+    return Article()
+      ..name = name
+      ..quantity = quantity
+      ..quantityUnit = quantityUnit
+      ..details = details;
+  }
+
+  String quantityUnitAsString() {
+    switch (quantityUnit) {
+      case QuantityUnit.pieces:
+        return "stk";
+      case QuantityUnit.gram:
+        return "g";
+      case QuantityUnit.milliliter:
+        return "ml";
+      case QuantityUnit.teaspoon:
+        return "tl";
+      case QuantityUnit.tablespoon:
+        return "el";
+    }
+  }
+}
+
+@HiveType(typeId: 2)
 enum QuantityUnit {
   @JsonValue("pieces")
   @HiveField(0)
