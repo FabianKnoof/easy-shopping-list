@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
@@ -39,11 +37,11 @@ Future<void> _initHive() async {
   await Hive.openBox<Article>(ArticleSuggestionsHive.boxName);
   await Hive.openBox<Meal>(MealSuggestionsHive.boxName);
 
-  ShoppingListHive().shoppingListBox.clear();
-  ShoppingListHive().shoppingListCheckedBox.clear();
-
-  CookingListHive().cookingListBox.clear();
-  CookingListHive().cookingListCheckedBox.clear();
+  // ShoppingListHive().shoppingListBox.clear();
+  // ShoppingListHive().shoppingListCheckedBox.clear();
+  //
+  // CookingListHive().cookingListBox.clear();
+  // CookingListHive().cookingListCheckedBox.clear();
   //
   // VersionsSuggestionsHive().box.clear();
   // ArticleSuggestionsHive().box.clear();

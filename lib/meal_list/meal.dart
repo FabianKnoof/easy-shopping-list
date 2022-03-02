@@ -27,7 +27,9 @@ class Meal extends HiveObject {
       ..name = name
       ..quantity = quantity
       ..quantityUnit = quantityUnit
-      ..ingredients = [for (Article ingredient in ingredients) ingredient.getCopy()];
+      ..ingredients = [
+        for (Article ingredient in ingredients) ingredient.getCopy()
+      ];
   }
 
   @override

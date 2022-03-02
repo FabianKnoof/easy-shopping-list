@@ -1,7 +1,5 @@
-import 'dart:developer';
 
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
-import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/general_use_functions.dart';
 import 'package:easy_shopping_list/meal_list/add_meal.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';

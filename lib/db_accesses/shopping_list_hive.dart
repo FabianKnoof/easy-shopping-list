@@ -1,4 +1,3 @@
-
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:hive/hive.dart';
 
