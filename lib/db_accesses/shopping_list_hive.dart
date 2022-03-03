@@ -1,3 +1,4 @@
+import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:hive/hive.dart';
 
@@ -11,20 +12,29 @@ class ShoppingListHive {
 
   ShoppingListHive._internal();
 
-  static final String boxName = "ShoppingList";
+  static final String shoppingListBoxName = "ShoppingList";
 
-  final Box<Article> box = Hive.box<Article>(boxName);
+  final Box<ArticleEntry> shoppingListBox =
+      Hive.box<ArticleEntry>(shoppingListBoxName);
+
+  static final String shoppingListCheckedBoxName = "ShoppingListChecked";
+
+  final Box<ArticleEntry> shoppingListCheckedBox =
+      Hive.box<ArticleEntry>(shoppingListCheckedBoxName);
 
   void addArticle(Article? newArticle) {
     if (newArticle == null) return;
-    for (Article article in box.values) {
-      if (article.name == newArticle.name &&
-          article.quantityUnit == newArticle.quantityUnit) {
-        article.quantity += newArticle.quantity;
+    for (ArticleEntry articleEntry in shoppingListBox.values) {
+      if (articleEntry.name == newArticle.name &&
+          articleEntry.quantityUnit == newArticle.quantityUnit) {
+        articleEntry.addArticle(newArticle);
         return;
       }
     }
-    box.put(box.length, newArticle);
+    shoppingListBox.put(
+        shoppingListBox.length,
+        ArticleEntry(newArticle.name, newArticle.quantity,
+            newArticle.quantityUnit, newArticle.details, [newArticle]));
   }
 
   void addArticles(List<Article> newArticles) {
@@ -33,68 +43,74 @@ class ShoppingListHive {
     }
   }
 
-  void replaceArticleAt(int? indexKey, Article? article) {
-    if (indexKey == null || article == null) return;
-    box.put(indexKey, article);
+  void replaceArticleEntryAt(int? indexKey, ArticleEntry? articleEntry) {
+    if (indexKey == null || articleEntry == null) return;
+    shoppingListBox.put(indexKey, articleEntry);
   }
 
-  void reorderArticleAt(int oldIndex, int newIndex) {
-    Article reorderedArticle = box.get(oldIndex)!;
+  void reorderArticleEntryAt(int oldIndex, int newIndex) {
+    ArticleEntry reorderedArticleEntry = shoppingListBox.get(oldIndex)!;
     if (oldIndex < newIndex) {
       --newIndex;
       for (int indexKey = oldIndex; indexKey < newIndex; ++indexKey) {
-        Article nextArticle = box.get(indexKey + 1)!;
-        box.delete(indexKey + 1);
-        box.put(indexKey, nextArticle);
+        ArticleEntry nextArticleEntry = shoppingListBox.get(indexKey + 1)!;
+        shoppingListBox.delete(indexKey + 1);
+        shoppingListBox.put(indexKey, nextArticleEntry);
       }
-      box.put(newIndex, reorderedArticle);
+      shoppingListBox.put(newIndex, reorderedArticleEntry);
     } else {
       for (int indexKey = oldIndex; indexKey > newIndex; --indexKey) {
-        Article nextArticle = box.get(indexKey - 1)!;
-        box.delete(indexKey - 1);
-        box.put(indexKey, nextArticle);
+        ArticleEntry nextArticleEntry = shoppingListBox.get(indexKey - 1)!;
+        shoppingListBox.delete(indexKey - 1);
+        shoppingListBox.put(indexKey, nextArticleEntry);
       }
-      box.put(newIndex, reorderedArticle);
+      shoppingListBox.put(newIndex, reorderedArticleEntry);
     }
   }
 
-  void removeArticleAt(int indexKey) {
-    Map<dynamic, Article> articleMap = {};
-    for (int i = indexKey; i < box.length - 1; ++i) {
-      articleMap[i] = box.get(i + 1)!;
+  void removeArticleEntryAt(int indexKey) {
+    Map<dynamic, ArticleEntry> articleEntryMap = {};
+    for (int i = indexKey; i < shoppingListBox.length - 1; ++i) {
+      articleEntryMap[i] = shoppingListBox.get(i + 1)!;
     }
-    box.deleteAll([for (int i = indexKey; i < box.length; ++i) i]);
-    box.putAll(articleMap);
+    shoppingListBox
+        .deleteAll([for (int i = indexKey; i < shoppingListBox.length; ++i) i]);
+    shoppingListBox.putAll(articleEntryMap);
   }
 
-  void removeArticle(Article article) {
-    removeArticleAt(article.key);
-  }
-}
-
-class ShoppingListCheckedHive {
-  static final ShoppingListCheckedHive _shoppingListCheckedHive =
-      ShoppingListCheckedHive._internal();
-
-  factory ShoppingListCheckedHive() {
-    return _shoppingListCheckedHive;
+  void removeArticleEntry(ArticleEntry articleEntry) {
+    removeArticleEntryAt(articleEntry.key);
   }
 
-  ShoppingListCheckedHive._internal();
-
-  static final String boxName = "ShoppingListChecked";
-
-  final Box<Article> box = Hive.box<Article>(boxName);
-
-  final ShoppingListHive _shoppingListHive = ShoppingListHive();
-
-  void checkArticle(Article article) {
-    ShoppingListHive().removeArticle(article);
-    box.add(article);
+  void checkArticleEntry(ArticleEntry articleEntry) {
+    for (Article article in articleEntry.articles) {
+      article.isChecked = true;
+      if (article.partOfMeal.isNotEmpty) {
+        CookingListHive().getMealByName(article.partOfMeal).save();
+      }
+    }
+    removeArticleEntry(articleEntry);
+    shoppingListCheckedBox.add(articleEntry);
   }
 
-  void uncheckArticle(Article article) {
-    article.delete();
-    _shoppingListHive.addArticle(article);
+  void uncheckArticleEntry(ArticleEntry articleEntry) {
+    for (Article article in articleEntry.articles) {
+      article.isChecked = false;
+      if (article.partOfMeal.isNotEmpty) {
+        CookingListHive().getMealByName(article.partOfMeal).save();
+      }
+    }
+    articleEntry.delete();
+    addArticles(articleEntry.articles);
+  }
+
+  void checkIngredient(Article ingredient) {
+    for (ArticleEntry articleEntry in shoppingListBox.values) {
+      if (articleEntry.name == ingredient.name &&
+          articleEntry.quantityUnit == ingredient.quantityUnit) {
+        articleEntry.removeArticle(ingredient);
+        return;
+      }
+    }
   }
 }

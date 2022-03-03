@@ -15,7 +15,7 @@ class AddMealView extends StatefulWidget {
   _AddMealViewState createState() => _AddMealViewState();
 }
 
-class _AddMealViewState extends State<AddMealView> with buildTemplates {
+class _AddMealViewState extends State<AddMealView> with BuildTemplates {
   final double _padding = 5;
 
   List<Meal> _foundMeals =
@@ -114,29 +114,14 @@ class _AddMealViewState extends State<AddMealView> with buildTemplates {
                   )).then((newMeal) => Navigator.pop(context, newMeal));
                 },
                 child: Icon(Icons.add)),
-            title: Row(
-              children: [
-                Flexible(fit: FlexFit.loose, child: Text(meal.name)),
-                SizedBox(
-                  width: _padding,
-                ),
-                Text(meal.quantity.toString()),
-                Text(meal.quantityUnit)
-              ],
-            ),
+            title: mealRow(meal),
             children: [
               for (Article ingredient in meal.ingredients)
-                _buildMealIngredientTile(ingredient)
+                ListTile(title: articleColumn(ingredient))
             ],
           )
       ],
     );
-  }
-
-  ListTile _buildMealIngredientTile(Article ingredient) {
-    return ListTile(
-        // Note maybe add a lead icon or sth
-        title: articleColumn(ingredient));
   }
 }
 
@@ -148,7 +133,7 @@ class EditMealView extends StatefulWidget {
   _EditMealViewState createState() => _EditMealViewState();
 }
 
-class _EditMealViewState extends State<EditMealView> with buildTemplates {
+class _EditMealViewState extends State<EditMealView> with BuildTemplates {
   final double _padding = 5;
 
   Meal _meal = Meal();
@@ -163,6 +148,9 @@ class _EditMealViewState extends State<EditMealView> with buildTemplates {
     FormState? formState = _addMealFormKey.currentState;
     if (formState != null && formState.validate()) {
       formState.save();
+      for (Article ingredient in _meal.ingredients) {
+        ingredient.partOfMeal = _meal.name;
+      }
       Navigator.pop(context, _meal);
     }
   }

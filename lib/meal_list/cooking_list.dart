@@ -1,4 +1,5 @@
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
+import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/general_use_functions.dart';
 import 'package:easy_shopping_list/meal_list/add_meal.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
@@ -14,32 +15,53 @@ class CookingList extends StatefulWidget {
   _CookingListState createState() => _CookingListState();
 }
 
-class _CookingListState extends State<CookingList> with buildTemplates {
-  final double _padding = 5;
-
+class _CookingListState extends State<CookingList> with BuildTemplates {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildCookingListChecked(),
-        Expanded(child: _buildCookingList()),
-      ],
+    return ListView(
+      shrinkWrap: true,
+      children: [_buildCookingList(), _buildCookingListChecked()],
     );
   }
 
-  Container _buildCookingListChecked() {
-    return Container();
+  ValueListenableBuilder<Box<Meal>> _buildCookingListChecked() {
+    return ValueListenableBuilder<Box<Meal>>(
+      valueListenable: CookingListHive().cookingListCheckedBox.listenable(),
+      builder: (context, value, child) {
+        return ExpansionTile(
+          leading: Icon(Icons.checklist),
+          title: Text(
+              "Abgehakt (${CookingListHive().cookingListCheckedBox.length})"),
+          children: [
+            for (Meal meal in CookingListHive().cookingListCheckedBox.values)
+              ExpansionTile(
+                leading: _buildCheckbox(meal),
+                title: mealRow(meal),
+                children: [
+                  for (Article ingredient in meal.ingredients)
+                    _buildIngredient(ingredient),
+                ],
+              )
+          ].reversed.toList(),
+        );
+      },
+    );
   }
 
   ValueListenableBuilder<Box<dynamic>> _buildCookingList() {
     return ValueListenableBuilder<Box>(
-      valueListenable: CookingListHive().box.listenable(),
+      valueListenable: CookingListHive().cookingListBox.listenable(),
       builder: (context, value, child) {
         return ReorderableListView(
+          reverse: true,
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
           children: [
-            for (Meal meal in CookingListHive().box.values)
+            for (Meal meal in CookingListHive().cookingListBox.values)
+              // Todo fix expanded tile not changed based on index when reordering
               ExpansionTile(
                 key: Key(meal.key.toString()),
+                leading: _buildCheckbox(meal),
                 title: _buildMeal(meal),
                 children: [
                   for (Article ingredient in meal.ingredients)
@@ -57,6 +79,29 @@ class _CookingListState extends State<CookingList> with buildTemplates {
     );
   }
 
+  Checkbox _buildCheckbox(Meal meal) {
+    return Checkbox(
+      value: (meal.box == CookingListHive().cookingListCheckedBox),
+      onChanged: (value) {
+        if (value!) {
+          CookingListHive().checkMeal(meal);
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("Abgehakt"),
+            action: SnackBarAction(
+              label: "Rückgängig",
+              onPressed: () {
+                CookingListHive().uncheckMeal(meal);
+              },
+            ),
+          ));
+        } else {
+          CookingListHive().uncheckMeal(meal);
+        }
+      },
+    );
+  }
+
   ListTile _buildMeal(Meal meal) {
     return ListTile(
       onTap: () {
@@ -67,38 +112,27 @@ class _CookingListState extends State<CookingList> with buildTemplates {
             );
           },
         )).then((value) {
+          // Todo replace ingredients
           CookingListHive().replaceMeal(meal.key, value);
         });
       },
-      leading: Checkbox(
-        value: false,
-        onChanged: (value) {
-          // Todo edit checkbox
-        },
-      ),
-      title: _buildMealTitle(meal),
-    );
-  }
-
-  Row _buildMealTitle(Meal meal) {
-    return Row(
-      children: [
-        Flexible(fit: FlexFit.loose, child: Text(meal.name)),
-        SizedBox(
-          width: _padding,
-        ),
-        Text(meal.quantity.toString()),
-        Text(meal.quantityUnit)
-      ],
+      title: mealRow(meal),
     );
   }
 
   ListTile _buildIngredient(Article ingredient) {
     return ListTile(
         leading: Checkbox(
-          value: false, // Todo ingredient shopping list checkbox
+          value: ingredient.isChecked,
           onChanged: (value) {
-            // Todo change value of checkbox / check/uncheck
+            setState(() {
+              ingredient.isChecked = value!;
+              if (value) {
+                ShoppingListHive().checkIngredient(ingredient);
+              } else {
+                ShoppingListHive().addArticle(ingredient);
+              }
+            });
           },
         ),
         title: articleColumn(ingredient));

@@ -1,3 +1,4 @@
+
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
@@ -22,19 +23,30 @@ void main() async {
 Future<void> _initHive() async {
   await Hive.initFlutter();
 
+  Hive.registerAdapter(ArticleEntryAdapter());
   Hive.registerAdapter(ArticleAdapter());
   Hive.registerAdapter(QuantityUnitAdapter());
   Hive.registerAdapter(MealAdapter());
 
-  await Hive.openBox<Article>(ShoppingListHive.boxName);
-  await Hive.openBox<Article>(ShoppingListCheckedHive.boxName);
+  await Hive.openBox<ArticleEntry>(ShoppingListHive.shoppingListBoxName);
+  await Hive.openBox<ArticleEntry>(ShoppingListHive.shoppingListCheckedBoxName);
 
-  await Hive.openBox<Meal>(CookingListHive.boxName);
-  await Hive.openBox<Meal>(CookingListCheckedHive.boxName);
+  await Hive.openBox<Meal>(CookingListHive.cookingListBoxName);
+  await Hive.openBox<Meal>(CookingListHive.cookingListCheckedBoxName);
 
   await Hive.openBox<int>(VersionsSuggestionsHive.boxName);
   await Hive.openBox<Article>(ArticleSuggestionsHive.boxName);
   await Hive.openBox<Meal>(MealSuggestionsHive.boxName);
+
+  // ShoppingListHive().shoppingListBox.clear();
+  // ShoppingListHive().shoppingListCheckedBox.clear();
+  //
+  // CookingListHive().cookingListBox.clear();
+  // CookingListHive().cookingListCheckedBox.clear();
+
+  // VersionsSuggestionsHive().box.clear();
+  // ArticleSuggestionsHive().box.clear();
+  // MealSuggestionsHive().box.clear();
 }
 
 class MyApp extends StatelessWidget {
@@ -93,7 +105,6 @@ class _AppViewState extends State<AppView> {
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "")
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
         onTap: _onItemTapped,
       ),
       floatingActionButton: _selectedIndex != 2
@@ -117,7 +128,7 @@ class _AppViewState extends State<AppView> {
                       )).then((newMeal) {
                     if (newMeal.runtimeType == Meal) {
                       newMeal as Meal;
-                      CookingListHive().addMeal(newMeal);
+                      CookingListHive().addMeal(newMeal.getCopy());
                     }
                   });
                 }

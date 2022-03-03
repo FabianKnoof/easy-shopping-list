@@ -1,8 +1,23 @@
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:flutter/material.dart';
 
-mixin buildTemplates {
+import 'meal_list/meal.dart';
+
+mixin BuildTemplates {
   final double _padding = 5;
+
+  Row mealRow(Meal meal) {
+    return Row(
+      children: [
+        Flexible(fit: FlexFit.loose, child: Text(meal.name)),
+        SizedBox(
+          width: _padding,
+        ),
+        Text(meal.quantity.toString()),
+        Text(meal.quantityUnit)
+      ],
+    );
+  }
 
   Column articleColumn(Article article) {
     return Column(

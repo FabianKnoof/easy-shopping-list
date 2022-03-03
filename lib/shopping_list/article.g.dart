@@ -18,17 +18,19 @@ class ArticleAdapter extends TypeAdapter<Article> {
     };
     return Article()
       ..name = fields[0] == null ? '' : fields[0] as String
-      ..quantity = fields[1] == null ? 1 : fields[1] as int
+      ..quantity = fields[1] == null ? 0 : fields[1] as int
       ..quantityUnit =
           fields[2] == null ? QuantityUnit.pieces : fields[2] as QuantityUnit
       ..details = fields[3] == null ? '' : fields[3] as String
-      ..isIngredient = fields[4] == null ? true : fields[4] as bool;
+      ..isIngredient = fields[4] == null ? true : fields[4] as bool
+      ..isChecked = fields[5] == null ? false : fields[5] as bool
+      ..partOfMeal = fields[6] == null ? '' : fields[6] as String;
   }
 
   @override
   void write(BinaryWriter writer, Article obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -38,7 +40,11 @@ class ArticleAdapter extends TypeAdapter<Article> {
       ..writeByte(3)
       ..write(obj.details)
       ..writeByte(4)
-      ..write(obj.isIngredient);
+      ..write(obj.isIngredient)
+      ..writeByte(5)
+      ..write(obj.isChecked)
+      ..writeByte(6)
+      ..write(obj.partOfMeal);
   }
 
   @override
@@ -52,9 +58,55 @@ class ArticleAdapter extends TypeAdapter<Article> {
           typeId == other.typeId;
 }
 
-class QuantityUnitAdapter extends TypeAdapter<QuantityUnit> {
+class ArticleEntryAdapter extends TypeAdapter<ArticleEntry> {
   @override
   final int typeId = 1;
+
+  @override
+  ArticleEntry read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return ArticleEntry(
+      fields[0] == null ? '' : fields[0] as String,
+      fields[1] == null ? 0 : fields[1] as int,
+      fields[2] == null ? QuantityUnit.pieces : fields[2] as QuantityUnit,
+      fields[3] == null ? '' : fields[3] as String,
+      fields[4] == null ? [] : (fields[4] as List).cast<Article>(),
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, ArticleEntry obj) {
+    writer
+      ..writeByte(5)
+      ..writeByte(0)
+      ..write(obj.name)
+      ..writeByte(1)
+      ..write(obj.quantity)
+      ..writeByte(2)
+      ..write(obj.quantityUnit)
+      ..writeByte(3)
+      ..write(obj.details)
+      ..writeByte(4)
+      ..write(obj.articles);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ArticleEntryAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class QuantityUnitAdapter extends TypeAdapter<QuantityUnit> {
+  @override
+  final int typeId = 2;
 
   @override
   QuantityUnit read(BinaryReader reader) {

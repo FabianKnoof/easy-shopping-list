@@ -5,7 +5,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'meal.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-@HiveType(typeId: 2)
+@HiveType(typeId: 3)
 class Meal extends HiveObject {
   @HiveField(0, defaultValue: "")
   String name = "";
@@ -23,15 +23,19 @@ class Meal extends HiveObject {
   Map<String, dynamic> toJson() => _$MealToJson(this);
 
   Meal getCopy() {
-    return Meal()
+    Meal copy = Meal()
       ..name = name
       ..quantity = quantity
-      ..quantityUnit = quantityUnit
-      ..ingredients = ingredients;
+      ..quantityUnit = quantityUnit;
+    // ..ingredients = ingredients;
+    for (Article ingredient in ingredients) {
+      copy.ingredients.add(ingredient.getCopy());
+    }
+    return copy;
   }
 
   @override
   String toString() {
-    return "$name $quantity$quantityUnit $ingredients";
+    return "$name, $quantity$quantityUnit, $ingredients, ${box != null ? box!.name : null};";
   }
 }

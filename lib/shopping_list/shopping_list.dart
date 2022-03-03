@@ -13,7 +13,7 @@ class ShoppingList extends StatefulWidget {
   State<ShoppingList> createState() => _ShoppingListState();
 }
 
-class _ShoppingListState extends State<ShoppingList> with buildTemplates {
+class _ShoppingListState extends State<ShoppingList> with BuildTemplates {
   @override
   Widget build(BuildContext context) {
     // Note needs testing and maybe different solution to shrinkWrap
@@ -23,18 +23,20 @@ class _ShoppingListState extends State<ShoppingList> with buildTemplates {
     );
   }
 
-  ValueListenableBuilder<Box<Article>> _buildShoppingListChecked() {
+  ValueListenableBuilder<Box<ArticleEntry>> _buildShoppingListChecked() {
     return ValueListenableBuilder(
-      valueListenable: ShoppingListCheckedHive().box.listenable(),
+      valueListenable: ShoppingListHive().shoppingListCheckedBox.listenable(),
       builder: (context, value, child) {
         return ExpansionTile(
           leading: Icon(Icons.checklist),
-          title: Text("Abgehakt (${ShoppingListCheckedHive().box.length})"),
+          title: Text(
+              "Abgehakt (${ShoppingListHive().shoppingListCheckedBox.length})"),
           children: [
-            for (Article article in ShoppingListCheckedHive().box.values)
+            for (ArticleEntry articleEntry
+                in ShoppingListHive().shoppingListCheckedBox.values)
               ListTile(
-                leading: _buildCheckbox(article),
-                title: articleColumn(article),
+                leading: _buildCheckbox(articleEntry),
+                title: articleColumn(articleEntry.getAsArticle()),
               )
           ].reversed.toList(),
         );
@@ -44,68 +46,78 @@ class _ShoppingListState extends State<ShoppingList> with buildTemplates {
 
   ValueListenableBuilder<Box<dynamic>> _buildShoppingList() {
     return ValueListenableBuilder<Box>(
-        valueListenable: ShoppingListHive().box.listenable(),
+        valueListenable: ShoppingListHive().shoppingListBox.listenable(),
         builder: (context, box, widget) {
           return ReorderableListView(
             reverse: true,
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
-            children: _buildArticleListTile(),
+            children: _buildArticleEntryListTile(),
             onReorder: (oldIndex, newIndex) {
               setState(() {
-                ShoppingListHive().reorderArticleAt(oldIndex, newIndex);
+                ShoppingListHive().reorderArticleEntryAt(oldIndex, newIndex);
               });
             },
           );
         });
   }
 
-  List<Widget> _buildArticleListTile() {
-    // Todo / Note Use separate ingredients hive which is in sync with ingredients of cooking list and shopping list
-    List<Widget> articleListTiles = [];
+  List<Widget> _buildArticleEntryListTile() {
+    List<Widget> articleEntryListTiles = [];
     for (int indexKey = 0;
-        indexKey < ShoppingListHive().box.length;
+        indexKey < ShoppingListHive().shoppingListBox.length;
         ++indexKey) {
-      Article article = ShoppingListHive().box.get(indexKey)!;
-      articleListTiles.add(ListTile(
+      ArticleEntry articleEntry =
+          ShoppingListHive().shoppingListBox.get(indexKey)!;
+      articleEntryListTiles.add(ListTile(
         key: Key(indexKey.toString()),
+        leading: _buildCheckbox(articleEntry),
+        title: articleColumn(articleEntry.getAsArticle()),
         onTap: () {
           showModalBottomSheet(
             context: context,
             builder: (context) {
               return AddArticleBottomSheet(
-                article: article,
+                article: articleEntry.getAsArticle(),
               );
             },
           ).then((newArticle) {
-            ShoppingListHive().replaceArticleAt(indexKey, newArticle);
+            if (newArticle.runtimeType == Article) {
+              newArticle as Article;
+              ShoppingListHive().replaceArticleEntryAt(
+                  indexKey,
+                  ArticleEntry(
+                      newArticle.name,
+                      newArticle.quantity,
+                      newArticle.quantityUnit,
+                      newArticle.details,
+                      [newArticle]));
+            }
           });
         },
-        leading: _buildCheckbox(article),
-        title: articleColumn(article),
       ));
     }
-    return articleListTiles;
+    return articleEntryListTiles;
   }
 
-  Checkbox _buildCheckbox(Article article) {
+  Checkbox _buildCheckbox(ArticleEntry articleEntry) {
     return Checkbox(
-      value: (article.box == ShoppingListCheckedHive().box),
+      value: (articleEntry.box == ShoppingListHive().shoppingListCheckedBox),
       onChanged: (value) {
         if (value!) {
-          ShoppingListCheckedHive().checkArticle(article);
+          ShoppingListHive().checkArticleEntry(articleEntry);
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Abgehakt"),
             action: SnackBarAction(
               label: "Rückgängig",
               onPressed: () {
-                ShoppingListCheckedHive().uncheckArticle(article);
+                ShoppingListHive().uncheckArticleEntry(articleEntry);
               },
             ),
           ));
         } else {
-          ShoppingListCheckedHive().uncheckArticle(article);
+          ShoppingListHive().uncheckArticleEntry(articleEntry);
         }
       },
     );

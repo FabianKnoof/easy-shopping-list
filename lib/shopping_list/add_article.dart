@@ -17,7 +17,7 @@ class AddArticleBottomSheet extends StatefulWidget {
 }
 
 class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
-    with buildTemplates {
+    with BuildTemplates {
   Article _article = Article();
 
   bool _suggestOnlyIngredients = false;
@@ -36,14 +36,6 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
         value: unit, child: Text(Article.quantityUnitToString(unit)));
   }).toList();
 
-  void _submitForm() {
-    FormState? formState = _addArticleFormKey.currentState;
-    if (formState != null && formState.validate()) {
-      formState.save();
-      Navigator.pop(context, _article);
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -56,6 +48,14 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
     _dropdownValue = _article.quantityUnit;
     if (widget.suggestOnlyIngredients != null) {
       _suggestOnlyIngredients = widget.suggestOnlyIngredients!;
+    }
+  }
+
+  void _submitForm() {
+    FormState? formState = _addArticleFormKey.currentState;
+    if (formState != null && formState.validate()) {
+      formState.save();
+      Navigator.pop(context, _article);
     }
   }
 
