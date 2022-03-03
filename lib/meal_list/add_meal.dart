@@ -18,10 +18,24 @@ class AddMealView extends StatefulWidget {
 class _AddMealViewState extends State<AddMealView> with BuildTemplates {
   final double _padding = 5;
 
-  List<Meal> _foundMeals =
-      SuggestionsHive().mealBox.values.map((e) => e.getCopy()).toList();
+  List<Meal> _foundMeals = [];
 
   final TextEditingController _searchFieldController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _foundMeals = SuggestionsHive()
+            .mealBox
+            .values
+            .map((e) => e.getCopy())
+            .toList() +
+        SuggestionsHive().userMealsBox.values.map((e) => e.getCopy()).toList();
+    _foundMeals.sort((a, b) {
+      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,20 +77,23 @@ class _AddMealViewState extends State<AddMealView> with BuildTemplates {
       onChanged: (value) {
         setState(() {
           value = value.trim();
-          if (value.isEmpty) {
-            _foundMeals = SuggestionsHive()
-                .mealBox
-                .values
-                .map((e) => e.getCopy())
-                .toList();
-          }
           _foundMeals = SuggestionsHive()
-              .mealBox
-              .values
-              .where((meal) =>
-                  meal.name.toLowerCase().startsWith(value.toLowerCase()))
-              .map((e) => e.getCopy())
-              .toList();
+                  .mealBox
+                  .values
+                  .where((meal) =>
+                      meal.name.toLowerCase().startsWith(value.toLowerCase()))
+                  .map((e) => e.getCopy())
+                  .toList() +
+              SuggestionsHive()
+                  .userMealsBox
+                  .values
+                  .where((meal) =>
+                      meal.name.toLowerCase().startsWith(value.toLowerCase()))
+                  .map((e) => e.getCopy())
+                  .toList();
+          _foundMeals.sort((a, b) {
+            return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+          });
         });
       },
       decoration: textFieldInputDecoration("Gericht"),

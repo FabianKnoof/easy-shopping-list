@@ -7,6 +7,7 @@ import 'package:easy_shopping_list/meal_list/add_meal.dart';
 import 'package:easy_shopping_list/meal_list/meal.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class OptionsView extends StatefulWidget {
   const OptionsView({Key? key}) : super(key: key);
@@ -204,35 +205,55 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
           appBar: AppBar(
             title: Text("Eigene Gerichte"),
           ),
-          body: ListView(
-            shrinkWrap: true,
-            children: [
-              for (Meal meal in SuggestionsHive().userMealsBox.values)
-                ExpansionTile(
-                  title: mealRow(meal),
-                  leading: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(
-                          builder: (context) {
-                            return EditMealView(
-                              meal: meal,
-                            );
-                          },
-                        )).then((newMeal) {
-                          Navigator.pop(context, newMeal);
-                        });
-                      },
-                      child: Icon(Icons.add)),
-                  // Todo edit usermeal?
-                  // Todo option to delete usermeal
-                  children: [
-                    for (Article ingredient in meal.ingredients)
-                      ListTile(
-                        title: articleColumn(ingredient),
-                      )
-                  ],
-                )
-            ],
+          body: ValueListenableBuilder(
+            valueListenable: SuggestionsHive().userMealsBox.listenable(),
+            builder: (context, value, child) {
+              return ListView(
+                shrinkWrap: true,
+                children: [
+                  for (Meal meal in SuggestionsHive().userMealsBox.values)
+                    ExpansionTile(
+                      title: mealRow(meal),
+                      leading: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ElevatedButton(
+                              style: ButtonStyle(
+                                  shape: MaterialStateProperty.all(
+                                      CircleBorder())),
+                              onPressed: () {
+                                Navigator.push(context, MaterialPageRoute(
+                                  builder: (context) {
+                                    return EditMealView(
+                                      meal: meal,
+                                    );
+                                  },
+                                )).then((newMeal) {
+                                  Navigator.pop(context, newMeal);
+                                });
+                              },
+                              child: Icon(Icons.add)),
+                          ElevatedButton(
+                              style: ButtonStyle(
+                                  shape: MaterialStateProperty.all(
+                                      CircleBorder())),
+                              onPressed: () {
+                                SuggestionsHive().userMealsBox.delete(meal.key);
+                              },
+                              child: Icon(Icons.delete))
+                        ],
+                      ),
+                      // Todo edit usermeal?
+                      children: [
+                        for (Article ingredient in meal.ingredients)
+                          ListTile(
+                            title: articleColumn(ingredient),
+                          )
+                      ],
+                    )
+                ],
+              );
+            },
           ),
         );
       },
