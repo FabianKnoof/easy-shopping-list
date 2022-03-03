@@ -1,5 +1,6 @@
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/meal_list/meal.dart';
+import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class CookingListHive {
@@ -63,7 +64,10 @@ class CookingListHive {
   }
 
   void checkMeal(Meal meal) {
-    // Todo check ingredients?
+    for (Article ingredient in meal.ingredients) {
+      ShoppingListHive().checkIngredient(ingredient);
+      ingredient.isChecked = true;
+    }
     removeMealAt(meal.key);
     cookingListCheckedBox.add(meal);
   }
