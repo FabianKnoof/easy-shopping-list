@@ -37,6 +37,8 @@ Future<void> _initHive() async {
   await Hive.openBox<Article>(SuggestionsHive.articleBoxName);
   await Hive.openBox<Meal>(SuggestionsHive.mealBoxName);
 
+  await Hive.openBox<Meal>(SuggestionsHive.userMealsBoxName);
+
   // ShoppingListHive().shoppingListBox.clear();
   // ShoppingListHive().shoppingListCheckedBox.clear();
   //
@@ -128,6 +130,7 @@ class _AppViewState extends State<AppView> {
                     if (newMeal.runtimeType == Meal) {
                       newMeal as Meal;
                       CookingListHive().addMeal(newMeal.getCopy());
+                      SuggestionsHive().addUserMeal(newMeal.getCopy());
                     }
                   });
                 }

@@ -2,7 +2,9 @@ import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_mongodb.dart';
+import 'package:easy_shopping_list/general_use_functions.dart';
 import 'package:easy_shopping_list/meal_list/add_meal.dart';
+import 'package:easy_shopping_list/meal_list/meal.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:flutter/material.dart';
 
@@ -13,7 +15,7 @@ class OptionsView extends StatefulWidget {
   _OptionsViewState createState() => _OptionsViewState();
 }
 
-class _OptionsViewState extends State<OptionsView> {
+class _OptionsViewState extends State<OptionsView> with BuildTemplates {
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -195,7 +197,49 @@ class _OptionsViewState extends State<OptionsView> {
     );
   }
 
-  void _showUserCreatedMeals() {}
+  void _showUserCreatedMeals() {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text("Eigene Gerichte"),
+          ),
+          body: ListView(
+            shrinkWrap: true,
+            children: [
+              for (Meal meal in SuggestionsHive().userMealsBox.values)
+                ExpansionTile(
+                  title: mealRow(meal),
+                  leading: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (context) {
+                            return EditMealView(
+                              meal: meal,
+                            );
+                          },
+                        )).then((newMeal) {
+                          Navigator.pop(context, newMeal);
+                        });
+                      },
+                      child: Icon(Icons.add)),
+                  // Todo edit usermeal?
+                  // Todo option to delete usermeal
+                  children: [
+                    for (Article ingredient in meal.ingredients)
+                      ListTile(
+                        title: articleColumn(ingredient),
+                      )
+                  ],
+                )
+            ],
+          ),
+        );
+      },
+    )).then((newMeal) {
+      CookingListHive().addMeal(newMeal);
+    });
+  }
 }
 
 class ArticleSuggestion extends StatefulWidget {

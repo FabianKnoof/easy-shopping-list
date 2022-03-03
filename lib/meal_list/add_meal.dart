@@ -151,6 +151,7 @@ class _EditMealViewState extends State<EditMealView> with BuildTemplates {
       for (Article ingredient in _meal.ingredients) {
         ingredient.partOfMeal = _meal.name;
       }
+
       Navigator.pop(context, _meal);
     }
   }
