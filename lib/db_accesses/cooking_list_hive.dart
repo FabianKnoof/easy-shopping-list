@@ -70,15 +70,12 @@ class CookingListHive {
     }
     removeMealAt(meal.key);
     cookingListCheckedBox.add(meal);
-    // Todo check ingredients?
-    for (Article ingredient in meal.ingredients) {
-      ShoppingListHive().checkIngredient(ingredient);
-      ingredient.isChecked = true;
-    }
   }
 
   void uncheckMeal(Meal meal) {
-    // Todo uncheck ingredients?
+    for (Article ingredient in meal.ingredients) {
+      ingredient.isChecked = false;
+    }
     meal.delete();
     addMeal(meal);
   }
