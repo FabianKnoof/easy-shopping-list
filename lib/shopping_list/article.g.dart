@@ -23,13 +23,14 @@ class ArticleAdapter extends TypeAdapter<Article> {
           fields[2] == null ? QuantityUnit.pieces : fields[2] as QuantityUnit
       ..details = fields[3] == null ? '' : fields[3] as String
       ..isIngredient = fields[4] == null ? true : fields[4] as bool
-      ..isChecked = fields[5] == null ? false : fields[5] as bool;
+      ..isChecked = fields[5] == null ? false : fields[5] as bool
+      ..mealIndex = fields[6] as int?;
   }
 
   @override
   void write(BinaryWriter writer, Article obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -41,7 +42,9 @@ class ArticleAdapter extends TypeAdapter<Article> {
       ..writeByte(4)
       ..write(obj.isIngredient)
       ..writeByte(5)
-      ..write(obj.isChecked);
+      ..write(obj.isChecked)
+      ..writeByte(6)
+      ..write(obj.mealIndex);
   }
 
   @override

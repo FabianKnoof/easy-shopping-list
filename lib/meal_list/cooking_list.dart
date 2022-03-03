@@ -1,5 +1,5 @@
-
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
+import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/general_use_functions.dart';
 import 'package:easy_shopping_list/meal_list/add_meal.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
@@ -126,12 +126,11 @@ class _CookingListState extends State<CookingList> with BuildTemplates {
           value: ingredient.isChecked, // Todo ingredient shopping list checkbox
           onChanged: (value) {
             setState(() {
-              if (value!) {
-                ingredient.isChecked = true;
-                // ShoppingListHive().checkIngredient(ingredient);
+              ingredient.isChecked = value!;
+              if (value) {
+                ShoppingListHive().checkIngredient(ingredient);
               } else {
-                ingredient.isChecked = false;
-                // ShoppingListHive().uncheckIngredient(ingredient);
+                ShoppingListHive().addArticle(ingredient);
               }
             });
             // Todo change value of checkbox / check/uncheck

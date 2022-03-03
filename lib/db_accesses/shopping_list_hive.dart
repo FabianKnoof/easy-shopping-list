@@ -1,3 +1,4 @@
+import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:hive/hive.dart';
 
@@ -82,34 +83,34 @@ class ShoppingListHive {
   }
 
   void checkArticleEntry(ArticleEntry articleEntry) {
+    for (Article article in articleEntry.articles) {
+      article.isChecked = true;
+      if (article.mealIndex != null) {
+        CookingListHive().cookingListBox.get(article.mealIndex)!.save();
+      }
+    }
     removeArticleEntry(articleEntry);
     shoppingListCheckedBox.add(articleEntry);
   }
 
   void uncheckArticleEntry(ArticleEntry articleEntry) {
+    for (Article article in articleEntry.articles) {
+      article.isChecked = false;
+      if (article.mealIndex != null) {
+        CookingListHive().cookingListBox.get(article.mealIndex)!.save();
+      }
+    }
     articleEntry.delete();
     addArticles(articleEntry.articles);
   }
 
-// void checkIngredient(Article ingredient) {
-//   for (Article article in shoppingListBox.values) {
-//     if (article.name == ingredient.name &&
-//         article.quantityUnit == ingredient.quantityUnit) {
-//       log("${article.quantity == ingredient.quantity}");
-//       if (article.quantity == ingredient.quantity) {
-//         checkArticleEntry(article);
-//       } else {
-//         article.quantity -= ingredient.quantity;
-//         article.save();
-//       }
-//       return;
-//     }
-//   }
-// }
-//
-// void uncheckIngredient(Article ingredient) {
-//   for (Article ingredient in shoppingListBox.values) {
-//     log(ingredient.toString());
-//   }
-// }
+  void checkIngredient(Article ingredient) {
+    for (ArticleEntry articleEntry in shoppingListBox.values) {
+      if (articleEntry.name == ingredient.name &&
+          articleEntry.quantityUnit == ingredient.quantityUnit) {
+        articleEntry.removeArticle(ingredient);
+        return;
+      }
+    }
+  }
 }

@@ -1,3 +1,4 @@
+import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -19,6 +20,9 @@ class Article extends HiveObject {
   @JsonKey(ignore: true)
   @HiveField(5, defaultValue: false)
   bool isChecked = false;
+  @JsonKey(ignore: true)
+  @HiveField(6)
+  int? mealIndex;
 
   Article();
 
@@ -64,12 +68,13 @@ class Article extends HiveObject {
       ..quantityUnit = quantityUnit
       ..details = details
       ..isIngredient = isIngredient
-      ..isChecked = isChecked;
+      ..isChecked = isChecked
+      ..mealIndex = mealIndex;
   }
 
   @override
   String toString() {
-    return "$name, $quantity ${quantityUnitAsString()}, $details";
+    return "$name, $quantity${quantityUnitAsString()}, $details, $isIngredient, $isChecked, $mealIndex;";
   }
 }
 
@@ -97,15 +102,17 @@ class ArticleEntry extends HiveObject {
     save();
   }
 
-  void removeArticle(Article article) {
-    articles.remove(article);
-    quantity -= article.quantity;
-    details.replaceAll(article.details, "");
-    details.replaceAll(",,", ",");
-    if (quantity <= 0 || articles.isEmpty) {
-      delete();
+  void removeArticle(Article removeArticle) {
+    articles
+        .removeWhere((element) => element.quantity == removeArticle.quantity);
+    if (articles.isEmpty) {
+      ShoppingListHive().removeArticleEntry(this);
+    } else {
+      quantity -= removeArticle.quantity;
+      details.replaceAll(removeArticle.details, "");
+      details.replaceAll(",,", ",");
+      save();
     }
-    save();
   }
 
   Article getAsArticle() {

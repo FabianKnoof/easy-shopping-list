@@ -25,7 +25,7 @@ class _ShoppingListState extends State<ShoppingList> with BuildTemplates {
 
   ValueListenableBuilder<Box<ArticleEntry>> _buildShoppingListChecked() {
     return ValueListenableBuilder(
-      valueListenable: ShoppingListHive().shoppingListBox.listenable(),
+      valueListenable: ShoppingListHive().shoppingListCheckedBox.listenable(),
       builder: (context, value, child) {
         return ExpansionTile(
           leading: Icon(Icons.checklist),
@@ -63,7 +63,6 @@ class _ShoppingListState extends State<ShoppingList> with BuildTemplates {
   }
 
   List<Widget> _buildArticleEntryListTile() {
-    // Todo / Note Use separate ingredients hive which is in sync with ingredients of cooking list and shopping list
     List<Widget> articleEntryListTiles = [];
     for (int indexKey = 0;
         indexKey < ShoppingListHive().shoppingListBox.length;

@@ -1,4 +1,6 @@
+import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/meal_list/meal.dart';
+import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class CookingListHive {
@@ -21,7 +23,12 @@ class CookingListHive {
 
   void addMeal(Meal? newMeal) {
     if (newMeal == null) return;
+    for (Article ingredient in newMeal.ingredients) {
+      ingredient.mealIndex = cookingListBox.length;
+    }
     cookingListBox.put(cookingListBox.length, newMeal);
+    ShoppingListHive().addArticles(newMeal.ingredients);
+    // Todo check if meal already present
   }
 
   void replaceMeal(int? indexKey, Meal? meal) {
