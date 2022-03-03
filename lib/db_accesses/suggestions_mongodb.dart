@@ -54,25 +54,25 @@ class SuggestionsMongoDB {
     }
 
     if (version["articleSuggestions"] >
-        VersionsSuggestionsHive()
-            .box
+        SuggestionsHive()
+            .versionsBox
             .get("articleSuggestions", defaultValue: 0)) {
       log("Article suggestions update available");
-      await ArticleSuggestionsHive().box.clear();
-      ArticleSuggestionsHive().box.addAll(await _getArticleSuggestions());
-      VersionsSuggestionsHive()
-          .box
+      await SuggestionsHive().articleBox.clear();
+      SuggestionsHive().articleBox.addAll(await _getArticleSuggestions());
+      SuggestionsHive()
+          .versionsBox
           .put("articleSuggestions", version["articleSuggestions"]);
 
       log("Article suggestions updated");
     }
     if (version["mealSuggestions"] >
-        VersionsSuggestionsHive().box.get("mealSuggestions", defaultValue: 0)) {
+        SuggestionsHive().versionsBox.get("mealSuggestions", defaultValue: 0)) {
       log("Meal suggestions update available");
-      await MealSuggestionsHive().box.clear();
-      MealSuggestionsHive().box.addAll(await _getMealSuggestions());
-      VersionsSuggestionsHive()
-          .box
+      await SuggestionsHive().mealBox.clear();
+      SuggestionsHive().mealBox.addAll(await _getMealSuggestions());
+      SuggestionsHive()
+          .versionsBox
           .put("mealSuggestions", version["mealSuggestions"]);
       log("Meal suggestions updated");
     }

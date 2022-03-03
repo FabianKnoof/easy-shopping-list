@@ -1,48 +1,45 @@
+
 import 'package:easy_shopping_list/meal_list/meal.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-class VersionsSuggestionsHive {
-  static final VersionsSuggestionsHive _versionsSuggestionsHive =
-      VersionsSuggestionsHive._internal();
+class SuggestionsHive {
+  static final SuggestionsHive _suggestionsHive = SuggestionsHive._internal();
 
-  factory VersionsSuggestionsHive() {
-    return _versionsSuggestionsHive;
+  factory SuggestionsHive() {
+    return _suggestionsHive;
   }
 
-  VersionsSuggestionsHive._internal();
+  SuggestionsHive._internal();
 
-  static final String boxName = "VersionsSuggestions";
+  static final String versionsBoxName = "VersionsSuggestions";
 
-  final Box<int> box = Hive.box<int>(boxName);
-}
+  final Box<int> versionsBox = Hive.box<int>(versionsBoxName);
 
-class ArticleSuggestionsHive {
-  static final ArticleSuggestionsHive _articleSuggestionsHive =
-      ArticleSuggestionsHive._internal();
+  static final String articleBoxName = "ArticleSuggestions";
 
-  factory ArticleSuggestionsHive() {
-    return _articleSuggestionsHive;
+  final Box<Article> articleBox = Hive.box<Article>(articleBoxName);
+
+  static final String mealBoxName = "MealSuggestions";
+
+  final Box<Meal> mealBox = Hive.box<Meal>(mealBoxName);
+
+  static final String userMealsBoxName = "UserMeals";
+
+  final Box<Meal> userMealsBox = Hive.box<Meal>(userMealsBoxName);
+
+  void addUserMeal(Meal? userMeal) {
+    if (userMeal == null) return;
+    for (Meal meal in mealBox.values) {
+      if (meal.name == userMeal.name) return;
+    }
+    for (Meal meal in userMealsBox.values) {
+      if (meal.name == userMeal.name) return;
+    }
+    userMealsBox.add(userMeal);
   }
 
-  ArticleSuggestionsHive._internal();
-
-  static final String boxName = "ArticleSuggestions";
-
-  final Box<Article> box = Hive.box<Article>(boxName);
-}
-
-class MealSuggestionsHive {
-  static final MealSuggestionsHive _mealSuggestionsHive =
-      MealSuggestionsHive._internal();
-
-  factory MealSuggestionsHive() {
-    return _mealSuggestionsHive;
+  void removeUserMeal(Meal mealToRemove) {
+    mealToRemove.delete();
   }
-
-  MealSuggestionsHive._internal();
-
-  static final String boxName = "MealSuggestions";
-
-  final Box<Meal> box = Hive.box<Meal>(boxName);
 }

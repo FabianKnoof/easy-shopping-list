@@ -18,10 +18,24 @@ class AddMealView extends StatefulWidget {
 class _AddMealViewState extends State<AddMealView> with BuildTemplates {
   final double _padding = 5;
 
-  List<Meal> _foundMeals =
-      MealSuggestionsHive().box.values.map((e) => e.getCopy()).toList();
+  List<Meal> _foundMeals = [];
 
   final TextEditingController _searchFieldController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _foundMeals = SuggestionsHive()
+            .mealBox
+            .values
+            .map((e) => e.getCopy())
+            .toList() +
+        SuggestionsHive().userMealsBox.values.map((e) => e.getCopy()).toList();
+    _foundMeals.sort((a, b) {
+      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,20 +77,23 @@ class _AddMealViewState extends State<AddMealView> with BuildTemplates {
       onChanged: (value) {
         setState(() {
           value = value.trim();
-          if (value.isEmpty) {
-            _foundMeals = MealSuggestionsHive()
-                .box
-                .values
-                .map((e) => e.getCopy())
-                .toList();
-          }
-          _foundMeals = MealSuggestionsHive()
-              .box
-              .values
-              .where((meal) =>
-                  meal.name.toLowerCase().startsWith(value.toLowerCase()))
-              .map((e) => e.getCopy())
-              .toList();
+          _foundMeals = SuggestionsHive()
+                  .mealBox
+                  .values
+                  .where((meal) =>
+                      meal.name.toLowerCase().startsWith(value.toLowerCase()))
+                  .map((e) => e.getCopy())
+                  .toList() +
+              SuggestionsHive()
+                  .userMealsBox
+                  .values
+                  .where((meal) =>
+                      meal.name.toLowerCase().startsWith(value.toLowerCase()))
+                  .map((e) => e.getCopy())
+                  .toList();
+          _foundMeals.sort((a, b) {
+            return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+          });
         });
       },
       decoration: textFieldInputDecoration("Gericht"),
@@ -151,6 +168,7 @@ class _EditMealViewState extends State<EditMealView> with BuildTemplates {
       for (Article ingredient in _meal.ingredients) {
         ingredient.partOfMeal = _meal.name;
       }
+
       Navigator.pop(context, _meal);
     }
   }
@@ -262,8 +280,8 @@ class _EditMealViewState extends State<EditMealView> with BuildTemplates {
         if (pattern.isEmpty) {
           return const <String>[];
         }
-        return MealSuggestionsHive()
-            .box
+        return SuggestionsHive()
+            .mealBox
             .values
             .where((meal) =>
                 meal.name.toLowerCase().startsWith(pattern.toLowerCase()))

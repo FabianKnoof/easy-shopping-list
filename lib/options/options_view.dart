@@ -2,9 +2,12 @@ import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_mongodb.dart';
+import 'package:easy_shopping_list/general_use_functions.dart';
 import 'package:easy_shopping_list/meal_list/add_meal.dart';
+import 'package:easy_shopping_list/meal_list/meal.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class OptionsView extends StatefulWidget {
   const OptionsView({Key? key}) : super(key: key);
@@ -13,7 +16,7 @@ class OptionsView extends StatefulWidget {
   _OptionsViewState createState() => _OptionsViewState();
 }
 
-class _OptionsViewState extends State<OptionsView> {
+class _OptionsViewState extends State<OptionsView> with BuildTemplates {
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -22,11 +25,9 @@ class _OptionsViewState extends State<OptionsView> {
         Card(
           child: ListTile(
             title: Text("Eigene Gerichte einsehen"),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            title: Text("Eigene Artikel einsehen"),
+            onTap: () {
+              _showUserCreatedMeals();
+            },
           ),
         ),
         Card(
@@ -167,9 +168,9 @@ class _OptionsViewState extends State<OptionsView> {
         CookingListHive().cookingListBox.clear();
         CookingListHive().cookingListCheckedBox.clear();
 
-        VersionsSuggestionsHive().box.clear();
-        ArticleSuggestionsHive().box.clear();
-        MealSuggestionsHive().box.clear();
+        SuggestionsHive().versionsBox.clear();
+        SuggestionsHive().articleBox.clear();
+        SuggestionsHive().mealBox.clear();
       }
     });
   }
@@ -195,6 +196,70 @@ class _OptionsViewState extends State<OptionsView> {
         );
       },
     );
+  }
+
+  void _showUserCreatedMeals() {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text("Eigene Gerichte"),
+          ),
+          body: ValueListenableBuilder(
+            valueListenable: SuggestionsHive().userMealsBox.listenable(),
+            builder: (context, value, child) {
+              return ListView(
+                shrinkWrap: true,
+                children: [
+                  for (Meal meal in SuggestionsHive().userMealsBox.values)
+                    ExpansionTile(
+                      title: mealRow(meal),
+                      leading: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ElevatedButton(
+                              style: ButtonStyle(
+                                  shape: MaterialStateProperty.all(
+                                      CircleBorder())),
+                              onPressed: () {
+                                Navigator.push(context, MaterialPageRoute(
+                                  builder: (context) {
+                                    return EditMealView(
+                                      meal: meal,
+                                    );
+                                  },
+                                )).then((newMeal) {
+                                  Navigator.pop(context, newMeal);
+                                });
+                              },
+                              child: Icon(Icons.add)),
+                          ElevatedButton(
+                              style: ButtonStyle(
+                                  shape: MaterialStateProperty.all(
+                                      CircleBorder())),
+                              onPressed: () {
+                                SuggestionsHive().userMealsBox.delete(meal.key);
+                              },
+                              child: Icon(Icons.delete))
+                        ],
+                      ),
+                      // Todo edit usermeal?
+                      children: [
+                        for (Article ingredient in meal.ingredients)
+                          ListTile(
+                            title: articleColumn(ingredient),
+                          )
+                      ],
+                    )
+                ],
+              );
+            },
+          ),
+        );
+      },
+    )).then((newMeal) {
+      CookingListHive().addMeal(newMeal);
+    });
   }
 }
 
@@ -244,7 +309,7 @@ class _ArticleSuggestionState extends State<ArticleSuggestion> {
                         if (value!.isEmpty) {
                           return "Artikel eingeben";
                         }
-                        if (ArticleSuggestionsHive().box.values.any((article) =>
+                        if (SuggestionsHive().articleBox.values.any((article) =>
                             article.name.toLowerCase() ==
                             value.toLowerCase())) {
                           return "Artikel bereits vorhanden";
