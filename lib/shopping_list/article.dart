@@ -21,8 +21,8 @@ class Article extends HiveObject {
   @HiveField(5, defaultValue: false)
   bool isChecked = false;
   @JsonKey(ignore: true)
-  @HiveField(6)
-  int? mealIndex;
+  @HiveField(6, defaultValue: "")
+  String partOfMeal = "";
 
   Article();
 
@@ -69,12 +69,12 @@ class Article extends HiveObject {
       ..details = details
       ..isIngredient = isIngredient
       ..isChecked = isChecked
-      ..mealIndex = mealIndex;
+      ..partOfMeal = partOfMeal;
   }
 
   @override
   String toString() {
-    return "$name, $quantity${quantityUnitAsString()}, $details, $isIngredient, $isChecked, $mealIndex;";
+    return "$name, $quantity${quantityUnitAsString()}, $details, $isIngredient, $isChecked, $partOfMeal;";
   }
 }
 

@@ -85,8 +85,8 @@ class ShoppingListHive {
   void checkArticleEntry(ArticleEntry articleEntry) {
     for (Article article in articleEntry.articles) {
       article.isChecked = true;
-      if (article.mealIndex != null) {
-        CookingListHive().cookingListBox.get(article.mealIndex)!.save();
+      if (article.partOfMeal.isNotEmpty) {
+        CookingListHive().getMealByName(article.partOfMeal).save();
       }
     }
     removeArticleEntry(articleEntry);
@@ -96,8 +96,8 @@ class ShoppingListHive {
   void uncheckArticleEntry(ArticleEntry articleEntry) {
     for (Article article in articleEntry.articles) {
       article.isChecked = false;
-      if (article.mealIndex != null) {
-        CookingListHive().cookingListBox.get(article.mealIndex)!.save();
+      if (article.partOfMeal.isNotEmpty) {
+        CookingListHive().getMealByName(article.partOfMeal).save();
       }
     }
     articleEntry.delete();

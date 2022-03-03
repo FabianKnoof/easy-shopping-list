@@ -148,6 +148,9 @@ class _EditMealViewState extends State<EditMealView> with BuildTemplates {
     FormState? formState = _addMealFormKey.currentState;
     if (formState != null && formState.validate()) {
       formState.save();
+      for (Article ingredient in _meal.ingredients) {
+        ingredient.partOfMeal = _meal.name;
+      }
       Navigator.pop(context, _meal);
     }
   }

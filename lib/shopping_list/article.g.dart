@@ -24,7 +24,7 @@ class ArticleAdapter extends TypeAdapter<Article> {
       ..details = fields[3] == null ? '' : fields[3] as String
       ..isIngredient = fields[4] == null ? true : fields[4] as bool
       ..isChecked = fields[5] == null ? false : fields[5] as bool
-      ..mealIndex = fields[6] as int?;
+      ..partOfMeal = fields[6] == null ? '' : fields[6] as String;
   }
 
   @override
@@ -44,7 +44,7 @@ class ArticleAdapter extends TypeAdapter<Article> {
       ..writeByte(5)
       ..write(obj.isChecked)
       ..writeByte(6)
-      ..write(obj.mealIndex);
+      ..write(obj.partOfMeal);
   }
 
   @override
