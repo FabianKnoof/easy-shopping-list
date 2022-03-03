@@ -22,11 +22,9 @@ class _OptionsViewState extends State<OptionsView> {
         Card(
           child: ListTile(
             title: Text("Eigene Gerichte einsehen"),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            title: Text("Eigene Artikel einsehen"),
+            onTap: () {
+              _showUserCreatedMeals();
+            },
           ),
         ),
         Card(
@@ -167,9 +165,9 @@ class _OptionsViewState extends State<OptionsView> {
         CookingListHive().cookingListBox.clear();
         CookingListHive().cookingListCheckedBox.clear();
 
-        VersionsSuggestionsHive().box.clear();
-        ArticleSuggestionsHive().box.clear();
-        MealSuggestionsHive().box.clear();
+        SuggestionsHive().versionsBox.clear();
+        SuggestionsHive().articleBox.clear();
+        SuggestionsHive().mealBox.clear();
       }
     });
   }
@@ -196,6 +194,8 @@ class _OptionsViewState extends State<OptionsView> {
       },
     );
   }
+
+  void _showUserCreatedMeals() {}
 }
 
 class ArticleSuggestion extends StatefulWidget {
@@ -244,7 +244,7 @@ class _ArticleSuggestionState extends State<ArticleSuggestion> {
                         if (value!.isEmpty) {
                           return "Artikel eingeben";
                         }
-                        if (ArticleSuggestionsHive().box.values.any((article) =>
+                        if (SuggestionsHive().articleBox.values.any((article) =>
                             article.name.toLowerCase() ==
                             value.toLowerCase())) {
                           return "Artikel bereits vorhanden";

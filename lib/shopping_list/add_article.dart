@@ -136,7 +136,7 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
         if (pattern.isEmpty) {
           return const <String>[];
         }
-        return ArticleSuggestionsHive().box.values.where((Article article) {
+        return SuggestionsHive().articleBox.values.where((Article article) {
           return article.name.toLowerCase().startsWith(pattern.toLowerCase()) &&
               (!_suggestOnlyIngredients ||
                   article.isIngredient); // Note may need to correct this
