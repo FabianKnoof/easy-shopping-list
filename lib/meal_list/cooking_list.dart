@@ -58,6 +58,7 @@ class _CookingListState extends State<CookingList> with BuildTemplates {
           physics: NeverScrollableScrollPhysics(),
           children: [
             for (Meal meal in CookingListHive().cookingListBox.values)
+              // Todo fix expanded tile not changed based on index when reordering
               ExpansionTile(
                 key: Key(meal.key.toString()),
                 leading: _buildCheckbox(meal),
@@ -83,7 +84,6 @@ class _CookingListState extends State<CookingList> with BuildTemplates {
       value: (meal.box == CookingListHive().cookingListCheckedBox),
       onChanged: (value) {
         if (value!) {
-          // Todo Check ingredients
           CookingListHive().checkMeal(meal);
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -123,7 +123,7 @@ class _CookingListState extends State<CookingList> with BuildTemplates {
   ListTile _buildIngredient(Article ingredient) {
     return ListTile(
         leading: Checkbox(
-          value: ingredient.isChecked, // Todo ingredient shopping list checkbox
+          value: ingredient.isChecked,
           onChanged: (value) {
             setState(() {
               ingredient.isChecked = value!;
@@ -133,7 +133,6 @@ class _CookingListState extends State<CookingList> with BuildTemplates {
                 ShoppingListHive().addArticle(ingredient);
               }
             });
-            // Todo change value of checkbox / check/uncheck
           },
         ),
         title: articleColumn(ingredient));

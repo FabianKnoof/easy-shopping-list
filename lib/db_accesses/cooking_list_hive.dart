@@ -34,9 +34,11 @@ class CookingListHive {
   void replaceMeal(int? indexKey, Meal? meal) {
     if (indexKey == null || meal == null) return;
     cookingListBox.put(indexKey, meal);
+    // Todo maybe change ingredient meal key
   }
 
   void reorderMealAt(int oldIndex, int newIndex) {
+    // Todo handle ingredients meal keys
     Meal reorderedMeal = cookingListBox.get(oldIndex)!;
     if (oldIndex < newIndex) {
       --newIndex;
@@ -67,11 +69,13 @@ class CookingListHive {
   }
 
   void checkMeal(Meal meal) {
+    // Todo check ingredients?
     removeMealAt(meal.key);
     cookingListCheckedBox.add(meal);
   }
 
   void uncheckMeal(Meal meal) {
+    // Todo uncheck ingredients?
     meal.delete();
     addMeal(meal);
   }
