@@ -9,7 +9,7 @@ mixin ViewTemplates {
   Future<dynamic> queryUser(
       {required BuildContext context,
       required String question,
-      required String? positiveAnswer,
+      required String positiveAnswer,
       String? negativeAnswer}) {
     return showDialog(
       context: context,
@@ -23,12 +23,11 @@ mixin ViewTemplates {
                     Navigator.pop(context, false);
                   },
                   child: Text(negativeAnswer)),
-            if (positiveAnswer != null)
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context, true);
-                  },
-                  child: Text(positiveAnswer))
+            TextButton(
+                onPressed: () {
+                  Navigator.pop(context, true);
+                },
+                child: Text(positiveAnswer))
           ],
         );
       },
