@@ -218,9 +218,6 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           ElevatedButton(
-                              style: ButtonStyle(
-                                  shape: MaterialStateProperty.all(
-                                      CircleBorder())),
                               onPressed: () {
                                 Navigator.push(context, MaterialPageRoute(
                                   builder: (context) {
@@ -234,9 +231,6 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
                               },
                               child: Icon(Icons.add)),
                           ElevatedButton(
-                              style: ButtonStyle(
-                                  shape: MaterialStateProperty.all(
-                                      CircleBorder())),
                               onPressed: () {
                                 SuggestionsHive().userMealsBox.delete(meal.key);
                               },

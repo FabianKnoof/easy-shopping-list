@@ -22,6 +22,8 @@ class _AddMealViewState extends State<AddMealView> with BuildTemplates {
 
   final TextEditingController _searchFieldController = TextEditingController();
 
+  List<String> _filters = [];
+
   @override
   void initState() {
     super.initState();
@@ -32,9 +34,8 @@ class _AddMealViewState extends State<AddMealView> with BuildTemplates {
             .map((e) => e.getCopy())
             .toList() +
         SuggestionsHive().userMealsBox.values.map((e) => e.getCopy()).toList();
-    _foundMeals.sort((a, b) {
-      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
-    });
+    _foundMeals
+        .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
   }
 
   @override
@@ -65,6 +66,14 @@ class _AddMealViewState extends State<AddMealView> with BuildTemplates {
           SizedBox(
             height: _padding,
           ),
+          Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                  padding: EdgeInsets.all(_padding),
+                  child: _buildFilterButton())),
+          SizedBox(
+            height: _padding,
+          ),
           Flexible(fit: FlexFit.loose, child: _buildFoundMealsExpansionList())
         ],
       ),
@@ -91,9 +100,9 @@ class _AddMealViewState extends State<AddMealView> with BuildTemplates {
                       meal.name.toLowerCase().startsWith(value.toLowerCase()))
                   .map((e) => e.getCopy())
                   .toList();
-          _foundMeals.sort((a, b) {
-            return a.name.toLowerCase().compareTo(b.name.toLowerCase());
-          });
+          _foundMeals = _filterMeals(_foundMeals);
+          _foundMeals.sort(
+              (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
         });
       },
       decoration: textFieldInputDecoration("Gericht"),
@@ -138,6 +147,165 @@ class _AddMealViewState extends State<AddMealView> with BuildTemplates {
             ],
           )
       ],
+    );
+  }
+
+  _buildFilterButton() {
+    return ElevatedButton(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(
+            builder: (context) {
+              return FilterView(
+                filters: _filters,
+              );
+            },
+          )).then((value) {
+            if (value.runtimeType == List<String>) {
+              value as List<String>;
+              setState(() {
+                _filters = value;
+                if (_filters.isEmpty) return;
+                _foundMeals = _filterMeals(_foundMeals);
+              });
+            }
+          });
+        },
+        child: Text("Filter (${_filters.length})"));
+  }
+
+  List<Meal> _filterMeals(List<Meal> mealList) {
+    List<Meal> filteredMeals = [];
+    for (Meal meal in mealList) {
+      bool mealContainFilter = false;
+      mealLoop:
+      for (Article ingredient in meal.ingredients) {
+        for (String filter in _filters) {
+          if (ingredient.name.toLowerCase().contains(filter.toLowerCase())) {
+            mealContainFilter = true;
+            continue mealLoop;
+          }
+        }
+      }
+      if (mealContainFilter) {
+        filteredMeals.add(meal);
+      }
+    }
+    return filteredMeals;
+  }
+}
+
+class FilterView extends StatefulWidget {
+  const FilterView({Key? key, required this.filters}) : super(key: key);
+  final List<String> filters;
+
+  @override
+  State<FilterView> createState() => _FilterViewState();
+}
+
+class _FilterViewState extends State<FilterView> with BuildTemplates {
+  final double _padding = 5;
+
+  List<String> _ingredients = [];
+
+  List<String> _filters = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _ingredients = SuggestionsHive()
+        .articleBox
+        .values
+        .where((element) => element.isIngredient)
+        .map((e) => e.name)
+        .toList();
+    _ingredients.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+
+    _filters = widget.filters;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Gericht Filter"),
+        leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context, _filters);
+            },
+            icon: Icon(Icons.arrow_back)),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(_padding),
+            child: TextField(
+              onChanged: (value) {
+                setState(() {
+                  value = value.trim();
+                  _ingredients = SuggestionsHive()
+                      .articleBox
+                      .values
+                      .where((element) => element.isIngredient)
+                      .where((element) => element.name
+                          .toLowerCase()
+                          .startsWith(value.toLowerCase()))
+                      .map((e) => e.name)
+                      .toList();
+                  _ingredients.sort(
+                      (a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+                });
+              },
+              decoration: textFieldInputDecoration("Filter Suche"),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(_padding),
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  Wrap(
+                    spacing: _padding,
+                    children: [
+                      for (String ingredient in _filters)
+                        FilterChip(
+                          label: Text(ingredient),
+                          selected: true,
+                          onSelected: (value) {
+                            setState(() {
+                              _ingredients.add(ingredient);
+                              _ingredients.sort((a, b) =>
+                                  a.toLowerCase().compareTo(b.toLowerCase()));
+                              _filters.remove(ingredient);
+                              _filters.sort((a, b) =>
+                                  a.toLowerCase().compareTo(b.toLowerCase()));
+                            });
+                          },
+                        ),
+                      for (String ingredient in _ingredients)
+                        FilterChip(
+                          label: Text(ingredient),
+                          selected: false,
+                          onSelected: (value) {
+                            setState(() {
+                              _filters.add(ingredient);
+                              _filters.sort((a, b) =>
+                                  a.toLowerCase().compareTo(b.toLowerCase()));
+                              _ingredients.remove(ingredient);
+                              _ingredients.sort((a, b) =>
+                                  a.toLowerCase().compareTo(b.toLowerCase()));
+                            });
+                          },
+                        )
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

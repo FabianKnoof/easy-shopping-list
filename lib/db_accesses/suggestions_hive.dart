@@ -28,6 +28,7 @@ class SuggestionsHive {
 
   final Box<Meal> userMealsBox = Hive.box<Meal>(userMealsBoxName);
 
+
   void addUserMeal(Meal? userMeal) {
     if (userMeal == null) return;
     for (Meal meal in mealBox.values) {
