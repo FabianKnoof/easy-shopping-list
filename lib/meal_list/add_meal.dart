@@ -230,82 +230,83 @@ class _FilterViewState extends State<FilterView> with BuildTemplates {
     return Scaffold(
       appBar: AppBar(
         title: Text("Gericht Filter"),
-        leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context, _filters);
-            },
-            icon: Icon(Icons.arrow_back)),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(_padding),
-            child: TextField(
-              onChanged: (value) {
-                setState(() {
-                  value = value.trim();
-                  _ingredients = SuggestionsHive()
-                      .articleBox
-                      .values
-                      .where((element) => element.isIngredient)
-                      .where((element) => element.name
-                          .toLowerCase()
-                          .startsWith(value.toLowerCase()))
-                      .map((e) => e.name)
-                      .toList();
-                  _ingredients.sort(
-                      (a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
-                });
-              },
-              decoration: textFieldInputDecoration("Filter Suche"),
-            ),
-          ),
-          Expanded(
-            child: Padding(
+      body: WillPopScope(
+        onWillPop: () async {
+          Navigator.pop(context, _filters);
+          return false;
+        },
+        child: Column(
+          children: [
+            Padding(
               padding: EdgeInsets.all(_padding),
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  Wrap(
-                    spacing: _padding,
-                    children: [
-                      for (String ingredient in _filters)
-                        FilterChip(
-                          label: Text(ingredient),
-                          selected: true,
-                          onSelected: (value) {
-                            setState(() {
-                              _ingredients.add(ingredient);
-                              _ingredients.sort((a, b) =>
-                                  a.toLowerCase().compareTo(b.toLowerCase()));
-                              _filters.remove(ingredient);
-                              _filters.sort((a, b) =>
-                                  a.toLowerCase().compareTo(b.toLowerCase()));
-                            });
-                          },
-                        ),
-                      for (String ingredient in _ingredients)
-                        FilterChip(
-                          label: Text(ingredient),
-                          selected: false,
-                          onSelected: (value) {
-                            setState(() {
-                              _filters.add(ingredient);
-                              _filters.sort((a, b) =>
-                                  a.toLowerCase().compareTo(b.toLowerCase()));
-                              _ingredients.remove(ingredient);
-                              _ingredients.sort((a, b) =>
-                                  a.toLowerCase().compareTo(b.toLowerCase()));
-                            });
-                          },
-                        )
-                    ],
-                  ),
-                ],
+              child: TextField(
+                onChanged: (value) {
+                  setState(() {
+                    value = value.trim();
+                    _ingredients = SuggestionsHive()
+                        .articleBox
+                        .values
+                        .where((element) => element.isIngredient)
+                        .where((element) => element.name
+                            .toLowerCase()
+                            .startsWith(value.toLowerCase()))
+                        .map((e) => e.name)
+                        .toList();
+                    _ingredients.sort(
+                        (a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+                  });
+                },
+                decoration: textFieldInputDecoration("Filter Suche"),
               ),
             ),
-          ),
-        ],
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(_padding),
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    Wrap(
+                      spacing: _padding,
+                      children: [
+                        for (String ingredient in _filters)
+                          FilterChip(
+                            label: Text(ingredient),
+                            selected: true,
+                            onSelected: (value) {
+                              setState(() {
+                                _ingredients.add(ingredient);
+                                _ingredients.sort((a, b) =>
+                                    a.toLowerCase().compareTo(b.toLowerCase()));
+                                _filters.remove(ingredient);
+                                _filters.sort((a, b) =>
+                                    a.toLowerCase().compareTo(b.toLowerCase()));
+                              });
+                            },
+                          ),
+                        for (String ingredient in _ingredients)
+                          FilterChip(
+                            label: Text(ingredient),
+                            selected: false,
+                            onSelected: (value) {
+                              setState(() {
+                                _filters.add(ingredient);
+                                _filters.sort((a, b) =>
+                                    a.toLowerCase().compareTo(b.toLowerCase()));
+                                _ingredients.remove(ingredient);
+                                _ingredients.sort((a, b) =>
+                                    a.toLowerCase().compareTo(b.toLowerCase()));
+                              });
+                            },
+                          )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
