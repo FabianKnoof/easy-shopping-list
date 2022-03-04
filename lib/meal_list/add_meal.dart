@@ -90,14 +90,14 @@ class _AddMealViewState extends State<AddMealView> with BuildTemplates {
                   .mealBox
                   .values
                   .where((meal) =>
-                      meal.name.toLowerCase().startsWith(value.toLowerCase()))
+                      meal.name.toLowerCase().contains(value.toLowerCase()))
                   .map((e) => e.getCopy())
                   .toList() +
               SuggestionsHive()
                   .userMealsBox
                   .values
                   .where((meal) =>
-                      meal.name.toLowerCase().startsWith(value.toLowerCase()))
+                      meal.name.toLowerCase().contains(value.toLowerCase()))
                   .map((e) => e.getCopy())
                   .toList();
           _foundMeals = _filterMeals(_foundMeals);
@@ -174,6 +174,7 @@ class _AddMealViewState extends State<AddMealView> with BuildTemplates {
   }
 
   List<Meal> _filterMeals(List<Meal> mealList) {
+    if (_filters.isEmpty) return mealList;
     List<Meal> filteredMeals = [];
     for (Meal meal in mealList) {
       bool mealContainFilter = false;
