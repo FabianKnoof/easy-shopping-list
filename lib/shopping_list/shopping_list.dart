@@ -1,3 +1,4 @@
+import 'package:easy_shopping_list/db_accesses/list_sharing.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/general_use_functions.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
@@ -48,6 +49,7 @@ class _ShoppingListState extends State<ShoppingList> with ViewTemplates {
     return ValueListenableBuilder<Box>(
         valueListenable: ShoppingListHive().shoppingListBox.listenable(),
         builder: (context, box, widget) {
+          if (ListSharingHive().isSharing()) ListSharingHive().pushUpdates();
           return ReorderableListView(
             reverse: true,
             shrinkWrap: true,

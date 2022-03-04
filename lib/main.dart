@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
+import 'package:easy_shopping_list/db_accesses/list_sharing.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_mongodb.dart';
@@ -15,6 +18,9 @@ import 'shopping_list/article.dart';
 
 void main() async {
   await _initHive();
+  if (ListSharingHive().isSharing()) {
+    await ListSharingHive().pullUpdates();
+  }
   SuggestionsMongoDB.syncSuggestions();
   runApp(const MyApp());
 }
@@ -39,15 +45,20 @@ Future<void> _initHive() async {
 
   await Hive.openBox<Meal>(SuggestionsHive.userMealsBoxName);
 
+  await Hive.openBox(ListSharingHive.listSharingBoxName);
+
+  // ListSharingHive().listSharingBox.clear();
+  //
   // ShoppingListHive().shoppingListBox.clear();
   // ShoppingListHive().shoppingListCheckedBox.clear();
   //
   // CookingListHive().cookingListBox.clear();
   // CookingListHive().cookingListCheckedBox.clear();
-
-  // VersionsSuggestionsHive().box.clear();
-  // ArticleSuggestionsHive().box.clear();
-  // MealSuggestionsHive().box.clear();
+  //
+  // SuggestionsHive().articleBox.clear();
+  // SuggestionsHive().mealBox.clear();
+  // SuggestionsHive().userMealsBox.clear();
+  // SuggestionsHive().versionsBox.clear();
 }
 
 class MyApp extends StatelessWidget {

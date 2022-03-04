@@ -1,4 +1,6 @@
+
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
+import 'package:easy_shopping_list/db_accesses/list_sharing.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_mongodb.dart';
@@ -7,6 +9,7 @@ import 'package:easy_shopping_list/meal_list/add_meal.dart';
 import 'package:easy_shopping_list/meal_list/meal.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class OptionsView extends StatefulWidget {
@@ -156,6 +159,8 @@ class _OptionsViewState extends State<OptionsView> with ViewTemplates {
         SuggestionsHive().versionsBox.clear();
         SuggestionsHive().articleBox.clear();
         SuggestionsHive().mealBox.clear();
+
+        ListSharingHive().listSharingBox.clear();
       }
     });
   }
@@ -218,7 +223,75 @@ class _OptionsViewState extends State<OptionsView> with ViewTemplates {
     });
   }
 
-  void _shareShoppingList(BuildContext context) {}
+  void _shareShoppingList(BuildContext context) {
+    queryUser(
+            context: context,
+            question:
+                "Eigene Liste für andere freigeben oder Liste von jemand anderem  verwenden?",
+            positiveAnswer: "Eigene Liste freigeben",
+            negativeAnswer: "Liste von jemand anderem verwenden")
+        .then((value) {
+      if (value) {
+        _shareListWithOthers();
+        // Todo loading bar
+      } else {
+        _syncListWithOthers();
+      }
+    });
+  }
+
+  Future<void> _shareListWithOthers() async {
+    queryUser(
+        context: context,
+        question:
+            "Folgenden Code bei jemand anderem eintragen:\n${await ListSharingHive().getUserCode()}",
+        positiveAnswer: "Ok");
+  }
+
+  void _syncListWithOthers() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        TextEditingController textEditingController = TextEditingController();
+        return AlertDialog(
+          title: Text("Sechs stelligen Code eingeben"),
+          content: TextField(
+            // Todo max 6 digits
+            textInputAction: TextInputAction.next,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            keyboardType: TextInputType.number,
+            maxLines: 1,
+            controller: textEditingController,
+          ),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.pop(context, textEditingController.text);
+                },
+                child: Text("Bestätigen"))
+          ],
+        );
+      },
+    ).then((value) async {
+      int? userCode = int.tryParse(value);
+      if (userCode != null) {
+        if ((await ListSharingMongoDB().checkIfUserCodeExists(userCode))) {
+          ListSharingHive().setUserCode(userCode);
+        } else {
+          queryUser(
+                  context: context,
+                  question: "Code existiert nicht",
+                  positiveAnswer: "Anderen Code eingeben",
+                  negativeAnswer: "Abbrechen")
+              .then((value) {
+            if (value) {
+              _syncListWithOthers();
+            }
+          });
+        }
+      }
+    });
+  }
 }
 
 class ArticleSuggestion extends StatefulWidget {
