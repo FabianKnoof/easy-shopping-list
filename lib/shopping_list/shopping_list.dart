@@ -13,7 +13,7 @@ class ShoppingList extends StatefulWidget {
   State<ShoppingList> createState() => _ShoppingListState();
 }
 
-class _ShoppingListState extends State<ShoppingList> with BuildTemplates {
+class _ShoppingListState extends State<ShoppingList> with ViewTemplates {
   @override
   Widget build(BuildContext context) {
     // Note needs testing and maybe different solution to shrinkWrap

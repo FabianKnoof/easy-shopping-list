@@ -3,8 +3,37 @@ import 'package:flutter/material.dart';
 
 import 'meal_list/meal.dart';
 
-mixin BuildTemplates {
+mixin ViewTemplates {
   final double _padding = 5;
+
+  Future<dynamic> queryUser(
+      {required BuildContext context,
+      required String question,
+      required String? positiveAnswer,
+      String? negativeAnswer}) {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(question),
+          actions: [
+            if (negativeAnswer != null)
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: Text(negativeAnswer)),
+            if (positiveAnswer != null)
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  child: Text(positiveAnswer))
+          ],
+        );
+      },
+    );
+  }
 
   Row mealRow(Meal meal) {
     return Row(

@@ -16,7 +16,7 @@ class OptionsView extends StatefulWidget {
   _OptionsViewState createState() => _OptionsViewState();
 }
 
-class _OptionsViewState extends State<OptionsView> with BuildTemplates {
+class _OptionsViewState extends State<OptionsView> with ViewTemplates {
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -35,6 +35,14 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
             title: Text("Abgehakt Listen leeren"),
             onTap: () {
               _clearCheckedListsAction(context);
+            },
+          ),
+        ),
+        Card(
+          child: ListTile(
+            title: Text("Einkaufsliste mit anderen teilen"),
+            onTap: () {
+              _shareShoppingList(context);
             },
           ),
         ),
@@ -67,26 +75,12 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
   }
 
   void _clearCheckedListsAction(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Abgehakte Einkaufs- und Kochliste leeren?"),
-          actions: [
-            TextButton(
-                onPressed: () {
-                  Navigator.pop(context, false);
-                },
-                child: Text("Nein")),
-            TextButton(
-                onPressed: () {
-                  Navigator.pop(context, true);
-                },
-                child: Text("Ja"))
-          ],
-        );
-      },
-    ).then((userAnswer) {
+    queryUser(
+            context: context,
+            question: "Abgehakte Einkaufs- und Kochliste leeren?",
+            positiveAnswer: "Ja",
+            negativeAnswer: "Nein")
+        .then((userAnswer) {
       if (userAnswer) {
         ShoppingListHive().shoppingListCheckedBox.clear();
         CookingListHive().cookingListCheckedBox.clear();
@@ -101,25 +95,18 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
       },
     )).then((meal) {
       if (meal == null) return;
-      _getUserAnswer(context, "${meal.name} als Vorschlag absenden?")
+      queryUser(
+              context: context,
+              question: "${meal.name} als Vorschlag absenden?",
+              positiveAnswer: "Ja",
+              negativeAnswer: "Nein")
           .then((userAnswer) async {
         if (userAnswer) {
           if (!await SuggestionsMongoDB.insertUserMealSuggestion(meal)) {
-            showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  title: Text("Gericht ist bereits als Vorschlag eingeangen"),
-                  actions: [
-                    TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text("Ok"))
-                  ],
-                );
-              },
-            );
+            queryUser(
+                context: context,
+                question: "Gericht ist bereits als Vorschlag eingeangen",
+                positiveAnswer: "Ok");
           }
         }
       });
@@ -134,25 +121,18 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
       },
     ).then((article) {
       if (article == null) return;
-      _getUserAnswer(context, "${article.name} als Vorschlag absenden?")
+      queryUser(
+              context: context,
+              question: "${article.name} als Vorschlag absenden?",
+              positiveAnswer: "Ja",
+              negativeAnswer: "Nein")
           .then((userAnswer) async {
         if (userAnswer) {
           if (!await SuggestionsMongoDB.insertUserArticleSuggestion(article)) {
-            showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  title: Text("Artikel ist bereits als Vorschlag eingegangen"),
-                  actions: [
-                    TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text("Ok"))
-                  ],
-                );
-              },
-            );
+            queryUser(
+                context: context,
+                question: "Artikel ist bereits als Vorschlag eingegangen",
+                positiveAnswer: "Ok");
           }
         }
       });
@@ -160,7 +140,12 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
   }
 
   _clearAllHives(BuildContext context) {
-    _getUserAnswer(context, "Alle Listen leeren?").then((userAnswer) {
+    queryUser(
+            context: context,
+            question: "Alle Listen leeren?",
+            positiveAnswer: "Ja",
+            negativeAnswer: "Nein")
+        .then((userAnswer) {
       if (userAnswer) {
         ShoppingListHive().shoppingListBox.clear();
         ShoppingListHive().shoppingListCheckedBox.clear();
@@ -173,29 +158,6 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
         SuggestionsHive().mealBox.clear();
       }
     });
-  }
-
-  Future<dynamic> _getUserAnswer(BuildContext context, String question) {
-    return showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(question),
-          actions: [
-            TextButton(
-                onPressed: () {
-                  Navigator.pop(context, false);
-                },
-                child: Text("Nein")),
-            TextButton(
-                onPressed: () {
-                  Navigator.pop(context, true);
-                },
-                child: Text("Ja"))
-          ],
-        );
-      },
-    );
   }
 
   void _showUserCreatedMeals() {
@@ -255,6 +217,8 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
       CookingListHive().addMeal(newMeal);
     });
   }
+
+  void _shareShoppingList(BuildContext context) {}
 }
 
 class ArticleSuggestion extends StatefulWidget {
