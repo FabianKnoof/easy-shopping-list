@@ -252,20 +252,35 @@ class _OptionsViewState extends State<OptionsView> with ViewTemplates {
       context: context,
       builder: (context) {
         TextEditingController textEditingController = TextEditingController();
+        GlobalKey<FormState> formKey = GlobalKey<FormState>();
         return AlertDialog(
           title: Text("Sechs stelligen Code eingeben"),
-          content: TextField(
-            // Todo max 6 digits
-            textInputAction: TextInputAction.next,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            keyboardType: TextInputType.number,
-            maxLines: 1,
-            controller: textEditingController,
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              autofocus: true,
+              textInputAction: TextInputAction.next,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              keyboardType: TextInputType.number,
+              maxLines: 1,
+              maxLength: 6,
+              controller: textEditingController,
+              validator: (value) {
+                if (value == null || value.isEmpty) return "Code eingeben";
+                if (value.length < 6) {
+                  return "Code muss sechs Zahlen lang sein";
+                }
+                return null;
+              },
+            ),
           ),
           actions: [
             TextButton(
                 onPressed: () {
-                  Navigator.pop(context, textEditingController.text);
+                  FormState? formState = formKey.currentState;
+                  if (formState != null && formState.validate()) {
+                    Navigator.pop(context, textEditingController.text);
+                  }
                 },
                 child: Text("Bestätigen"))
           ],
