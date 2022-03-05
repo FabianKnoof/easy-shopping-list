@@ -1,4 +1,3 @@
-
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/list_sharing.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
@@ -277,6 +276,7 @@ class _OptionsViewState extends State<OptionsView> with ViewTemplates {
       if (userCode != null) {
         if ((await ListSharingMongoDB().checkIfUserCodeExists(userCode))) {
           ListSharingHive().setUserCode(userCode);
+          ListSharingMongoDB().pullUpdates(userCode);
         } else {
           queryUser(
                   context: context,

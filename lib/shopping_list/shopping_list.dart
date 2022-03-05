@@ -17,11 +17,23 @@ class ShoppingList extends StatefulWidget {
 class _ShoppingListState extends State<ShoppingList> with ViewTemplates {
   @override
   Widget build(BuildContext context) {
-    // Note needs testing and maybe different solution to shrinkWrap
-    return ListView(
-      shrinkWrap: true,
-      children: [_buildShoppingList(), _buildShoppingListChecked()],
-    );
+    if (ListSharingHive().isSharing()) {
+      return RefreshIndicator(
+        onRefresh: () async {
+          return ListSharingHive().pullUpdates();
+        },
+        child: ListView(
+          shrinkWrap: true,
+          physics: AlwaysScrollableScrollPhysics(),
+          children: [_buildShoppingList(), _buildShoppingListChecked()],
+        ),
+      );
+    } else {
+      return ListView(
+        shrinkWrap: true,
+        children: [_buildShoppingList(), _buildShoppingListChecked()],
+      );
+    }
   }
 
   ValueListenableBuilder<Box<ArticleEntry>> _buildShoppingListChecked() {

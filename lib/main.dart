@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/list_sharing.dart';
@@ -47,18 +46,18 @@ Future<void> _initHive() async {
 
   await Hive.openBox(ListSharingHive.listSharingBoxName);
 
-  // ListSharingHive().listSharingBox.clear();
+  // await ListSharingHive().listSharingBox.clear();
   //
-  // ShoppingListHive().shoppingListBox.clear();
-  // ShoppingListHive().shoppingListCheckedBox.clear();
+  // await ShoppingListHive().shoppingListBox.clear();
+  // await ShoppingListHive().shoppingListCheckedBox.clear();
   //
-  // CookingListHive().cookingListBox.clear();
-  // CookingListHive().cookingListCheckedBox.clear();
+  // await CookingListHive().cookingListBox.clear();
+  // await CookingListHive().cookingListCheckedBox.clear();
   //
-  // SuggestionsHive().articleBox.clear();
-  // SuggestionsHive().mealBox.clear();
-  // SuggestionsHive().userMealsBox.clear();
-  // SuggestionsHive().versionsBox.clear();
+  // await SuggestionsHive().articleBox.clear();
+  // await SuggestionsHive().mealBox.clear();
+  // await SuggestionsHive().userMealsBox.clear();
+  // await SuggestionsHive().versionsBox.clear();
 }
 
 class MyApp extends StatelessWidget {

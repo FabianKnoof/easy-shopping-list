@@ -153,7 +153,6 @@ class ListSharingHive {
   Future<void> setUserCode(int userCode) async {
     listSharingBox.put("userCode", userCode);
     listSharingBox.put("version", 0);
-    await ListSharingMongoDB().pullUpdates(userCode);
   }
 
   Future<void> pushUpdates() async {
@@ -169,13 +168,13 @@ class ListSharingHive {
     if (mongoVersion > listSharingBox.get("version")!) {
       List<ArticleEntry> shoppingList = await ListSharingMongoDB()
           .pullUpdates(listSharingBox.get("userCode"));
-      // listSharingBox.put("version", mongoVersion);
       await ShoppingListHive().shoppingListBox.clear();
       for (int indexKey = 0; indexKey < shoppingList.length; ++indexKey) {
         ShoppingListHive()
             .shoppingListBox
             .put(indexKey, shoppingList[indexKey]);
       }
+      listSharingBox.put("version", mongoVersion);
     }
   }
 }
