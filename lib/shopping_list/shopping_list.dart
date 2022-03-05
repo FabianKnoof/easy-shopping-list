@@ -1,3 +1,4 @@
+import 'package:easy_shopping_list/db_accesses/list_sharing.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/general_use_functions.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
@@ -13,14 +14,26 @@ class ShoppingList extends StatefulWidget {
   State<ShoppingList> createState() => _ShoppingListState();
 }
 
-class _ShoppingListState extends State<ShoppingList> with BuildTemplates {
+class _ShoppingListState extends State<ShoppingList> with ViewTemplates {
   @override
   Widget build(BuildContext context) {
-    // Note needs testing and maybe different solution to shrinkWrap
-    return ListView(
-      shrinkWrap: true,
-      children: [_buildShoppingList(), _buildShoppingListChecked()],
-    );
+    if (ListSharingHive().isSharing()) {
+      return RefreshIndicator(
+        onRefresh: () async {
+          return ListSharingHive().pullUpdates();
+        },
+        child: ListView(
+          shrinkWrap: true,
+          physics: AlwaysScrollableScrollPhysics(),
+          children: [_buildShoppingList(), _buildShoppingListChecked()],
+        ),
+      );
+    } else {
+      return ListView(
+        shrinkWrap: true,
+        children: [_buildShoppingList(), _buildShoppingListChecked()],
+      );
+    }
   }
 
   ValueListenableBuilder<Box<ArticleEntry>> _buildShoppingListChecked() {
@@ -48,6 +61,7 @@ class _ShoppingListState extends State<ShoppingList> with BuildTemplates {
     return ValueListenableBuilder<Box>(
         valueListenable: ShoppingListHive().shoppingListBox.listenable(),
         builder: (context, box, widget) {
+          if (ListSharingHive().isSharing()) ListSharingHive().pushUpdates();
           return ReorderableListView(
             reverse: true,
             shrinkWrap: true,

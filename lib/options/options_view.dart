@@ -1,4 +1,5 @@
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
+import 'package:easy_shopping_list/db_accesses/list_sharing.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_mongodb.dart';
@@ -7,6 +8,7 @@ import 'package:easy_shopping_list/meal_list/add_meal.dart';
 import 'package:easy_shopping_list/meal_list/meal.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class OptionsView extends StatefulWidget {
@@ -16,7 +18,7 @@ class OptionsView extends StatefulWidget {
   _OptionsViewState createState() => _OptionsViewState();
 }
 
-class _OptionsViewState extends State<OptionsView> with BuildTemplates {
+class _OptionsViewState extends State<OptionsView> with ViewTemplates {
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -35,6 +37,14 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
             title: Text("Abgehakt Listen leeren"),
             onTap: () {
               _clearCheckedListsAction(context);
+            },
+          ),
+        ),
+        Card(
+          child: ListTile(
+            title: Text("Einkaufsliste mit anderen teilen"),
+            onTap: () {
+              _shareShoppingList(context);
             },
           ),
         ),
@@ -67,26 +77,12 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
   }
 
   void _clearCheckedListsAction(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Abgehakte Einkaufs- und Kochliste leeren?"),
-          actions: [
-            TextButton(
-                onPressed: () {
-                  Navigator.pop(context, false);
-                },
-                child: Text("Nein")),
-            TextButton(
-                onPressed: () {
-                  Navigator.pop(context, true);
-                },
-                child: Text("Ja"))
-          ],
-        );
-      },
-    ).then((userAnswer) {
+    queryUser(
+            context: context,
+            question: "Abgehakte Einkaufs- und Kochliste leeren?",
+            positiveAnswer: "Ja",
+            negativeAnswer: "Nein")
+        .then((userAnswer) {
       if (userAnswer) {
         ShoppingListHive().shoppingListCheckedBox.clear();
         CookingListHive().cookingListCheckedBox.clear();
@@ -101,25 +97,18 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
       },
     )).then((meal) {
       if (meal == null) return;
-      _getUserAnswer(context, "${meal.name} als Vorschlag absenden?")
+      queryUser(
+              context: context,
+              question: "${meal.name} als Vorschlag absenden?",
+              positiveAnswer: "Ja",
+              negativeAnswer: "Nein")
           .then((userAnswer) async {
         if (userAnswer) {
           if (!await SuggestionsMongoDB.insertUserMealSuggestion(meal)) {
-            showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  title: Text("Gericht ist bereits als Vorschlag eingeangen"),
-                  actions: [
-                    TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text("Ok"))
-                  ],
-                );
-              },
-            );
+            queryUser(
+                context: context,
+                question: "Gericht ist bereits als Vorschlag eingeangen",
+                positiveAnswer: "Ok");
           }
         }
       });
@@ -134,25 +123,18 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
       },
     ).then((article) {
       if (article == null) return;
-      _getUserAnswer(context, "${article.name} als Vorschlag absenden?")
+      queryUser(
+              context: context,
+              question: "${article.name} als Vorschlag absenden?",
+              positiveAnswer: "Ja",
+              negativeAnswer: "Nein")
           .then((userAnswer) async {
         if (userAnswer) {
           if (!await SuggestionsMongoDB.insertUserArticleSuggestion(article)) {
-            showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  title: Text("Artikel ist bereits als Vorschlag eingegangen"),
-                  actions: [
-                    TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text("Ok"))
-                  ],
-                );
-              },
-            );
+            queryUser(
+                context: context,
+                question: "Artikel ist bereits als Vorschlag eingegangen",
+                positiveAnswer: "Ok");
           }
         }
       });
@@ -160,7 +142,12 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
   }
 
   _clearAllHives(BuildContext context) {
-    _getUserAnswer(context, "Alle Listen leeren?").then((userAnswer) {
+    queryUser(
+            context: context,
+            question: "Alle Listen leeren?",
+            positiveAnswer: "Ja",
+            negativeAnswer: "Nein")
+        .then((userAnswer) {
       if (userAnswer) {
         ShoppingListHive().shoppingListBox.clear();
         ShoppingListHive().shoppingListCheckedBox.clear();
@@ -171,31 +158,10 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
         SuggestionsHive().versionsBox.clear();
         SuggestionsHive().articleBox.clear();
         SuggestionsHive().mealBox.clear();
+
+        ListSharingHive().listSharingBox.clear();
       }
     });
-  }
-
-  Future<dynamic> _getUserAnswer(BuildContext context, String question) {
-    return showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(question),
-          actions: [
-            TextButton(
-                onPressed: () {
-                  Navigator.pop(context, false);
-                },
-                child: Text("Nein")),
-            TextButton(
-                onPressed: () {
-                  Navigator.pop(context, true);
-                },
-                child: Text("Ja"))
-          ],
-        );
-      },
-    );
   }
 
   void _showUserCreatedMeals() {
@@ -218,9 +184,6 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           ElevatedButton(
-                              style: ButtonStyle(
-                                  shape: MaterialStateProperty.all(
-                                      CircleBorder())),
                               onPressed: () {
                                 Navigator.push(context, MaterialPageRoute(
                                   builder: (context) {
@@ -234,9 +197,6 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
                               },
                               child: Icon(Icons.add)),
                           ElevatedButton(
-                              style: ButtonStyle(
-                                  shape: MaterialStateProperty.all(
-                                      CircleBorder())),
                               onPressed: () {
                                 SuggestionsHive().userMealsBox.delete(meal.key);
                               },
@@ -259,6 +219,92 @@ class _OptionsViewState extends State<OptionsView> with BuildTemplates {
       },
     )).then((newMeal) {
       CookingListHive().addMeal(newMeal);
+    });
+  }
+
+  void _shareShoppingList(BuildContext context) {
+    queryUser(
+            context: context,
+            question:
+                "Eigene Liste für andere freigeben oder Liste von jemand anderem  verwenden?",
+            positiveAnswer: "Eigene Liste freigeben",
+            negativeAnswer: "Liste von jemand anderem verwenden")
+        .then((value) {
+      if (value) {
+        _shareListWithOthers();
+        // Todo loading bar
+      } else {
+        _syncListWithOthers();
+      }
+    });
+  }
+
+  Future<void> _shareListWithOthers() async {
+    queryUser(
+        context: context,
+        question:
+            "Folgenden Code bei jemand anderem eintragen:\n${await ListSharingHive().getUserCode()}",
+        positiveAnswer: "Ok");
+  }
+
+  void _syncListWithOthers() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        TextEditingController textEditingController = TextEditingController();
+        GlobalKey<FormState> formKey = GlobalKey<FormState>();
+        return AlertDialog(
+          title: Text("Sechs stelligen Code eingeben"),
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              autofocus: true,
+              textInputAction: TextInputAction.next,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              keyboardType: TextInputType.number,
+              maxLines: 1,
+              maxLength: 6,
+              controller: textEditingController,
+              validator: (value) {
+                if (value == null || value.isEmpty) return "Code eingeben";
+                if (value.length < 6) {
+                  return "Code muss sechs Zahlen lang sein";
+                }
+                return null;
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  FormState? formState = formKey.currentState;
+                  if (formState != null && formState.validate()) {
+                    Navigator.pop(context, textEditingController.text);
+                  }
+                },
+                child: Text("Bestätigen"))
+          ],
+        );
+      },
+    ).then((value) async {
+      int? userCode = int.tryParse(value);
+      if (userCode != null) {
+        if ((await ListSharingMongoDB().checkIfUserCodeExists(userCode))) {
+          ListSharingHive().setUserCode(userCode);
+          ListSharingMongoDB().pullUpdates(userCode);
+        } else {
+          queryUser(
+                  context: context,
+                  question: "Code existiert nicht",
+                  positiveAnswer: "Anderen Code eingeben",
+                  negativeAnswer: "Abbrechen")
+              .then((value) {
+            if (value) {
+              _syncListWithOthers();
+            }
+          });
+        }
+      }
     });
   }
 }

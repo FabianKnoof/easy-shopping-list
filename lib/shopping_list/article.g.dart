@@ -184,3 +184,22 @@ const _$QuantityUnitEnumMap = {
   QuantityUnit.teaspoon: 'teaspoon',
   QuantityUnit.tablespoon: 'tablespoon',
 };
+
+ArticleEntry _$ArticleEntryFromJson(Map<String, dynamic> json) => ArticleEntry(
+      json['name'] as String,
+      json['quantity'] as int,
+      $enumDecode(_$QuantityUnitEnumMap, json['quantityUnit']),
+      json['details'] as String,
+      (json['articles'] as List<dynamic>)
+          .map((e) => Article.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$ArticleEntryToJson(ArticleEntry instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'quantity': instance.quantity,
+      'quantityUnit': _$QuantityUnitEnumMap[instance.quantityUnit],
+      'details': instance.details,
+      'articles': instance.articles.map((e) => e.toJson()).toList(),
+    };

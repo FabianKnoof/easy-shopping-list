@@ -78,6 +78,7 @@ class Article extends HiveObject {
   }
 }
 
+@JsonSerializable(explicitToJson: true)
 @HiveType(typeId: 1)
 class ArticleEntry extends HiveObject {
   @HiveField(0, defaultValue: "")
@@ -93,6 +94,13 @@ class ArticleEntry extends HiveObject {
 
   ArticleEntry(
       this.name, this.quantity, this.quantityUnit, this.details, this.articles);
+
+  // Article();
+
+  factory ArticleEntry.fromJson(Map<String, dynamic> json) =>
+      _$ArticleEntryFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ArticleEntryToJson(this);
 
   void addArticle(Article article) {
     articles.add(article);
