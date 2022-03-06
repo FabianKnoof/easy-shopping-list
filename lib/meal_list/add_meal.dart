@@ -347,7 +347,7 @@ class _EditMealViewState extends State<EditMealView> with ViewTemplates {
   void initState() {
     super.initState();
     if (widget.meal != null) {
-      _meal = widget.meal!;
+      _meal = widget.meal!.getCopy();
     }
     _mealNameController.text = _meal.name;
     _quantityController.text = _meal.quantity.toString();
@@ -544,7 +544,6 @@ class _EditMealViewState extends State<EditMealView> with ViewTemplates {
           ).then((newIngredient) {
             if (newIngredient != null) {
               setState(() {
-                // Note Add article quantity if article already in ingredients?
                 _meal.ingredients.insert(0, newIngredient);
               });
             }
@@ -575,11 +574,11 @@ class _EditMealViewState extends State<EditMealView> with ViewTemplates {
               );
             },
           ).then((newIngredient) {
-            if (newIngredient != null) {
-              setState(() {
+            setState(() {
+              if (newIngredient != null) {
                 ingredient = newIngredient;
-              });
-            }
+              }
+            });
           });
         },
         leading: ElevatedButton(

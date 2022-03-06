@@ -104,7 +104,7 @@ class ShoppingListHive {
     addArticles(articleEntry.articles);
   }
 
-  void checkIngredient(Article ingredient) {
+  void removeIngredient(Article ingredient) {
     for (ArticleEntry articleEntry in shoppingListBox.values) {
       if (articleEntry.name == ingredient.name &&
           articleEntry.quantityUnit == ingredient.quantityUnit) {

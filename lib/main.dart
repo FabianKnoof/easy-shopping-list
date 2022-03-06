@@ -45,13 +45,13 @@ Future<void> _initHive() async {
 
   await Hive.openBox(ListSharingHive.listSharingBoxName);
 
+  await ShoppingListHive().shoppingListBox.clear();
+  await ShoppingListHive().shoppingListCheckedBox.clear();
+
+  await CookingListHive().cookingListBox.clear();
+  await CookingListHive().cookingListCheckedBox.clear();
+
   // await ListSharingHive().listSharingBox.clear();
-  //
-  // await ShoppingListHive().shoppingListBox.clear();
-  // await ShoppingListHive().shoppingListCheckedBox.clear();
-  //
-  // await CookingListHive().cookingListBox.clear();
-  // await CookingListHive().cookingListCheckedBox.clear();
   //
   // await SuggestionsHive().articleBox.clear();
   // await SuggestionsHive().mealBox.clear();
@@ -101,7 +101,6 @@ class _AppViewState extends State<AppView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Note maybe use a "SliverAppBar"
         title: Text("Easy Shopping List"),
       ),
       body: IndexedStack(
