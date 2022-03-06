@@ -179,7 +179,22 @@ class _OptionsViewState extends State<OptionsView> with ViewTemplates {
                 children: [
                   for (Meal meal in SuggestionsHive().userMealsBox.values)
                     ExpansionTile(
-                      title: mealRow(meal),
+                      title: ListTile(
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(
+                              builder: (context) {
+                                return EditMealView(
+                                  meal: meal,
+                                );
+                              },
+                            )).then((newMeal) {
+                              if (newMeal is Meal) {
+                                SuggestionsHive().removeUserMeal(meal);
+                                SuggestionsHive().addUserMeal(newMeal);
+                              }
+                            });
+                          },
+                          title: mealRow(meal)),
                       leading: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -203,7 +218,6 @@ class _OptionsViewState extends State<OptionsView> with ViewTemplates {
                               child: Icon(Icons.delete))
                         ],
                       ),
-                      // Todo edit usermeal?
                       children: [
                         for (Article ingredient in meal.ingredients)
                           ListTile(
