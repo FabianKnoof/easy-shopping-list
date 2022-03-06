@@ -160,8 +160,7 @@ class _AddMealViewState extends State<AddMealView> with ViewTemplates {
               );
             },
           )).then((value) {
-            if (value.runtimeType == List<String>) {
-              value as List<String>;
+            if (value is List<String>) {
               setState(() {
                 _filters = value;
                 if (_filters.isEmpty) return;

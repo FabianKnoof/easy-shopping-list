@@ -119,8 +119,7 @@ class _AppViewState extends State<AppView> {
       floatingActionButton: _selectedIndex != 2
           ? FloatingActionButton(
               onPressed: () {
-                if (_widgetOptions[_selectedIndex].runtimeType ==
-                    ShoppingList) {
+                if (_widgetOptions[_selectedIndex] is ShoppingList) {
                   showModalBottomSheet(
                       isScrollControlled: true,
                       context: context,
@@ -129,15 +128,13 @@ class _AppViewState extends State<AppView> {
                       }).then((newArticle) {
                     ShoppingListHive().addArticle(newArticle);
                   });
-                } else if (_widgetOptions[_selectedIndex].runtimeType ==
-                    CookingList) {
+                } else if (_widgetOptions[_selectedIndex] is CookingList) {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => AddMealView(),
                       )).then((newMeal) {
-                    if (newMeal.runtimeType == Meal) {
-                      newMeal as Meal;
+                    if (newMeal is Meal) {
                       CookingListHive().addMeal(newMeal.getCopy());
                       SuggestionsHive().addUserMeal(newMeal.getCopy());
                     }

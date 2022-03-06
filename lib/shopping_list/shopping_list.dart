@@ -97,8 +97,7 @@ class _ShoppingListState extends State<ShoppingList> with ViewTemplates {
               );
             },
           ).then((newArticle) {
-            if (newArticle.runtimeType == Article) {
-              newArticle as Article;
+            if (newArticle is Article) {
               ShoppingListHive().replaceArticleEntryAt(
                   indexKey,
                   ArticleEntry(
