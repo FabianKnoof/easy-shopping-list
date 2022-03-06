@@ -436,6 +436,7 @@ class _EditMealViewState extends State<EditMealView> with ViewTemplates {
     return TypeAheadFormField(
       hideOnEmpty: true,
       hideOnLoading: true,
+      hideOnError: true,
       onSuggestionSelected: (String suggestion) {
         setState(() {
           _meal = SuggestionsHive()
