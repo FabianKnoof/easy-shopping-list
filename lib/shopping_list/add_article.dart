@@ -62,7 +62,7 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: MediaQuery.of(context).viewInsets,
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height / 3),
       child: Form(
           key: _addArticleFormKey,
           child: FocusTraversalGroup(
