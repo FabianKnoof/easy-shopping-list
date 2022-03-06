@@ -116,34 +116,43 @@ class _AppViewState extends State<AppView> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
       ),
-      floatingActionButton: _selectedIndex != 2
-          ? FloatingActionButton(
-              onPressed: () {
-                if (_widgetOptions[_selectedIndex] is ShoppingList) {
-                  showModalBottomSheet(
-                      isScrollControlled: true,
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AddArticleBottomSheet();
-                      }).then((newArticle) {
-                    ShoppingListHive().addArticle(newArticle);
-                  });
-                } else if (_widgetOptions[_selectedIndex] is CookingList) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddMealView(),
-                      )).then((newMeal) {
-                    if (newMeal is Meal) {
-                      CookingListHive().addMeal(newMeal.getCopy());
-                      SuggestionsHive().addUserMeal(newMeal.getCopy());
-                    }
-                  });
-                }
-              },
-              child: const Icon(Icons.add),
-            )
-          : null,
+      floatingActionButton: _buildFloatingActionButton(),
     );
+  }
+
+  _buildFloatingActionButton() {
+    if (_widgetOptions[_selectedIndex] is ShoppingList) {
+      return FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+              isScrollControlled: true,
+              context: context,
+              builder: (BuildContext context) {
+                return AddArticleBottomSheet();
+              }).then((newArticle) {
+            ShoppingListHive().addArticle(newArticle);
+          });
+        },
+        child: const Icon(Icons.add),
+      );
+    } else if (_widgetOptions[_selectedIndex] is CookingList) {
+      return FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddMealView(),
+              )).then((newMeal) {
+            if (newMeal is Meal) {
+              CookingListHive().addMeal(newMeal.getCopy());
+              SuggestionsHive().addUserMeal(newMeal.getCopy());
+            }
+          });
+        },
+        child: const Icon(Icons.add),
+      );
+    } else {
+      return null;
+    }
   }
 }
