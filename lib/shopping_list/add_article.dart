@@ -61,13 +61,14 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints.expand(),
+    return Padding(
+      padding: MediaQuery.of(context).viewInsets,
       child: Form(
           key: _addArticleFormKey,
           child: FocusTraversalGroup(
             policy: OrderedTraversalPolicy(),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(
                   height: _padding,

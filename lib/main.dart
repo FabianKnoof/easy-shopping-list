@@ -1,4 +1,3 @@
-
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/list_sharing.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
@@ -124,6 +123,7 @@ class _AppViewState extends State<AppView> {
                 if (_widgetOptions[_selectedIndex].runtimeType ==
                     ShoppingList) {
                   showModalBottomSheet(
+                      isScrollControlled: true,
                       context: context,
                       builder: (BuildContext context) {
                         return AddArticleBottomSheet();

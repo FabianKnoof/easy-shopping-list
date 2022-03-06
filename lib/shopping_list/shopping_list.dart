@@ -89,6 +89,7 @@ class _ShoppingListState extends State<ShoppingList> with ViewTemplates {
         title: articleColumn(articleEntry.getAsArticle()),
         onTap: () {
           showModalBottomSheet(
+            isScrollControlled: true,
             context: context,
             builder: (context) {
               return AddArticleBottomSheet(

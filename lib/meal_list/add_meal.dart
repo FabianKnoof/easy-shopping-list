@@ -528,6 +528,7 @@ class _EditMealViewState extends State<EditMealView> with ViewTemplates {
     return ElevatedButton(
         onPressed: () {
           showModalBottomSheet(
+            isScrollControlled: true,
             context: context,
             builder: (context) {
               return AddArticleBottomSheet(
@@ -560,6 +561,7 @@ class _EditMealViewState extends State<EditMealView> with ViewTemplates {
     return ListTile(
         onTap: () {
           showModalBottomSheet(
+            isScrollControlled: true,
             context: context,
             builder: (context) {
               return AddArticleBottomSheet(
