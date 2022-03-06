@@ -437,17 +437,22 @@ class _EditMealViewState extends State<EditMealView> with ViewTemplates {
       hideOnEmpty: true,
       hideOnLoading: true,
       onSuggestionSelected: (String suggestion) {
-        _mealNameController.text = suggestion;
-        // Todo meal suggestion selection
+        setState(() {
+          _meal = SuggestionsHive()
+              .getMealsForSuggestion()
+              .firstWhere((element) => element.name == suggestion);
+          _mealNameController.text = _meal.name;
+          _quantityController.text = _meal.quantity.toString();
+        });
       },
-      itemBuilder: (context, String itemData) {
+      itemBuilder: (context, String suggestion) {
         return ListTile(
-          title: Text(itemData),
+          title: Text(suggestion),
         );
       },
       suggestionsCallback: (pattern) {
         pattern = pattern.trim();
-        if (pattern.isEmpty) {
+        if (pattern.isEmpty || pattern == _meal.name) {
           return const <String>[];
         }
         return SuggestionsHive()

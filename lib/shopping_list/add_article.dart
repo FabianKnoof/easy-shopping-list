@@ -125,7 +125,9 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
       hideOnLoading: true,
       direction: AxisDirection.up,
       onSuggestionSelected: (String suggestion) {
-        _typeAheadController.text = suggestion;
+        setState(() {
+          _typeAheadController.text = suggestion;
+        });
       },
       itemBuilder: (context, String suggestion) {
         return ListTile(
@@ -139,8 +141,7 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
         }
         return SuggestionsHive().articleBox.values.where((Article article) {
           return article.name.toLowerCase().startsWith(pattern.toLowerCase()) &&
-              (!_suggestOnlyIngredients ||
-                  article.isIngredient); // Note may need to correct this
+              (!_suggestOnlyIngredients || article.isIngredient);
         }).map((article) => article.name);
       },
       validator: (value) {
