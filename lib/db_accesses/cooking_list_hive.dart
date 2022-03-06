@@ -25,7 +25,6 @@ class CookingListHive {
     if (newMeal == null) return;
     cookingListBox.put(cookingListBox.length, newMeal);
     ShoppingListHive().addArticles(newMeal.ingredients);
-    // Todo check if meal already present
   }
 
   void replaceMeal(int? indexKey, Meal? meal) {
