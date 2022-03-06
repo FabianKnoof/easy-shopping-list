@@ -83,6 +83,7 @@ class _AddMealViewState extends State<AddMealView> with ViewTemplates {
   TextField _buildSearchField() {
     return TextField(
       controller: _searchFieldController,
+      autofocus: true,
       onChanged: (value) {
         setState(() {
           value = value.trim();
