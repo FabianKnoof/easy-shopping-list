@@ -22,7 +22,8 @@ class _AddMealViewState extends State<AddMealView> with ViewTemplates {
 
   final TextEditingController _searchFieldController = TextEditingController();
 
-  List<String> _filters = [];
+  List<String> _selectFilters = [];
+  List<String> _deselectFilters = [];
 
   @override
   void initState() {
@@ -101,7 +102,7 @@ class _AddMealViewState extends State<AddMealView> with ViewTemplates {
                       meal.name.toLowerCase().contains(value.toLowerCase()))
                   .map((e) => e.getCopy())
                   .toList();
-          _foundMeals = _filterMeals(_foundMeals);
+          _filterFoundMeals();
           _foundMeals.sort(
               (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
         });
@@ -157,47 +158,75 @@ class _AddMealViewState extends State<AddMealView> with ViewTemplates {
           Navigator.push(context, MaterialPageRoute(
             builder: (context) {
               return FilterView(
-                filters: _filters,
+                selectFilters: _selectFilters,
+                deselectFilters: _deselectFilters,
+                ingredients: SuggestionsHive()
+                    .articleBox
+                    .values
+                    .where((element) => element.isIngredient)
+                    .map((e) => e.name)
+                    .toList(),
               );
             },
           )).then((value) {
-            if (value is List<String>) {
+            if (value is List<List<String>>) {
               setState(() {
-                _filters = value;
-                if (_filters.isEmpty) return;
-                _foundMeals = _filterMeals(_foundMeals);
+                _selectFilters = value[0];
+                _deselectFilters = value[1];
+                if (_selectFilters.isNotEmpty || _deselectFilters.isNotEmpty) {
+                  _filterFoundMeals();
+                }
               });
             }
           });
         },
-        child: Text("Filter (${_filters.length})"));
+        child: Row(
+          children: [
+            Text("Filter ("),
+            Icon(Icons.check),
+            Text(":${_selectFilters.length},"),
+            Icon(Icons.close),
+            Text(":${_deselectFilters.length})")
+          ],
+        ));
   }
 
-  List<Meal> _filterMeals(List<Meal> mealList) {
-    if (_filters.isEmpty) return mealList;
+  void _filterFoundMeals() {
     List<Meal> filteredMeals = [];
-    for (Meal meal in mealList) {
-      bool mealContainFilter = false;
-      mealLoop:
-      for (Article ingredient in meal.ingredients) {
-        for (String filter in _filters) {
-          if (ingredient.name.toLowerCase().contains(filter.toLowerCase())) {
-            mealContainFilter = true;
+    mealLoop:
+    for (Meal meal in _foundMeals) {
+      for (String deselectFilter in _deselectFilters) {
+        for (Article ingredient in meal.ingredients) {
+          if (ingredient.name.toLowerCase() == deselectFilter.toLowerCase()) {
             continue mealLoop;
           }
         }
       }
-      if (mealContainFilter) {
-        filteredMeals.add(meal);
+      for (String selectFilter in _selectFilters) {
+        for (Article ingredient in meal.ingredients) {
+          if (ingredient.name
+              .toLowerCase()
+              .contains(selectFilter.toLowerCase())) {
+            filteredMeals.add(meal);
+            continue mealLoop;
+          }
+        }
       }
     }
-    return filteredMeals;
+    _foundMeals = filteredMeals;
   }
 }
 
 class FilterView extends StatefulWidget {
-  const FilterView({Key? key, required this.filters}) : super(key: key);
-  final List<String> filters;
+  const FilterView(
+      {Key? key,
+      required this.ingredients,
+      required this.selectFilters,
+      required this.deselectFilters})
+      : super(key: key);
+  final List<String> ingredients;
+  final List<String> selectFilters;
+  final List<String> deselectFilters;
 
   @override
   State<FilterView> createState() => _FilterViewState();
@@ -210,30 +239,37 @@ class _FilterViewState extends State<FilterView> with ViewTemplates {
 
   List<String> _filters = [];
 
+  List<String> _selectFilters = [];
+  List<String> _deselectFilters = [];
+
   @override
   void initState() {
     super.initState();
 
-    _ingredients = SuggestionsHive()
-        .articleBox
-        .values
-        .where((element) => element.isIngredient)
-        .map((e) => e.name)
-        .toList();
+    _ingredients = widget.ingredients;
     _ingredients.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
 
-    _filters = widget.filters;
+    _filters = _ingredients;
+
+    _selectFilters = widget.selectFilters;
+    _deselectFilters = widget.deselectFilters;
   }
 
   @override
   Widget build(BuildContext context) {
+    _selectFilters.sort(
+      (a, b) => a.toLowerCase().compareTo(b.toLowerCase()),
+    );
+    _deselectFilters.sort(
+      (a, b) => a.toLowerCase().compareTo(b.toLowerCase()),
+    );
     return Scaffold(
       appBar: AppBar(
         title: Text("Gericht Filter"),
       ),
       body: WillPopScope(
         onWillPop: () async {
-          Navigator.pop(context, _filters);
+          Navigator.pop(context, [_selectFilters, _deselectFilters]);
           return false;
         },
         child: Column(
@@ -244,17 +280,22 @@ class _FilterViewState extends State<FilterView> with ViewTemplates {
                 onChanged: (value) {
                   setState(() {
                     value = value.trim();
-                    _ingredients = SuggestionsHive()
-                        .articleBox
-                        .values
-                        .where((element) => element.isIngredient)
-                        .where((element) => element.name
+                    _filters = _ingredients
+                        .where((element) => element
                             .toLowerCase()
                             .startsWith(value.toLowerCase()))
-                        .map((e) => e.name)
                         .toList();
-                    _ingredients.sort(
-                        (a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+                    // Todo maybe fix that it only shows searched filters
+                    // _selectFilters = _selectFilters
+                    //     .where((element) => element
+                    //         .toLowerCase()
+                    //         .startsWith(value.toLowerCase()))
+                    //     .toList();
+                    // _deselectFilters = _deselectFilters
+                    //     .where((element) => element
+                    //         .toLowerCase()
+                    //         .startsWith(value.toLowerCase()))
+                    //     .toList();
                   });
                 },
                 decoration: textFieldInputDecoration("Filter Suche"),
@@ -268,39 +309,16 @@ class _FilterViewState extends State<FilterView> with ViewTemplates {
                   children: [
                     Wrap(
                       spacing: _padding,
-                      children: [
-                        for (String ingredient in _filters)
-                          FilterChip(
-                            label: Text(ingredient),
-                            selected: true,
-                            onSelected: (value) {
-                              setState(() {
-                                _ingredients.add(ingredient);
-                                _ingredients.sort((a, b) =>
-                                    a.toLowerCase().compareTo(b.toLowerCase()));
-                                _filters.remove(ingredient);
-                                _filters.sort((a, b) =>
-                                    a.toLowerCase().compareTo(b.toLowerCase()));
-                              });
-                            },
-                          ),
-                        for (String ingredient in _ingredients)
-                          FilterChip(
-                            label: Text(ingredient),
-                            selected: false,
-                            onSelected: (value) {
-                              setState(() {
-                                _filters.add(ingredient);
-                                _filters.sort((a, b) =>
-                                    a.toLowerCase().compareTo(b.toLowerCase()));
-                                _ingredients.remove(ingredient);
-                                _ingredients.sort((a, b) =>
-                                    a.toLowerCase().compareTo(b.toLowerCase()));
-                              });
-                            },
-                          )
-                      ],
+                      children: _buildSelectFiltersChips(),
                     ),
+                    Wrap(
+                      spacing: _padding,
+                      children: _buildDeselectFiltersChips(),
+                    ),
+                    Wrap(
+                      spacing: _padding,
+                      children: _buildFiltersChips(),
+                    )
                   ],
                 ),
               ),
@@ -309,6 +327,76 @@ class _FilterViewState extends State<FilterView> with ViewTemplates {
         ),
       ),
     );
+  }
+
+  List<Widget> _buildFiltersChips() {
+    return [
+      for (String ingredient in _filters)
+        FilterChip(
+          label: Text(ingredient),
+          showCheckmark: false,
+          selected: _selectFilters.contains(ingredient) ||
+              _deselectFilters.contains(ingredient),
+          avatar: _getFilterChipAvatar(ingredient),
+          onSelected: (value) {
+            setState(() {
+              if (_selectFilters.contains(ingredient)) {
+                _selectFilters.remove(ingredient);
+                _deselectFilters.add(ingredient);
+              } else if (_deselectFilters.contains(ingredient)) {
+                _deselectFilters.remove(ingredient);
+              } else {
+                _selectFilters.add(ingredient);
+              }
+            });
+          },
+        )
+    ];
+  }
+
+  List<Widget> _buildDeselectFiltersChips() {
+    return [
+      for (String ingredient in _deselectFilters)
+        FilterChip(
+          label: Text(ingredient),
+          avatar: Icon(Icons.close),
+          selected: true,
+          showCheckmark: false,
+          onSelected: (value) {
+            setState(() {
+              _deselectFilters.remove(ingredient);
+            });
+          },
+        ),
+    ];
+  }
+
+  List<Widget> _buildSelectFiltersChips() {
+    return [
+      for (String ingredient in _selectFilters)
+        FilterChip(
+          label: Text(ingredient),
+          avatar: Icon(Icons.check),
+          selected: true,
+          showCheckmark: false,
+          onSelected: (value) {
+            setState(() {
+              _selectFilters.remove(ingredient);
+              _deselectFilters.add(ingredient);
+            });
+          },
+        ),
+    ];
+  }
+
+  _getFilterChipAvatar(String ingredient) {
+    if (_selectFilters.contains(ingredient)) {
+      return Icon(Icons.check);
+    } else if (_deselectFilters.contains(ingredient)) {
+      return Icon(Icons.close);
+    } else {
+      return null;
+    }
   }
 }
 
