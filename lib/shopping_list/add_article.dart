@@ -61,13 +61,14 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints.expand(),
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height / 3),
       child: Form(
           key: _addArticleFormKey,
           child: FocusTraversalGroup(
             policy: OrderedTraversalPolicy(),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(
                   height: _padding,
@@ -124,7 +125,9 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
       hideOnLoading: true,
       direction: AxisDirection.up,
       onSuggestionSelected: (String suggestion) {
-        _typeAheadController.text = suggestion;
+        setState(() {
+          _typeAheadController.text = suggestion;
+        });
       },
       itemBuilder: (context, String suggestion) {
         return ListTile(
@@ -138,8 +141,7 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
         }
         return SuggestionsHive().articleBox.values.where((Article article) {
           return article.name.toLowerCase().startsWith(pattern.toLowerCase()) &&
-              (!_suggestOnlyIngredients ||
-                  article.isIngredient); // Note may need to correct this
+              (!_suggestOnlyIngredients || article.isIngredient);
         }).map((article) => article.name);
       },
       validator: (value) {

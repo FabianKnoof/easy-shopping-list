@@ -112,7 +112,6 @@ class _CookingListState extends State<CookingList> with ViewTemplates {
             );
           },
         )).then((value) {
-          // Todo replace ingredients
           CookingListHive().replaceMeal(meal.key, value);
         });
       },
@@ -128,7 +127,7 @@ class _CookingListState extends State<CookingList> with ViewTemplates {
             setState(() {
               ingredient.isChecked = value!;
               if (value) {
-                ShoppingListHive().checkIngredient(ingredient);
+                ShoppingListHive().removeIngredient(ingredient);
               } else {
                 ShoppingListHive().addArticle(ingredient);
               }

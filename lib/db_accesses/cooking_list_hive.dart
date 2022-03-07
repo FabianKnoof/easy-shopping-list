@@ -25,11 +25,14 @@ class CookingListHive {
     if (newMeal == null) return;
     cookingListBox.put(cookingListBox.length, newMeal);
     ShoppingListHive().addArticles(newMeal.ingredients);
-    // Todo check if meal already present
   }
 
   void replaceMeal(int? indexKey, Meal? meal) {
     if (indexKey == null || meal == null) return;
+    for (Article ingredient in cookingListBox.get(indexKey)!.ingredients) {
+      ShoppingListHive().removeIngredient(ingredient);
+    }
+    ShoppingListHive().addArticles(meal.ingredients);
     cookingListBox.put(indexKey, meal);
   }
 
@@ -65,7 +68,7 @@ class CookingListHive {
 
   void checkMeal(Meal meal) {
     for (Article ingredient in meal.ingredients) {
-      ShoppingListHive().checkIngredient(ingredient);
+      ShoppingListHive().removeIngredient(ingredient);
       ingredient.isChecked = true;
     }
     removeMealAt(meal.key);

@@ -1,4 +1,3 @@
-
 import 'package:easy_shopping_list/meal_list/meal.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -28,6 +27,9 @@ class SuggestionsHive {
 
   final Box<Meal> userMealsBox = Hive.box<Meal>(userMealsBoxName);
 
+  List<Meal> getMealsForSuggestion() {
+    return mealBox.values.toList() + userMealsBox.values.toList();
+  }
 
   void addUserMeal(Meal? userMeal) {
     if (userMeal == null) return;

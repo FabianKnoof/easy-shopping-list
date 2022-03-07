@@ -89,6 +89,7 @@ class _ShoppingListState extends State<ShoppingList> with ViewTemplates {
         title: articleColumn(articleEntry.getAsArticle()),
         onTap: () {
           showModalBottomSheet(
+            isScrollControlled: true,
             context: context,
             builder: (context) {
               return AddArticleBottomSheet(
@@ -96,8 +97,7 @@ class _ShoppingListState extends State<ShoppingList> with ViewTemplates {
               );
             },
           ).then((newArticle) {
-            if (newArticle.runtimeType == Article) {
-              newArticle as Article;
+            if (newArticle is Article) {
               ShoppingListHive().replaceArticleEntryAt(
                   indexKey,
                   ArticleEntry(

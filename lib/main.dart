@@ -1,4 +1,3 @@
-
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/list_sharing.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
@@ -46,13 +45,13 @@ Future<void> _initHive() async {
 
   await Hive.openBox(ListSharingHive.listSharingBoxName);
 
-  // await ListSharingHive().listSharingBox.clear();
-  //
   // await ShoppingListHive().shoppingListBox.clear();
   // await ShoppingListHive().shoppingListCheckedBox.clear();
   //
   // await CookingListHive().cookingListBox.clear();
   // await CookingListHive().cookingListCheckedBox.clear();
+
+  // await ListSharingHive().listSharingBox.clear();
   //
   // await SuggestionsHive().articleBox.clear();
   // await SuggestionsHive().mealBox.clear();
@@ -102,7 +101,6 @@ class _AppViewState extends State<AppView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Note maybe use a "SliverAppBar"
         title: Text("Easy Shopping List"),
       ),
       body: IndexedStack(
@@ -118,36 +116,43 @@ class _AppViewState extends State<AppView> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
       ),
-      floatingActionButton: _selectedIndex != 2
-          ? FloatingActionButton(
-              onPressed: () {
-                if (_widgetOptions[_selectedIndex].runtimeType ==
-                    ShoppingList) {
-                  showModalBottomSheet(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AddArticleBottomSheet();
-                      }).then((newArticle) {
-                    ShoppingListHive().addArticle(newArticle);
-                  });
-                } else if (_widgetOptions[_selectedIndex].runtimeType ==
-                    CookingList) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddMealView(),
-                      )).then((newMeal) {
-                    if (newMeal.runtimeType == Meal) {
-                      newMeal as Meal;
-                      CookingListHive().addMeal(newMeal.getCopy());
-                      SuggestionsHive().addUserMeal(newMeal.getCopy());
-                    }
-                  });
-                }
-              },
-              child: const Icon(Icons.add),
-            )
-          : null,
+      floatingActionButton: _buildFloatingActionButton(),
     );
+  }
+
+  _buildFloatingActionButton() {
+    if (_widgetOptions[_selectedIndex] is ShoppingList) {
+      return FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+              isScrollControlled: true,
+              context: context,
+              builder: (BuildContext context) {
+                return AddArticleBottomSheet();
+              }).then((newArticle) {
+            ShoppingListHive().addArticle(newArticle);
+          });
+        },
+        child: const Icon(Icons.add),
+      );
+    } else if (_widgetOptions[_selectedIndex] is CookingList) {
+      return FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddMealView(),
+              )).then((newMeal) {
+            if (newMeal is Meal) {
+              CookingListHive().addMeal(newMeal.getCopy());
+              SuggestionsHive().addUserMeal(newMeal.getCopy());
+            }
+          });
+        },
+        child: const Icon(Icons.add),
+      );
+    } else {
+      return null;
+    }
   }
 }
