@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
 import 'package:easy_shopping_list/general_use_functions.dart';
@@ -190,7 +188,6 @@ class _AddMealViewState extends State<AddMealView> with ViewTemplates {
             builder: (context) {
               return FilterView(
                 selectFilters: _selectFiltersShoppingList,
-                // deselectFilters: _deselectFiltersShoppingList,
                 ingredients: ShoppingListHive()
                     .shoppingListBox
                     .values
