@@ -45,11 +45,11 @@ Future<void> _initHive() async {
 
   await Hive.openBox(ListSharingHive.listSharingBoxName);
 
-  await ShoppingListHive().shoppingListBox.clear();
-  await ShoppingListHive().shoppingListCheckedBox.clear();
-
-  await CookingListHive().cookingListBox.clear();
-  await CookingListHive().cookingListCheckedBox.clear();
+  // await ShoppingListHive().shoppingListBox.clear();
+  // await ShoppingListHive().shoppingListCheckedBox.clear();
+  //
+  // await CookingListHive().cookingListBox.clear();
+  // await CookingListHive().cookingListCheckedBox.clear();
 
   // await ListSharingHive().listSharingBox.clear();
   //
