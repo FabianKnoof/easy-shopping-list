@@ -16,8 +16,15 @@ import 'shopping_list/article.dart';
 
 void main() async {
   await _initHive();
-  if (ListSharingHive().isSharing()) {
-    await ListSharingHive().pullUpdates();
+  if (ListSharingHive().isSharing() &&
+      await ListSharingMongoDB().hasConnection()) {
+    if (ListSharingHive().listSharingBox.get("version") >
+        ListSharingMongoDB()
+            .getVersion(ListSharingHive().listSharingBox.get("userCode"))) {
+      await ListSharingHive().pushUpdates();
+    } else {
+      await ListSharingHive().pullUpdates();
+    }
   }
   SuggestionsMongoDB.syncSuggestions();
   runApp(const MyApp());

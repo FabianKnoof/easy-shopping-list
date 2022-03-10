@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
@@ -31,7 +32,7 @@ class ListSharingMongoDB with ViewTemplates {
 
   final Map<dynamic, dynamic> _body = {
     "dataSource": "ESLDB",
-    "database": "ListSharing",
+    "database": "UserLists",
   };
 
   Map<dynamic, dynamic> _getBodyWithCollection(String collection) {
@@ -50,7 +51,9 @@ class ListSharingMongoDB with ViewTemplates {
   }
 
   Future<int> generateUserCode() async {
-    Map<dynamic, dynamic> body = _getBodyWithCollection("UserLists");
+    Map<dynamic, dynamic> body = {};
+    body = _getBodyWithCollection("UserLists");
+
     List<dynamic> httpResponse = [];
     int i = 0;
     int userCode = 0;
@@ -78,7 +81,9 @@ class ListSharingMongoDB with ViewTemplates {
   }
 
   Future<int> getVersion(int userCode) async {
-    Map<dynamic, dynamic> body = _getBodyWithCollection("UserLists");
+    Map<dynamic, dynamic> body = {};
+    body = _getBodyWithCollection("UserLists");
+
     body["filter"] = {"_id": userCode};
     body["projection"] = {"_id": 0, "version": 1};
     int version = (await _httpPost("findOne", body))[0]["version"];
@@ -88,7 +93,8 @@ class ListSharingMongoDB with ViewTemplates {
   }
 
   Future<void> pushUpdates(int userCode, int newVersion) async {
-    Map<dynamic, dynamic> body = _getBodyWithCollection("UserLists");
+    Map<dynamic, dynamic> body = {};
+    body = _getBodyWithCollection("UserLists");
 
     body["filter"] = {"_id": userCode};
 
@@ -106,7 +112,9 @@ class ListSharingMongoDB with ViewTemplates {
   }
 
   Future<List<ArticleEntry>> pullUpdates(int userCode) async {
-    Map<dynamic, dynamic> body = _getBodyWithCollection("UserLists");
+    Map<dynamic, dynamic> body = {};
+    body = _getBodyWithCollection("UserLists");
+
     body["projection"] = {"_id": 0, "shoppingList": 1};
     List<dynamic> response =
         (await _httpPost("find", body))[0][0]["shoppingList"];
@@ -115,11 +123,26 @@ class ListSharingMongoDB with ViewTemplates {
   }
 
   Future<bool> checkIfUserCodeExists(int userCode) async {
-    Map<dynamic, dynamic> body = _getBodyWithCollection("UserLists");
+    Map<dynamic, dynamic> body = {};
+    body = _getBodyWithCollection("UserLists");
+
     body["filter"] = {"_id": userCode};
     List<dynamic> response = await _httpPost("findOne", body);
     body.remove("filter");
     return response[0] != null;
+  }
+
+  Future<bool> hasConnection() async {
+    try {
+      final result = await InternetAddress.lookup("data.mongodb-api.com");
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      }
+    } on SocketException {
+      // No internet connection
+      return false;
+    }
+    return false;
   }
 }
 
@@ -140,13 +163,8 @@ class ListSharingHive {
     return (listSharingBox.get("userCode") != null);
   }
 
-  Future<int> getUserCode() async {
-    int? userCode = listSharingBox.get("userCode");
-    if (userCode == null) {
-      userCode = await ListSharingMongoDB().generateUserCode();
-      listSharingBox.put("userCode", userCode);
-      listSharingBox.put("version", 1);
-    }
+  int getUserCode() {
+    int userCode = listSharingBox.get("userCode")!;
     return userCode;
   }
 
@@ -155,26 +173,43 @@ class ListSharingHive {
     listSharingBox.put("version", 0);
   }
 
+  Future<int> generateUserCode() async {
+    int userCode = await ListSharingMongoDB().generateUserCode();
+    listSharingBox.put("userCode", userCode);
+    listSharingBox.put("version", 1);
+    return userCode;
+  }
+
   Future<void> pushUpdates() async {
     int newVersion = listSharingBox.get("version")! + 1;
-    await ListSharingMongoDB()
-        .pushUpdates(listSharingBox.get("userCode")!, newVersion);
     listSharingBox.put("version", newVersion);
+    if (await ListSharingMongoDB().hasConnection()) {
+      int mongoVersion = await ListSharingMongoDB()
+          .getVersion(listSharingBox.get("userCode")!);
+      if (newVersion > mongoVersion) {
+        await ListSharingMongoDB()
+            .pushUpdates(listSharingBox.get("userCode")!, newVersion);
+      } else {
+        await pullUpdates();
+      }
+    }
   }
 
   Future<void> pullUpdates() async {
-    int mongoVersion =
-        await ListSharingMongoDB().getVersion(listSharingBox.get("userCode")!);
-    if (mongoVersion > listSharingBox.get("version")!) {
-      List<ArticleEntry> shoppingList = await ListSharingMongoDB()
-          .pullUpdates(listSharingBox.get("userCode"));
-      await ShoppingListHive().shoppingListBox.clear();
-      for (int indexKey = 0; indexKey < shoppingList.length; ++indexKey) {
-        ShoppingListHive()
-            .shoppingListBox
-            .put(indexKey, shoppingList[indexKey]);
+    if (await ListSharingMongoDB().hasConnection()) {
+      int mongoVersion = await ListSharingMongoDB()
+          .getVersion(listSharingBox.get("userCode")!);
+      if (mongoVersion > listSharingBox.get("version")!) {
+        List<ArticleEntry> shoppingList = await ListSharingMongoDB()
+            .pullUpdates(listSharingBox.get("userCode"));
+        await ShoppingListHive().shoppingListBox.clear();
+        for (int indexKey = 0; indexKey < shoppingList.length; ++indexKey) {
+          ShoppingListHive()
+              .shoppingListBox
+              .put(indexKey, shoppingList[indexKey]);
+        }
+        listSharingBox.put("version", mongoVersion);
       }
-      listSharingBox.put("version", mongoVersion);
     }
   }
 }
