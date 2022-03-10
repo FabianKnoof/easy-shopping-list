@@ -20,7 +20,14 @@ class _ShoppingListState extends State<ShoppingList> with ViewTemplates {
     if (ListSharingHive().isSharing()) {
       return RefreshIndicator(
         onRefresh: () async {
-          return ListSharingHive().pullUpdates();
+          if (await ListSharingMongoDB().hasConnection()) {
+            return ListSharingHive().pullUpdates();
+          } else {
+            queryUser(
+                context: context,
+                question: "Keine Internet Verbindung",
+                positiveAnswer: "Ok");
+          }
         },
         child: ListView(
           shrinkWrap: true,

@@ -244,23 +244,30 @@ class _OptionsViewState extends State<OptionsView> with ViewTemplates {
     });
   }
 
-  void _shareShoppingList(BuildContext context) {
-    if (ListSharingHive().isSharing()) {
-      _displayUserCode();
+  Future<void> _shareShoppingList(BuildContext context) async {
+    if (await ListSharingMongoDB().hasConnection()) {
+      if (ListSharingHive().isSharing()) {
+        _displayUserCode();
+      } else {
+        queryUser(
+                context: context,
+                question:
+                    "Eigene Liste für andere freigeben oder Liste von jemand anderem  verwenden?",
+                positiveAnswer: "Eigene Liste freigeben",
+                negativeAnswer: "Liste von jemand anderem verwenden")
+            .then((value) {
+          if (value) {
+            _generateUserCode(context);
+          } else {
+            _syncListWithOthers();
+          }
+        });
+      }
     } else {
       queryUser(
-              context: context,
-              question:
-                  "Eigene Liste für andere freigeben oder Liste von jemand anderem  verwenden?",
-              positiveAnswer: "Eigene Liste freigeben",
-              negativeAnswer: "Liste von jemand anderem verwenden")
-          .then((value) {
-        if (value) {
-          _generateUserCode(context);
-        } else {
-          _syncListWithOthers();
-        }
-      });
+          context: context,
+          question: "Keine Internet Verbindung",
+          positiveAnswer: "Ok");
     }
   }
 

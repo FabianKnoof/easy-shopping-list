@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
@@ -130,6 +131,19 @@ class ListSharingMongoDB with ViewTemplates {
     body.remove("filter");
     return response[0] != null;
   }
+
+  Future<bool> hasConnection() async {
+    try {
+      final result = await InternetAddress.lookup("data.mongodb-api.com");
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      }
+    } on SocketException {
+      // No internet connection
+      return false;
+    }
+    return false;
+  }
 }
 
 class ListSharingHive {
@@ -154,6 +168,11 @@ class ListSharingHive {
     return userCode;
   }
 
+  Future<void> setUserCode(int userCode) async {
+    listSharingBox.put("userCode", userCode);
+    listSharingBox.put("version", 0);
+  }
+
   Future<int> generateUserCode() async {
     int userCode = await ListSharingMongoDB().generateUserCode();
     listSharingBox.put("userCode", userCode);
@@ -161,16 +180,21 @@ class ListSharingHive {
     return userCode;
   }
 
-  Future<void> setUserCode(int userCode) async {
-    listSharingBox.put("userCode", userCode);
-    listSharingBox.put("version", 0);
-  }
-
   Future<void> pushUpdates() async {
     int newVersion = listSharingBox.get("version")! + 1;
-    await ListSharingMongoDB()
-        .pushUpdates(listSharingBox.get("userCode")!, newVersion);
     listSharingBox.put("version", newVersion);
+    try {
+      int mongoVersion = await ListSharingMongoDB()
+          .getVersion(listSharingBox.get("userCode")!);
+      if (newVersion > mongoVersion) {
+        await ListSharingMongoDB()
+            .pushUpdates(listSharingBox.get("userCode")!, newVersion);
+      } else {
+        await pullUpdates();
+      }
+    } on SocketException {
+      // No internet connection
+    }
   }
 
   Future<void> pullUpdates() async {

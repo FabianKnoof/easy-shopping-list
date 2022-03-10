@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'dart:developer';
 
+import 'package:easy_shopping_list/db_accesses/list_sharing.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
 import 'package:easy_shopping_list/meal_list/meal.dart';
 import 'package:easy_shopping_list/secrets.dart';
@@ -39,6 +39,8 @@ class SuggestionsMongoDB {
   }
 
   static Future<void> syncSuggestions() async {
+    if (!(await ListSharingMongoDB().hasConnection())) return;
+
     Map<dynamic, dynamic> body = _getBodyWithCollection("VersionsSuggestions");
     body["projection"] = {
       "_id": 0,
@@ -57,24 +59,19 @@ class SuggestionsMongoDB {
         SuggestionsHive()
             .versionsBox
             .get("articleSuggestions", defaultValue: 0)) {
-      log("Article suggestions update available");
       await SuggestionsHive().articleBox.clear();
       SuggestionsHive().articleBox.addAll(await _getArticleSuggestions());
       SuggestionsHive()
           .versionsBox
           .put("articleSuggestions", version["articleSuggestions"]);
-
-      log("Article suggestions updated");
     }
     if (version["mealSuggestions"] >
         SuggestionsHive().versionsBox.get("mealSuggestions", defaultValue: 0)) {
-      log("Meal suggestions update available");
       await SuggestionsHive().mealBox.clear();
       SuggestionsHive().mealBox.addAll(await _getMealSuggestions());
       SuggestionsHive()
           .versionsBox
           .put("mealSuggestions", version["mealSuggestions"]);
-      log("Meal suggestions updated");
     }
   }
 
