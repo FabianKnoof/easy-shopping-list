@@ -25,7 +25,7 @@ class _ShoppingListState extends State<ShoppingList> with ViewTemplates {
           } else {
             queryUser(
                 context: context,
-                question: "Keine Internet Verbindung",
+                question: "Keine Verbindung zur Datenbank",
                 positiveAnswer: "Ok");
           }
         },

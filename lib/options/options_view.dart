@@ -266,7 +266,7 @@ class _OptionsViewState extends State<OptionsView> with ViewTemplates {
     } else {
       queryUser(
           context: context,
-          question: "Keine Internet Verbindung",
+          question: "Keine Verbindung zur Datenbank",
           positiveAnswer: "Ok");
     }
   }
