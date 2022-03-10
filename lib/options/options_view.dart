@@ -50,6 +50,14 @@ class _OptionsViewState extends State<OptionsView> with ViewTemplates {
         ),
         Card(
           child: ListTile(
+            title: Text("Einkaufliste teilen zurücksetzten"),
+            onTap: () {
+              _resetListSharing(context);
+            },
+          ),
+        ),
+        Card(
+          child: ListTile(
             title: Text("Artikel vorschlagen"),
             onTap: () async {
               await _userArticleSuggestionAction(context);
@@ -237,27 +245,76 @@ class _OptionsViewState extends State<OptionsView> with ViewTemplates {
   }
 
   void _shareShoppingList(BuildContext context) {
-    queryUser(
-            context: context,
-            question:
-                "Eigene Liste für andere freigeben oder Liste von jemand anderem  verwenden?",
-            positiveAnswer: "Eigene Liste freigeben",
-            negativeAnswer: "Liste von jemand anderem verwenden")
-        .then((value) {
-      if (value) {
-        _shareListWithOthers();
-        // Todo loading bar
-      } else {
-        _syncListWithOthers();
-      }
-    });
+    if (ListSharingHive().isSharing()) {
+      _displayUserCode();
+    } else {
+      queryUser(
+              context: context,
+              question:
+                  "Eigene Liste für andere freigeben oder Liste von jemand anderem  verwenden?",
+              positiveAnswer: "Eigene Liste freigeben",
+              negativeAnswer: "Liste von jemand anderem verwenden")
+          .then((value) {
+        if (value) {
+          _generateUserCode(context);
+        } else {
+          _syncListWithOthers();
+        }
+      });
+    }
   }
 
-  Future<void> _shareListWithOthers() async {
+  void _generateUserCode(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return FutureBuilder(
+            future: ListSharingHive().generateUserCode(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return AlertDialog(
+                  title: Text(
+                      "Folgenden Code bei jemand anderem eintragen:\n${ListSharingHive().getUserCode()}"),
+                  actions: [
+                    TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text("Ok"))
+                  ],
+                );
+              } else if (snapshot.hasError) {
+                return AlertDialog(
+                  title: Text("Fehler beim generieren des User Codes"),
+                  actions: [
+                    TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text("Ok"))
+                  ],
+                );
+              } else {
+                return AlertDialog(
+                  title: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                    ],
+                  ),
+                );
+              }
+            },
+          );
+        });
+  }
+
+  Future<void> _displayUserCode() async {
     queryUser(
         context: context,
         question:
-            "Folgenden Code bei jemand anderem eintragen:\n${await ListSharingHive().getUserCode()}",
+            "Folgenden Code bei jemand anderem eintragen:\n${ListSharingHive().getUserCode()}",
         positiveAnswer: "Ok");
   }
 
@@ -300,24 +357,78 @@ class _OptionsViewState extends State<OptionsView> with ViewTemplates {
           ],
         );
       },
-    ).then((value) async {
-      int? userCode = int.tryParse(value);
-      if (userCode != null) {
-        if ((await ListSharingMongoDB().checkIfUserCodeExists(userCode))) {
-          ListSharingHive().setUserCode(userCode);
-          ListSharingMongoDB().pullUpdates(userCode);
-        } else {
-          queryUser(
-                  context: context,
-                  question: "Code existiert nicht",
-                  positiveAnswer: "Anderen Code eingeben",
-                  negativeAnswer: "Abbrechen")
-              .then((value) {
-            if (value) {
-              _syncListWithOthers();
-            }
+    ).then((value) {
+      int userCode = int.tryParse(value)!;
+      showDialog(
+          context: context,
+          builder: (context) {
+            return FutureBuilder(
+              future: ListSharingMongoDB().checkIfUserCodeExists(userCode),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data is bool) {
+                  bool userCodeExists = snapshot.data as bool;
+                  if (userCodeExists) {
+                    ListSharingHive().setUserCode(userCode);
+                    ListSharingHive().pullUpdates();
+                    return AlertDialog(
+                      title: Text("Erfoglreich User Code gesetzt"),
+                      actions: [
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text("Ok"))
+                      ],
+                    );
+                  } else {
+                    return AlertDialog(
+                      title: Text("User Code exestiert nicht"),
+                      actions: [
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text("Ok"))
+                      ],
+                    );
+                  }
+                } else if (snapshot.hasError) {
+                  return AlertDialog(
+                    title: Text("Fehler beim prüfen des User Codes"),
+                    actions: [
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text("Ok"))
+                    ],
+                  );
+                } else {
+                  return AlertDialog(
+                    title: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(),
+                      ],
+                    ),
+                  );
+                }
+              },
+            );
           });
-        }
+    });
+  }
+
+  void _resetListSharing(BuildContext context) {
+    queryUser(
+            context: context,
+            question: "Listen teilen zurücksetzten?",
+            positiveAnswer: "Ja",
+            negativeAnswer: "Nein")
+        .then((value) {
+      if (value) {
+        ListSharingHive().listSharingBox.clear();
       }
     });
   }

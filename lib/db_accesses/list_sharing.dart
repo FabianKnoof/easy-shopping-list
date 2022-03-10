@@ -31,7 +31,7 @@ class ListSharingMongoDB with ViewTemplates {
 
   final Map<dynamic, dynamic> _body = {
     "dataSource": "ESLDB",
-    "database": "ListSharing",
+    "database": "UserLists",
   };
 
   Map<dynamic, dynamic> _getBodyWithCollection(String collection) {
@@ -50,7 +50,9 @@ class ListSharingMongoDB with ViewTemplates {
   }
 
   Future<int> generateUserCode() async {
-    Map<dynamic, dynamic> body = _getBodyWithCollection("UserLists");
+    Map<dynamic, dynamic> body = {};
+    body = _getBodyWithCollection("UserLists");
+
     List<dynamic> httpResponse = [];
     int i = 0;
     int userCode = 0;
@@ -78,7 +80,9 @@ class ListSharingMongoDB with ViewTemplates {
   }
 
   Future<int> getVersion(int userCode) async {
-    Map<dynamic, dynamic> body = _getBodyWithCollection("UserLists");
+    Map<dynamic, dynamic> body = {};
+    body = _getBodyWithCollection("UserLists");
+
     body["filter"] = {"_id": userCode};
     body["projection"] = {"_id": 0, "version": 1};
     int version = (await _httpPost("findOne", body))[0]["version"];
@@ -88,7 +92,8 @@ class ListSharingMongoDB with ViewTemplates {
   }
 
   Future<void> pushUpdates(int userCode, int newVersion) async {
-    Map<dynamic, dynamic> body = _getBodyWithCollection("UserLists");
+    Map<dynamic, dynamic> body = {};
+    body = _getBodyWithCollection("UserLists");
 
     body["filter"] = {"_id": userCode};
 
@@ -106,7 +111,9 @@ class ListSharingMongoDB with ViewTemplates {
   }
 
   Future<List<ArticleEntry>> pullUpdates(int userCode) async {
-    Map<dynamic, dynamic> body = _getBodyWithCollection("UserLists");
+    Map<dynamic, dynamic> body = {};
+    body = _getBodyWithCollection("UserLists");
+
     body["projection"] = {"_id": 0, "shoppingList": 1};
     List<dynamic> response =
         (await _httpPost("find", body))[0][0]["shoppingList"];
@@ -115,7 +122,9 @@ class ListSharingMongoDB with ViewTemplates {
   }
 
   Future<bool> checkIfUserCodeExists(int userCode) async {
-    Map<dynamic, dynamic> body = _getBodyWithCollection("UserLists");
+    Map<dynamic, dynamic> body = {};
+    body = _getBodyWithCollection("UserLists");
+
     body["filter"] = {"_id": userCode};
     List<dynamic> response = await _httpPost("findOne", body);
     body.remove("filter");
@@ -140,13 +149,15 @@ class ListSharingHive {
     return (listSharingBox.get("userCode") != null);
   }
 
-  Future<int> getUserCode() async {
-    int? userCode = listSharingBox.get("userCode");
-    if (userCode == null) {
-      userCode = await ListSharingMongoDB().generateUserCode();
-      listSharingBox.put("userCode", userCode);
-      listSharingBox.put("version", 1);
-    }
+  int getUserCode() {
+    int userCode = listSharingBox.get("userCode")!;
+    return userCode;
+  }
+
+  Future<int> generateUserCode() async {
+    int userCode = await ListSharingMongoDB().generateUserCode();
+    listSharingBox.put("userCode", userCode);
+    listSharingBox.put("version", 1);
     return userCode;
   }
 
@@ -165,7 +176,7 @@ class ListSharingHive {
   Future<void> pullUpdates() async {
     int mongoVersion =
         await ListSharingMongoDB().getVersion(listSharingBox.get("userCode")!);
-    if (mongoVersion > listSharingBox.get("version")!) {
+    if (mongoVersion > listSharingBox.get("version", defaultValue: 0)!) {
       List<ArticleEntry> shoppingList = await ListSharingMongoDB()
           .pullUpdates(listSharingBox.get("userCode"));
       await ShoppingListHive().shoppingListBox.clear();
