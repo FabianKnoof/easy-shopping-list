@@ -183,7 +183,7 @@ class ListSharingHive {
   Future<void> pushUpdates() async {
     int newVersion = listSharingBox.get("version")! + 1;
     listSharingBox.put("version", newVersion);
-    try {
+    if (await ListSharingMongoDB().hasConnection()) {
       int mongoVersion = await ListSharingMongoDB()
           .getVersion(listSharingBox.get("userCode")!);
       if (newVersion > mongoVersion) {
@@ -192,24 +192,24 @@ class ListSharingHive {
       } else {
         await pullUpdates();
       }
-    } on SocketException {
-      // No internet connection
     }
   }
 
   Future<void> pullUpdates() async {
-    int mongoVersion =
-        await ListSharingMongoDB().getVersion(listSharingBox.get("userCode")!);
-    if (mongoVersion > listSharingBox.get("version", defaultValue: 0)!) {
-      List<ArticleEntry> shoppingList = await ListSharingMongoDB()
-          .pullUpdates(listSharingBox.get("userCode"));
-      await ShoppingListHive().shoppingListBox.clear();
-      for (int indexKey = 0; indexKey < shoppingList.length; ++indexKey) {
-        ShoppingListHive()
-            .shoppingListBox
-            .put(indexKey, shoppingList[indexKey]);
+    if (await ListSharingMongoDB().hasConnection()) {
+      int mongoVersion = await ListSharingMongoDB()
+          .getVersion(listSharingBox.get("userCode")!);
+      if (mongoVersion > listSharingBox.get("version")!) {
+        List<ArticleEntry> shoppingList = await ListSharingMongoDB()
+            .pullUpdates(listSharingBox.get("userCode"));
+        await ShoppingListHive().shoppingListBox.clear();
+        for (int indexKey = 0; indexKey < shoppingList.length; ++indexKey) {
+          ShoppingListHive()
+              .shoppingListBox
+              .put(indexKey, shoppingList[indexKey]);
+        }
+        listSharingBox.put("version", mongoVersion);
       }
-      listSharingBox.put("version", mongoVersion);
     }
   }
 }

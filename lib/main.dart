@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/list_sharing.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
@@ -18,20 +16,14 @@ import 'shopping_list/article.dart';
 
 void main() async {
   await _initHive();
-  if (ListSharingHive().isSharing()) {
-    try {
-      final result = await InternetAddress.lookup("data.mongodb-api.com");
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        if (ListSharingHive().listSharingBox.get("version") >
-            ListSharingMongoDB()
-                .getVersion(ListSharingHive().listSharingBox.get("userCode"))) {
-          await ListSharingHive().pushUpdates();
-        } else {
-          await ListSharingHive().pullUpdates();
-        }
-      }
-    } on SocketException {
-      // No internet connection
+  if (ListSharingHive().isSharing() &&
+      await ListSharingMongoDB().hasConnection()) {
+    if (ListSharingHive().listSharingBox.get("version") >
+        ListSharingMongoDB()
+            .getVersion(ListSharingHive().listSharingBox.get("userCode"))) {
+      await ListSharingHive().pushUpdates();
+    } else {
+      await ListSharingHive().pullUpdates();
     }
   }
   SuggestionsMongoDB.syncSuggestions();
