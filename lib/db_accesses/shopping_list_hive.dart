@@ -25,7 +25,7 @@ class ShoppingListHive {
   void addArticle(Article? newArticle) {
     if (newArticle == null) return;
     for (ArticleEntry articleEntry in shoppingListBox.values) {
-      if (articleEntry.name == newArticle.name &&
+      if (articleEntry.name.toLowerCase() == newArticle.name.toLowerCase() &&
           articleEntry.quantityUnit == newArticle.quantityUnit) {
         articleEntry.addArticle(newArticle);
         return;
@@ -112,5 +112,15 @@ class ShoppingListHive {
         return;
       }
     }
+  }
+
+  List<ArticleEntry> getArticlesWithSameName(Article article) {
+    List<ArticleEntry> articleEntries = [];
+    for (ArticleEntry articleInList in shoppingListBox.values) {
+      if (article.name .toLowerCase() == articleInList.name.toLowerCase()) {
+        articleEntries.add(articleInList);
+      }
+    }
+    return articleEntries;
   }
 }

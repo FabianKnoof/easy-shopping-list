@@ -3,6 +3,7 @@ import 'package:easy_shopping_list/db_accesses/list_sharing.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_mongodb.dart';
+import 'package:easy_shopping_list/general_use_functions.dart';
 import 'package:easy_shopping_list/meal_list/add_meal.dart';
 import 'package:easy_shopping_list/meal_list/cooking_list.dart';
 import 'package:easy_shopping_list/meal_list/meal.dart';
@@ -87,7 +88,7 @@ class AppView extends StatefulWidget {
   _AppViewState createState() => _AppViewState();
 }
 
-class _AppViewState extends State<AppView> {
+class _AppViewState extends State<AppView> with ViewTemplates {
   int _selectedIndex = 0;
 
   double padding = 5;
@@ -131,14 +132,7 @@ class _AppViewState extends State<AppView> {
     if (_widgetOptions[_selectedIndex] is ShoppingList) {
       return FloatingActionButton(
         onPressed: () {
-          showModalBottomSheet(
-              isScrollControlled: true,
-              context: context,
-              builder: (BuildContext context) {
-                return AddArticleBottomSheet();
-              }).then((newArticle) {
-            ShoppingListHive().addArticle(newArticle);
-          });
+          showAddArticleBottomSheet();
         },
         child: const Icon(Icons.add),
       );
@@ -161,5 +155,43 @@ class _AppViewState extends State<AppView> {
     } else {
       return null;
     }
+  }
+
+  void showAddArticleBottomSheet([Article? article]) {
+    showModalBottomSheet(
+        isScrollControlled: true,
+        context: context,
+        builder: (BuildContext context) {
+          return AddArticleBottomSheet(
+            article: article,
+          );
+        }).then((newArticle) {
+      if (newArticle != null) {
+        List<ArticleEntry> sameArticles =
+            ShoppingListHive().getArticlesWithSameName(newArticle);
+        if (sameArticles.isNotEmpty) {
+          List<String> quantityUnits = sameArticles.map((article) {
+            return article.quantity.toString() +
+                " " +
+                article.quantityUnitAsString();
+          }).toList();
+          queryUser(
+                  context: context,
+                  question:
+                      "Artikel bereits in der Einkaufsliste (${quantityUnits.join(", ")})",
+                  positiveAnswer: "Hinzufügen",
+                  negativeAnswer: "Bearbeiten")
+              .then((userAnswer) {
+            if (userAnswer == true) {
+              ShoppingListHive().addArticle(newArticle);
+            } else if (userAnswer == false) {
+              showAddArticleBottomSheet(newArticle);
+            }
+          });
+        } else {
+          ShoppingListHive().addArticle(newArticle);
+        }
+      }
+    });
   }
 }
