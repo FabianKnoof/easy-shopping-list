@@ -1,8 +1,9 @@
 import 'package:easy_shopping_list/db_accesses/cooking_list_hive.dart';
+import 'package:easy_shopping_list/db_accesses/hive_interaction.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:hive/hive.dart';
 
-class ShoppingListHive {
+class ShoppingListHive with HiveHelperFunctions {
   static final ShoppingListHive _shoppingListHive =
       ShoppingListHive._internal();
 
@@ -49,37 +50,11 @@ class ShoppingListHive {
   }
 
   void reorderArticleEntryAt(int oldIndex, int newIndex) {
-    ArticleEntry reorderedArticleEntry = shoppingListBox.get(oldIndex)!;
-    if (oldIndex < newIndex) {
-      --newIndex;
-      for (int indexKey = oldIndex; indexKey < newIndex; ++indexKey) {
-        ArticleEntry nextArticleEntry = shoppingListBox.get(indexKey + 1)!;
-        shoppingListBox.delete(indexKey + 1);
-        shoppingListBox.put(indexKey, nextArticleEntry);
-      }
-      shoppingListBox.put(newIndex, reorderedArticleEntry);
-    } else {
-      for (int indexKey = oldIndex; indexKey > newIndex; --indexKey) {
-        ArticleEntry nextArticleEntry = shoppingListBox.get(indexKey - 1)!;
-        shoppingListBox.delete(indexKey - 1);
-        shoppingListBox.put(indexKey, nextArticleEntry);
-      }
-      shoppingListBox.put(newIndex, reorderedArticleEntry);
-    }
-  }
-
-  void removeArticleEntryAt(int indexKey) {
-    Map<dynamic, ArticleEntry> articleEntryMap = {};
-    for (int i = indexKey; i < shoppingListBox.length - 1; ++i) {
-      articleEntryMap[i] = shoppingListBox.get(i + 1)!;
-    }
-    shoppingListBox
-        .deleteAll([for (int i = indexKey; i < shoppingListBox.length; ++i) i]);
-    shoppingListBox.putAll(articleEntryMap);
+    reorderEntries(oldIndex, newIndex, shoppingListBox);
   }
 
   void removeArticleEntry(ArticleEntry articleEntry) {
-    removeArticleEntryAt(articleEntry.key);
+    removeEntryAt(articleEntry.key, shoppingListBox);
   }
 
   void checkArticleEntry(ArticleEntry articleEntry) {

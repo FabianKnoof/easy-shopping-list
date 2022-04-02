@@ -1,9 +1,10 @@
+import 'package:easy_shopping_list/db_accesses/hive_interaction.dart';
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/meal_list/meal.dart';
 import 'package:easy_shopping_list/shopping_list/article.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-class CookingListHive {
+class CookingListHive with HiveHelperFunctions {
   static final CookingListHive _cookingListHive = CookingListHive._internal();
 
   factory CookingListHive() {
@@ -37,33 +38,11 @@ class CookingListHive {
   }
 
   void reorderMealAt(int oldIndex, int newIndex) {
-    Meal reorderedMeal = cookingListBox.get(oldIndex)!;
-    if (oldIndex < newIndex) {
-      --newIndex;
-      for (int indexKey = oldIndex; indexKey < newIndex; ++indexKey) {
-        Meal nextMeal = cookingListBox.get(indexKey + 1)!;
-        cookingListBox.delete(indexKey + 1);
-        cookingListBox.put(indexKey, nextMeal);
-      }
-      cookingListBox.put(newIndex, reorderedMeal);
-    } else {
-      for (int indexKey = oldIndex; indexKey > newIndex; --indexKey) {
-        Meal nextMeal = cookingListBox.get(indexKey - 1)!;
-        cookingListBox.delete(indexKey - 1);
-        cookingListBox.put(indexKey, nextMeal);
-      }
-      cookingListBox.put(newIndex, reorderedMeal);
-    }
+    reorderEntries(oldIndex, newIndex, cookingListBox);
   }
 
   void removeMealAt(int indexKey) {
-    Map<dynamic, Meal> mealMap = {};
-    for (int i = indexKey; i < cookingListBox.length - 1; ++i) {
-      mealMap[i] = cookingListBox.get(i + 1)!;
-    }
-    cookingListBox
-        .deleteAll([for (int i = indexKey; i < cookingListBox.length; ++i) i]);
-    cookingListBox.putAll(mealMap);
+    removeEntryAt(indexKey, cookingListBox);
   }
 
   void checkMeal(Meal meal) {
