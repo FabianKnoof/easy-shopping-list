@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:easy_shopping_list/db_accesses/shopping_list_hive.dart';
 import 'package:easy_shopping_list/db_accesses/suggestions_hive.dart';
 import 'package:easy_shopping_list/general_use_functions.dart';
@@ -93,10 +95,9 @@ class _AddMealViewState extends State<AddMealView> with GeneralUserFunctions {
     return TextField(
       controller: _searchFieldController,
       autofocus: true,
-      onChanged: (value) {
+      onChanged: (searchPattern) {
         setState(() {
-          value = value.trim();
-          _filterFoundMeals(searchPattern: value);
+          _filterFoundMeals();
         });
       },
       decoration: textFieldInputDecoration("Gericht"),
@@ -112,7 +113,11 @@ class _AddMealViewState extends State<AddMealView> with GeneralUserFunctions {
                 builder: (context) => EditMealView(
                   meal: Meal()..name = _searchFieldController.text,
                 ),
-              )).then((newMeal) => Navigator.pop(context, newMeal));
+              )).then((newMeal) {
+            if (newMeal != null) {
+              Navigator.pop(context, newMeal);
+            }
+          });
         },
         child: Text("Neues Gericht"));
   }
@@ -131,7 +136,11 @@ class _AddMealViewState extends State<AddMealView> with GeneralUserFunctions {
                         meal: meal,
                       );
                     },
-                  )).then((newMeal) => Navigator.pop(context, newMeal));
+                  )).then((newMeal) {
+                    if (newMeal != null) {
+                      Navigator.pop(context, newMeal);
+                    }
+                  });
                 },
                 child: Icon(Icons.add)),
             title: mealRow(meal),
@@ -160,11 +169,11 @@ class _AddMealViewState extends State<AddMealView> with GeneralUserFunctions {
                     .toList(),
               );
             },
-          )).then((value) {
-            if (value is List<List<String>>) {
+          )).then((filters) {
+            if (filters is List<List<String>>) {
               setState(() {
-                _selectFilters = value[0];
-                _deselectFilters = value[1];
+                _selectFilters = filters[0];
+                _deselectFilters = filters[1];
                 _filterFoundMeals();
               });
             }
@@ -195,10 +204,10 @@ class _AddMealViewState extends State<AddMealView> with GeneralUserFunctions {
                     .toList(),
               );
             },
-          )).then((value) {
-            if (value is List<String>) {
+          )).then((filters) {
+            if (filters is List<String>) {
               setState(() {
-                _selectFiltersShoppingList = value;
+                _selectFiltersShoppingList = filters;
                 _filterFoundMeals();
               });
             }
@@ -213,13 +222,15 @@ class _AddMealViewState extends State<AddMealView> with GeneralUserFunctions {
         ));
   }
 
-  void _filterFoundMeals({String? searchPattern}) {
+  void _filterFoundMeals() {
     _foundMeals = _allMeals;
     List<Meal> filteredMeals = [];
 
-    if (searchPattern != null) {
+    if (_searchFieldController.text.isNotEmpty) {
       for (Meal meal in _foundMeals) {
-        if (meal.name.toLowerCase().contains(searchPattern.toLowerCase())) {
+        if (meal.name
+            .toLowerCase()
+            .contains(_searchFieldController.text.toLowerCase())) {
           filteredMeals.add(meal);
         }
       }
@@ -233,6 +244,7 @@ class _AddMealViewState extends State<AddMealView> with GeneralUserFunctions {
         for (String deselectFilter in _deselectFilters) {
           for (Article ingredient in meal.ingredients) {
             if (ingredient.name.toLowerCase() == deselectFilter.toLowerCase()) {
+              log(ingredient.toString());
               continue mealLoop;
             }
           }
@@ -251,8 +263,7 @@ class _AddMealViewState extends State<AddMealView> with GeneralUserFunctions {
           }
         }
       }
-      _foundMeals =
-          filteredMeals.isEmpty ? _foundMeals : List.from(filteredMeals);
+      _foundMeals = List.from(filteredMeals);
       filteredMeals.clear();
     }
 
@@ -268,8 +279,7 @@ class _AddMealViewState extends State<AddMealView> with GeneralUserFunctions {
           }
         }
       }
-      _foundMeals =
-          filteredMeals.isEmpty ? _foundMeals : List.from(filteredMeals);
+      _foundMeals = List.from(filteredMeals);
     }
   }
 }
