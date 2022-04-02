@@ -18,7 +18,7 @@ class AddMealView extends StatefulWidget {
   _AddMealViewState createState() => _AddMealViewState();
 }
 
-class _AddMealViewState extends State<AddMealView> with GeneralUserFunctions {
+class _AddMealViewState extends State<AddMealView> with GeneralUseFunctions {
   final double _padding = 5;
 
   List<Meal> _allMeals = [];
@@ -299,7 +299,7 @@ class FilterView extends StatefulWidget {
   State<FilterView> createState() => _FilterViewState();
 }
 
-class _FilterViewState extends State<FilterView> with GeneralUserFunctions {
+class _FilterViewState extends State<FilterView> with GeneralUseFunctions {
   final double _padding = 5;
 
   List<String> _ingredients = [];
@@ -520,7 +520,7 @@ class EditMealView extends StatefulWidget {
   _EditMealViewState createState() => _EditMealViewState();
 }
 
-class _EditMealViewState extends State<EditMealView> with GeneralUserFunctions {
+class _EditMealViewState extends State<EditMealView> with GeneralUseFunctions {
   final double _padding = 5;
 
   Meal _meal = Meal();

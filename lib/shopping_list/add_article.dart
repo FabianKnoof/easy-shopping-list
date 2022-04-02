@@ -17,7 +17,7 @@ class AddArticleBottomSheet extends StatefulWidget {
 }
 
 class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
-    with GeneralUserFunctions {
+    with GeneralUseFunctions {
   Article _article = Article();
 
   bool _suggestOnlyIngredients = false;

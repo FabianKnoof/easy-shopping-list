@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 
 import '../secrets.dart';
 
-class ListSharingMongoDB with GeneralUserFunctions {
+class ListSharingMongoDB with GeneralUseFunctions {
   static final ListSharingMongoDB _listSharingMongoDB =
       ListSharingMongoDB._internal();
 

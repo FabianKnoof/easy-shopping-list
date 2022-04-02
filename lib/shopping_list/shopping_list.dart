@@ -14,7 +14,7 @@ class ShoppingList extends StatefulWidget {
   State<ShoppingList> createState() => _ShoppingListState();
 }
 
-class _ShoppingListState extends State<ShoppingList> with GeneralUserFunctions {
+class _ShoppingListState extends State<ShoppingList> with GeneralUseFunctions {
   @override
   Widget build(BuildContext context) {
     if (ListSharingHive().isSharing()) {
