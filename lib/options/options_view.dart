@@ -36,7 +36,7 @@ class _OptionsViewState extends State<OptionsView> with GeneralUseFunctions {
           child: ListTile(
             title: Text("Abgehakt Listen leeren"),
             onTap: () {
-              _clearCheckedListsAction(context);
+              _clearCheckedLists(context);
             },
           ),
         ),
@@ -60,7 +60,7 @@ class _OptionsViewState extends State<OptionsView> with GeneralUseFunctions {
           child: ListTile(
             title: Text("Artikel vorschlagen"),
             onTap: () async {
-              await _userArticleSuggestionAction(context);
+              await _userArticleSuggestion(context);
             },
           ),
         ),
@@ -68,7 +68,7 @@ class _OptionsViewState extends State<OptionsView> with GeneralUseFunctions {
           child: ListTile(
             title: Text("Gericht vorschlagen"),
             onTap: () async {
-              await _userMealSuggestionAction(context);
+              await _userMealSuggestion(context);
             },
           ),
         ),
@@ -84,68 +84,71 @@ class _OptionsViewState extends State<OptionsView> with GeneralUseFunctions {
     );
   }
 
-  void _clearCheckedListsAction(BuildContext context) {
+  void _clearCheckedLists(BuildContext context) {
     queryUser(
             context: context,
             question: "Abgehakte Einkaufs- und Kochliste leeren?",
             positiveAnswer: "Ja",
             negativeAnswer: "Nein")
         .then((userAnswer) {
-      if (userAnswer) {
+      if (userAnswer != null && userAnswer) {
         ShoppingListHive().shoppingListCheckedBox.clear();
         CookingListHive().cookingListCheckedBox.clear();
       }
     });
   }
 
-  Future<void> _userMealSuggestionAction(BuildContext context) async {
+  Future<void> _userMealSuggestion(BuildContext context) async {
     Navigator.push(context, MaterialPageRoute(
       builder: (context) {
         return EditMealView();
       },
     )).then((meal) {
-      if (meal == null) return;
-      queryUser(
-              context: context,
-              question: "${meal.name} als Vorschlag absenden?",
-              positiveAnswer: "Ja",
-              negativeAnswer: "Nein")
-          .then((userAnswer) async {
-        if (userAnswer) {
-          if (!await SuggestionsMongoDB.insertUserMealSuggestion(meal)) {
-            queryUser(
+      if (meal != null) {
+        queryUser(
                 context: context,
-                question: "Gericht ist bereits als Vorschlag eingeangen",
-                positiveAnswer: "Ok");
+                question: "${meal.name} als Vorschlag absenden?",
+                positiveAnswer: "Ja",
+                negativeAnswer: "Nein")
+            .then((userAnswer) async {
+          if (userAnswer != null && userAnswer) {
+            if (!await SuggestionsMongoDB.tryAddUserMealSuggestion(meal)) {
+              queryUser(
+                  context: context,
+                  question: "Gericht ist bereits als Vorschlag eingeangen",
+                  positiveAnswer: "Ok");
+            }
           }
-        }
-      });
+        });
+      }
     });
   }
 
-  Future<void> _userArticleSuggestionAction(BuildContext context) async {
+  Future<void> _userArticleSuggestion(BuildContext context) async {
     showModalBottomSheet(
       context: context,
       builder: (context) {
         return ArticleSuggestion();
       },
     ).then((article) {
-      if (article == null) return;
-      queryUser(
-              context: context,
-              question: "${article.name} als Vorschlag absenden?",
-              positiveAnswer: "Ja",
-              negativeAnswer: "Nein")
-          .then((userAnswer) async {
-        if (userAnswer) {
-          if (!await SuggestionsMongoDB.insertUserArticleSuggestion(article)) {
-            queryUser(
+      if (article != null) {
+        queryUser(
                 context: context,
-                question: "Artikel ist bereits als Vorschlag eingegangen",
-                positiveAnswer: "Ok");
+                question: "${article.name} als Vorschlag absenden?",
+                positiveAnswer: "Ja",
+                negativeAnswer: "Nein")
+            .then((userAnswer) async {
+          if (userAnswer != null && userAnswer) {
+            if (!await SuggestionsMongoDB.tryAddUserArticleSuggestion(
+                article)) {
+              queryUser(
+                  context: context,
+                  question: "Artikel ist bereits als Vorschlag eingegangen",
+                  positiveAnswer: "Ok");
+            }
           }
-        }
-      });
+        });
+      }
     });
   }
 
@@ -156,7 +159,7 @@ class _OptionsViewState extends State<OptionsView> with GeneralUseFunctions {
             positiveAnswer: "Ja",
             negativeAnswer: "Nein")
         .then((userAnswer) {
-      if (userAnswer) {
+      if (userAnswer != null && userAnswer) {
         ShoppingListHive().shoppingListBox.clear();
         ShoppingListHive().shoppingListCheckedBox.clear();
 
@@ -195,10 +198,10 @@ class _OptionsViewState extends State<OptionsView> with GeneralUseFunctions {
                                   meal: meal,
                                 );
                               },
-                            )).then((newMeal) {
-                              if (newMeal is Meal) {
+                            )).then((editedMeal) {
+                              if (editedMeal is Meal) {
                                 SuggestionsHive().removeUserMeal(meal);
-                                SuggestionsHive().addUserMeal(newMeal);
+                                SuggestionsHive().addUserMeal(editedMeal);
                               }
                             });
                           },
@@ -240,7 +243,9 @@ class _OptionsViewState extends State<OptionsView> with GeneralUseFunctions {
         );
       },
     )).then((newMeal) {
-      CookingListHive().addMeal(newMeal);
+      if (newMeal != null) {
+        CookingListHive().addMeal(newMeal);
+      }
     });
   }
 
@@ -255,11 +260,11 @@ class _OptionsViewState extends State<OptionsView> with GeneralUseFunctions {
                     "Eigene Liste für andere freigeben oder Liste von jemand anderem  verwenden?",
                 positiveAnswer: "Eigene Liste freigeben",
                 negativeAnswer: "Liste von jemand anderem verwenden")
-            .then((value) {
-          if (value) {
+            .then((userAnswer) {
+          if (userAnswer != null && userAnswer) {
             _generateUserCode(context);
-          } else {
-            _syncListWithOthers();
+          } else if (userAnswer != null && !userAnswer) {
+            _syncListFromOthers();
           }
         });
       }
@@ -325,7 +330,7 @@ class _OptionsViewState extends State<OptionsView> with GeneralUseFunctions {
         positiveAnswer: "Ok");
   }
 
-  void _syncListWithOthers() {
+  void _syncListFromOthers() {
     showDialog(
       context: context,
       builder: (context) {
@@ -365,20 +370,44 @@ class _OptionsViewState extends State<OptionsView> with GeneralUseFunctions {
         );
       },
     ).then((value) {
-      int userCode = int.tryParse(value)!;
-      showDialog(
-          context: context,
-          builder: (context) {
-            return FutureBuilder(
-              future: ListSharingMongoDB().checkIfUserCodeExists(userCode),
-              builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data is bool) {
-                  bool userCodeExists = snapshot.data as bool;
-                  if (userCodeExists) {
-                    ListSharingHive().setUserCode(userCode);
-                    ListSharingHive().pullUpdates();
+      if (value != null) {
+        int userCode = int.tryParse(value)!;
+        showDialog(
+            context: context,
+            builder: (context) {
+              return FutureBuilder(
+                future: ListSharingMongoDB().checkIfUserCodeExists(userCode),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data is bool) {
+                    bool userCodeExists = snapshot.data as bool;
+                    if (userCodeExists) {
+                      ListSharingHive().setUserCode(userCode);
+                      ListSharingHive().pullUpdates();
+                      return AlertDialog(
+                        title: Text("Erfolgreich User Code gesetzt"),
+                        actions: [
+                          TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text("Ok"))
+                        ],
+                      );
+                    } else {
+                      return AlertDialog(
+                        title: Text("User Code exestiert nicht"),
+                        actions: [
+                          TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text("Ok"))
+                        ],
+                      );
+                    }
+                  } else if (snapshot.hasError) {
                     return AlertDialog(
-                      title: Text("Erfoglreich User Code gesetzt"),
+                      title: Text("Fehler beim prüfen des User Codes"),
                       actions: [
                         TextButton(
                             onPressed: () {
@@ -389,41 +418,19 @@ class _OptionsViewState extends State<OptionsView> with GeneralUseFunctions {
                     );
                   } else {
                     return AlertDialog(
-                      title: Text("User Code exestiert nicht"),
-                      actions: [
-                        TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text("Ok"))
-                      ],
+                      title: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(),
+                        ],
+                      ),
                     );
                   }
-                } else if (snapshot.hasError) {
-                  return AlertDialog(
-                    title: Text("Fehler beim prüfen des User Codes"),
-                    actions: [
-                      TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: Text("Ok"))
-                    ],
-                  );
-                } else {
-                  return AlertDialog(
-                    title: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircularProgressIndicator(),
-                      ],
-                    ),
-                  );
-                }
-              },
-            );
-          });
+                },
+              );
+            });
+      }
     });
   }
 
@@ -448,19 +455,11 @@ class ArticleSuggestion extends StatefulWidget {
   _ArticleSuggestionState createState() => _ArticleSuggestionState();
 }
 
-class _ArticleSuggestionState extends State<ArticleSuggestion> {
-  final double _padding = 5;
+class _ArticleSuggestionState extends State<ArticleSuggestion>
+    with GeneralUseFunctions {
   final GlobalKey<FormState> _articleSuggestionFormKey = GlobalKey<FormState>();
 
   final Article _articleSuggestion = Article();
-
-  void _submitForm() {
-    FormState? formState = _articleSuggestionFormKey.currentState;
-    if (formState != null && formState.validate()) {
-      formState.save();
-      Navigator.pop(context, _articleSuggestion);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -469,10 +468,10 @@ class _ArticleSuggestionState extends State<ArticleSuggestion> {
         child: Column(
           children: [
             SizedBox(
-              height: _padding,
+              height: padding,
             ),
             Padding(
-              padding: EdgeInsets.all(_padding),
+              padding: EdgeInsets.all(padding),
               child: Row(
                 children: [
                   Expanded(
@@ -494,13 +493,13 @@ class _ArticleSuggestionState extends State<ArticleSuggestion> {
                         }
                         return null;
                       },
-                      onSaved: (newValue) {
-                        _articleSuggestion.name = newValue!;
+                      onSaved: (name) {
+                        _articleSuggestion.name = name!;
                       },
                     ),
                   ),
                   SizedBox(
-                    width: _padding,
+                    width: padding,
                   ),
                   ElevatedButton(
                       onPressed: () => _submitForm(), child: Icon(Icons.check))
@@ -508,15 +507,15 @@ class _ArticleSuggestionState extends State<ArticleSuggestion> {
               ),
             ),
             SizedBox(
-              height: _padding,
+              height: padding,
             ),
             Padding(
-              padding: EdgeInsets.all(_padding),
+              padding: EdgeInsets.all(padding),
               child: Row(
                 children: [
                   Text("Ist eine Zutat"),
                   SizedBox(
-                    width: _padding,
+                    width: padding,
                   ),
                   Switch(
                     value: _articleSuggestion.isIngredient,
@@ -532,5 +531,13 @@ class _ArticleSuggestionState extends State<ArticleSuggestion> {
             )
           ],
         ));
+  }
+
+  void _submitForm() {
+    FormState? formState = _articleSuggestionFormKey.currentState;
+    if (formState != null && formState.validate()) {
+      formState.save();
+      Navigator.pop(context, _articleSuggestion);
+    }
   }
 }

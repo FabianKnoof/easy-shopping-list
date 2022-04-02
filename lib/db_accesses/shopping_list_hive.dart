@@ -117,7 +117,7 @@ class ShoppingListHive {
   List<ArticleEntry> getArticlesWithSameName(Article article) {
     List<ArticleEntry> articleEntries = [];
     for (ArticleEntry articleInList in shoppingListBox.values) {
-      if (article.name .toLowerCase() == articleInList.name.toLowerCase()) {
+      if (article.name.toLowerCase() == articleInList.name.toLowerCase()) {
         articleEntries.add(articleInList);
       }
     }

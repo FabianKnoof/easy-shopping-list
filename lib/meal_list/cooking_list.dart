@@ -58,7 +58,6 @@ class _CookingListState extends State<CookingList> with GeneralUseFunctions {
           physics: NeverScrollableScrollPhysics(),
           children: [
             for (Meal meal in CookingListHive().cookingListBox.values)
-              // Todo fix expanded tile not changed based on index when reordering
               ExpansionTile(
                 key: Key(meal.key.toString()),
                 leading: _buildCheckbox(meal),
@@ -111,8 +110,8 @@ class _CookingListState extends State<CookingList> with GeneralUseFunctions {
               meal: meal,
             );
           },
-        )).then((value) {
-          CookingListHive().replaceMeal(meal.key, value);
+        )).then((editedMeal) {
+          CookingListHive().replaceMeal(meal.key, editedMeal);
         });
       },
       title: mealRow(meal),

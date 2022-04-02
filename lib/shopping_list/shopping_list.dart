@@ -55,7 +55,7 @@ class _ShoppingListState extends State<ShoppingList> with GeneralUseFunctions {
             for (ArticleEntry articleEntry
                 in ShoppingListHive().shoppingListCheckedBox.values)
               ListTile(
-                leading: _buildCheckbox(articleEntry),
+                leading: _buildArticleCheckbox(articleEntry),
                 title: articleColumn(articleEntry.getAsArticle()),
               )
           ].reversed.toList(),
@@ -75,9 +75,7 @@ class _ShoppingListState extends State<ShoppingList> with GeneralUseFunctions {
             physics: NeverScrollableScrollPhysics(),
             children: _buildArticleEntryListTile(),
             onReorder: (oldIndex, newIndex) {
-              setState(() {
-                ShoppingListHive().reorderArticleEntryAt(oldIndex, newIndex);
-              });
+              ShoppingListHive().reorderArticleEntryAt(oldIndex, newIndex);
             },
           );
         });
@@ -92,7 +90,7 @@ class _ShoppingListState extends State<ShoppingList> with GeneralUseFunctions {
           ShoppingListHive().shoppingListBox.get(indexKey)!;
       articleEntryListTiles.add(ListTile(
         key: Key(indexKey.toString()),
-        leading: _buildCheckbox(articleEntry),
+        leading: _buildArticleCheckbox(articleEntry),
         title: articleColumn(articleEntry.getAsArticle()),
         onTap: () {
           showModalBottomSheet(
@@ -121,7 +119,7 @@ class _ShoppingListState extends State<ShoppingList> with GeneralUseFunctions {
     return articleEntryListTiles;
   }
 
-  Checkbox _buildCheckbox(ArticleEntry articleEntry) {
+  Checkbox _buildArticleCheckbox(ArticleEntry articleEntry) {
     return Checkbox(
       value: (articleEntry.box == ShoppingListHive().shoppingListCheckedBox),
       onChanged: (value) {

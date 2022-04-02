@@ -15,7 +15,6 @@ class SuggestionsMongoDB {
     'Content-Type': 'application/json',
     'Access-Control-Request-Headers': '*',
     'api-key': apiKeyMongoDB
-    // Todo don't do this
   };
 
   static final Map<dynamic, dynamic> _bodySuggestions = {
@@ -104,10 +103,8 @@ class SuggestionsMongoDB {
     return articleSuggestions;
   }
 
-  static Future<bool> insertUserMealSuggestion(Meal meal) async {
+  static Future<bool> tryAddUserMealSuggestion(Meal meal) async {
     Map<dynamic, dynamic> body = _getBodyWithCollection("UserMealSuggestions");
-    // Note case insensitivity
-    // Note check if meal already exists in Suggestion List
     body["filter"] = {"name": meal.name};
     List<dynamic> httpResponse = await _httpPost("findOne", body);
     body.remove("filter");
@@ -119,11 +116,9 @@ class SuggestionsMongoDB {
     return true;
   }
 
-  static Future<bool> insertUserArticleSuggestion(Article article) async {
+  static Future<bool> tryAddUserArticleSuggestion(Article article) async {
     Map<dynamic, dynamic> body =
         _getBodyWithCollection("UserArticleSuggestions");
-    // Note case insensitivity
-    // Note check if article already exists in Suggestion List
     body["filter"] = {"article": article.name};
     List<dynamic> httpResponse = await _httpPost("findOne", body);
     body.remove("filter");

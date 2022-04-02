@@ -17,16 +17,7 @@ import 'shopping_list/article.dart';
 
 void main() async {
   await _initHive();
-  if (ListSharingHive().isSharing() &&
-      await ListSharingMongoDB().hasConnection()) {
-    if (ListSharingHive().listSharingBox.get("version") >
-        ListSharingMongoDB()
-            .getVersion(ListSharingHive().listSharingBox.get("userCode"))) {
-      await ListSharingHive().pushUpdates();
-    } else {
-      await ListSharingHive().pullUpdates();
-    }
-  }
+  await initListSharing();
   SuggestionsMongoDB.syncSuggestions();
   runApp(const MyApp());
 }
@@ -52,19 +43,19 @@ Future<void> _initHive() async {
   await Hive.openBox<Meal>(SuggestionsHive.userMealsBoxName);
 
   await Hive.openBox(ListSharingHive.listSharingBoxName);
+}
 
-  // await ShoppingListHive().shoppingListBox.clear();
-  // await ShoppingListHive().shoppingListCheckedBox.clear();
-  //
-  // await CookingListHive().cookingListBox.clear();
-  // await CookingListHive().cookingListCheckedBox.clear();
-
-  // await ListSharingHive().listSharingBox.clear();
-  //
-  // await SuggestionsHive().articleBox.clear();
-  // await SuggestionsHive().mealBox.clear();
-  // await SuggestionsHive().userMealsBox.clear();
-  // await SuggestionsHive().versionsBox.clear();
+Future<void> initListSharing() async {
+  if (ListSharingHive().isSharing() &&
+      await ListSharingMongoDB().hasConnection()) {
+    if (ListSharingHive().listSharingBox.get("version") >
+        ListSharingMongoDB()
+            .getVersion(ListSharingHive().listSharingBox.get("userCode"))) {
+      await ListSharingHive().pushUpdates();
+    } else {
+      await ListSharingHive().pullUpdates();
+    }
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -75,7 +66,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "Easy shopping list",
       theme: ThemeData.dark(),
-      // darkTheme: ThemeData.dark(),
       home: AppView(),
     );
   }
@@ -91,19 +81,11 @@ class AppView extends StatefulWidget {
 class _AppViewState extends State<AppView> with GeneralUseFunctions {
   int _selectedIndex = 0;
 
-  double padding = 5;
-
   static const List<Widget> _widgetOptions = <Widget>[
     ShoppingList(),
     CookingList(),
     OptionsView()
   ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,6 +108,12 @@ class _AppViewState extends State<AppView> with GeneralUseFunctions {
       ),
       floatingActionButton: _buildFloatingActionButton(),
     );
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   _buildFloatingActionButton() {

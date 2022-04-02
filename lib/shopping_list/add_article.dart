@@ -22,8 +22,6 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
 
   bool _suggestOnlyIngredients = false;
 
-  final double _padding = 5;
-
   final GlobalKey<FormState> _addArticleFormKey = GlobalKey<FormState>();
 
   final TextEditingController _typeAheadController = TextEditingController();
@@ -51,14 +49,6 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
     }
   }
 
-  void _submitForm() {
-    FormState? formState = _addArticleFormKey.currentState;
-    if (formState != null && formState.validate()) {
-      formState.save();
-      Navigator.pop(context, _article);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -71,10 +61,10 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
               mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(
-                  height: _padding,
+                  height: padding,
                 ),
                 Padding(
-                  padding: EdgeInsets.all(_padding),
+                  padding: EdgeInsets.all(padding),
                   child: Row(
                     children: [
                       Expanded(
@@ -82,14 +72,14 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
                               order: NumericFocusOrder(1),
                               child: _buildArticleTypeAheadField())),
                       SizedBox(
-                        width: _padding,
+                        width: padding,
                       ),
                       _buildSubmitButton()
                     ],
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(_padding),
+                  padding: EdgeInsets.all(padding),
                   child: Row(
                     children: [
                       Expanded(
@@ -98,7 +88,7 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
                               order: NumericFocusOrder(2),
                               child: _buildQuantityTextField())),
                       SizedBox(
-                        width: _padding,
+                        width: padding,
                       ),
                       Expanded(
                         flex: 1,
@@ -108,7 +98,7 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(_padding),
+                  padding: EdgeInsets.all(padding),
                   child: FocusTraversalOrder(
                       order: NumericFocusOrder(3),
                       child: _buildDetailsTextField()),
@@ -117,6 +107,14 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
             ),
           )),
     );
+  }
+
+  void _submitForm() {
+    FormState? formState = _addArticleFormKey.currentState;
+    if (formState != null && formState.validate()) {
+      formState.save();
+      Navigator.pop(context, _article);
+    }
   }
 
   TypeAheadFormField<String> _buildArticleTypeAheadField() {
@@ -144,14 +142,14 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
               (!_suggestOnlyIngredients || article.isIngredient);
         }).map((article) => article.name);
       },
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
+      validator: (name) {
+        if (name == null || name.trim().isEmpty) {
           return "Artikel eingeben";
         }
         return null;
       },
-      onSaved: (newValue) {
-        _article.name = newValue!.trim();
+      onSaved: (name) {
+        _article.name = name!.trim();
       },
       textFieldConfiguration: TextFieldConfiguration(
           controller: _typeAheadController,
@@ -182,10 +180,10 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
         _quantityTextController.selection = TextSelection(
             baseOffset: 0, extentOffset: _quantityTextController.text.length);
       },
-      onSaved: (newValue) {
-        if (newValue != null && newValue.trim().isNotEmpty) {
-          _article.quantity = int.tryParse(newValue)!;
-        } else if (newValue != null && newValue.trim().isEmpty) {
+      onSaved: (quantity) {
+        if (quantity != null && quantity.trim().isNotEmpty) {
+          _article.quantity = int.tryParse(quantity)!;
+        } else if (quantity != null && quantity.trim().isEmpty) {
           _article.quantity = 0;
         }
       },
@@ -197,10 +195,10 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
     return DropdownButtonFormField<QuantityUnit>(
       value: _dropdownValue,
       items: _dropdownItems,
-      onChanged: (value) {
+      onChanged: (quantityUnit) {
         setState(() {
-          _dropdownValue = value!;
-          _article.quantityUnit = value;
+          _dropdownValue = quantityUnit!;
+          _article.quantityUnit = quantityUnit;
         });
       },
     );
@@ -212,12 +210,12 @@ class _AddArticleBottomSheetState extends State<AddArticleBottomSheet>
       textInputAction: TextInputAction.done,
       keyboardType: TextInputType.text,
       maxLines: 1,
-      onFieldSubmitted: (value) {
+      onFieldSubmitted: (details) {
         _submitForm();
       },
-      onSaved: (newValue) {
-        if (newValue != null && newValue.trim().isNotEmpty) {
-          _article.details = newValue;
+      onSaved: (details) {
+        if (details != null && details.trim().isNotEmpty) {
+          _article.details = details;
         }
       },
       decoration: textFieldInputDecoration("Details"),

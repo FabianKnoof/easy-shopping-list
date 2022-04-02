@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'meal_list/meal.dart';
 
 mixin GeneralUseFunctions {
-  final double _padding = 5;
+  final double padding = 5;
 
   Future<dynamic> queryUser(
       {required BuildContext context,
@@ -39,7 +39,7 @@ mixin GeneralUseFunctions {
       children: [
         Flexible(fit: FlexFit.loose, child: Text(meal.name)),
         SizedBox(
-          width: _padding,
+          width: padding,
         ),
         Text(meal.quantity.toString()),
         Text(meal.quantityUnit)
@@ -64,7 +64,7 @@ mixin GeneralUseFunctions {
               ),
               if (article.quantity != 0) ...[
                 SizedBox(
-                  width: _padding,
+                  width: padding,
                 ),
                 Text(article.quantity.toString()),
                 Text(article.quantityUnitAsString()),

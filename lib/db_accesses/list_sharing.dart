@@ -27,7 +27,6 @@ class ListSharingMongoDB with GeneralUseFunctions {
     'Content-Type': 'application/json',
     'Access-Control-Request-Headers': '*',
     'api-key': apiKeyMongoDB
-    // Todo don't do this
   };
 
   final Map<dynamic, dynamic> _body = {

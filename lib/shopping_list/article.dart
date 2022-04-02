@@ -47,18 +47,7 @@ class Article extends HiveObject {
   }
 
   String quantityUnitAsString() {
-    switch (quantityUnit) {
-      case QuantityUnit.pieces:
-        return "stk";
-      case QuantityUnit.gram:
-        return "g";
-      case QuantityUnit.milliliter:
-        return "ml";
-      case QuantityUnit.teaspoon:
-        return "tl";
-      case QuantityUnit.tablespoon:
-        return "el";
-    }
+    return Article.quantityUnitToString(quantityUnit);
   }
 
   Article getCopy() {
@@ -94,8 +83,6 @@ class ArticleEntry extends HiveObject {
 
   ArticleEntry(
       this.name, this.quantity, this.quantityUnit, this.details, this.articles);
-
-  // Article();
 
   factory ArticleEntry.fromJson(Map<String, dynamic> json) =>
       _$ArticleEntryFromJson(json);
