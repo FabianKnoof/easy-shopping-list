@@ -18,7 +18,7 @@ class OptionsView extends StatefulWidget {
   _OptionsViewState createState() => _OptionsViewState();
 }
 
-class _OptionsViewState extends State<OptionsView> with ViewTemplates {
+class _OptionsViewState extends State<OptionsView> with GeneralUserFunctions {
   @override
   Widget build(BuildContext context) {
     return ListView(

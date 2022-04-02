@@ -88,7 +88,7 @@ class AppView extends StatefulWidget {
   _AppViewState createState() => _AppViewState();
 }
 
-class _AppViewState extends State<AppView> with ViewTemplates {
+class _AppViewState extends State<AppView> with GeneralUserFunctions {
   int _selectedIndex = 0;
 
   double padding = 5;

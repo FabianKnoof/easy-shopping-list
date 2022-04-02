@@ -15,7 +15,7 @@ class CookingList extends StatefulWidget {
   _CookingListState createState() => _CookingListState();
 }
 
-class _CookingListState extends State<CookingList> with ViewTemplates {
+class _CookingListState extends State<CookingList> with GeneralUserFunctions {
   @override
   Widget build(BuildContext context) {
     return ListView(

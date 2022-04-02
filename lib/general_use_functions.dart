@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'meal_list/meal.dart';
 
-mixin ViewTemplates {
+mixin GeneralUserFunctions {
   final double _padding = 5;
 
   Future<dynamic> queryUser(
