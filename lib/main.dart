@@ -48,7 +48,7 @@ Future<void> initListSharing() async {
   if (ListSharingHive().isSharing() &&
       await ListSharingMongoDB().hasConnection()) {
     if (ListSharingHive().listSharingBox.get("version") >
-        ListSharingMongoDB()
+        await ListSharingMongoDB()
             .getVersion(ListSharingHive().listSharingBox.get("userCode"))) {
       await ListSharingHive().pushUpdates();
     } else {
