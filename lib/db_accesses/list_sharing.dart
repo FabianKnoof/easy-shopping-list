@@ -114,9 +114,11 @@ class ListSharingMongoDB with GeneralUseFunctions {
     Map<dynamic, dynamic> body = {};
     body = _getBodyWithCollection("UserLists");
 
+    body["filter"] = {"_id": userCode};
     body["projection"] = {"_id": 0, "shoppingList": 1};
     List<dynamic> response =
         (await _httpPost("find", body))[0][0]["shoppingList"];
+    body.remove("filter");
     body.remove("projection");
     return [for (dynamic entry in response) ArticleEntry.fromJson(entry)];
   }

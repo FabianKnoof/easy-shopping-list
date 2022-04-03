@@ -336,7 +336,7 @@ class _OptionsViewState extends State<OptionsView> with GeneralUseFunctions {
         TextEditingController textEditingController = TextEditingController();
         GlobalKey<FormState> formKey = GlobalKey<FormState>();
         return AlertDialog(
-          title: Text("Sechs stelligen Code eingeben"),
+          title: Text("Sechs stelligen Code eingeben (Die bestehende Einkaufsliste wird überschrieben)"),
           content: Form(
             key: formKey,
             child: TextFormField(
